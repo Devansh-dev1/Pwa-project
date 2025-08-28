@@ -25,24 +25,25 @@ const getZoneBackgroundColor = (zoneId, boothData) => {
 const Categories = ({ category, setCategory }) => (
   <div style={{ 
     display: 'flex', 
-    gap: 8, 
+    gap: 0, 
     padding: '0 16px', 
-    overflowX: 'auto',
     paddingBottom: 8,
     WebkitOverflowScrolling: 'touch'
   }}>
     <button
       onClick={() => setCategory(0)}
       style={{
+        flex: 1,
         background: category === 0 ? 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)' : '#f8f9fa',
         color: category === 0 ? '#fff' : '#6B7280',
         border: 'none',
-        borderRadius: 20,
-        padding: '8px 16px',
+        borderRadius: '20px 0 0 20px',
+        padding: '12px 16px',
         fontSize: 14,
         fontWeight: 500,
         cursor: 'pointer',
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
+        borderRight: category === 0 ? 'none' : '1px solid #e5e7eb'
       }}
     >
       Zones
@@ -50,15 +51,17 @@ const Categories = ({ category, setCategory }) => (
     <button
       onClick={() => setCategory(1)}
       style={{
+        flex: 1,
         background: category === 1 ? 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)' : '#f8f9fa',
         color: category === 1 ? '#fff' : '#6B7280',
         border: 'none',
-        borderRadius: 20,
-        padding: '8px 16px',
+        borderRadius: '0 20px 20px 0',
+        padding: '12px 16px',
         fontSize: 14,
         fontWeight: 500,
         cursor: 'pointer',
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
+        borderLeft: category === 1 ? 'none' : '1px solid #e5e7eb'
       }}
     >
       Categories
@@ -75,15 +78,16 @@ const BoothCard = ({ booth, zone, zoneColor, onClick, isSuggested }) => {
     <div
       onClick={onClick}
       style={{
-        width: '48%',
-        padding: '12px',
-        minHeight: 164,
-        border: '1.5px solid #2a46a8',
-        borderRadius: 24,
+        width: 'calc(50% - 30px)',
+        padding: '8px',
+        minHeight: 180,
+        border: '1px solid #e5e7eb',
+        borderRadius: 16,
         backgroundColor: '#fff',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
-        position: 'relative'
+        position: 'relative',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
       }}
       onMouseEnter={(e) => {
         e.target.style.transform = 'translateY(-2px)';
@@ -91,81 +95,88 @@ const BoothCard = ({ booth, zone, zoneColor, onClick, isSuggested }) => {
       }}
       onMouseLeave={(e) => {
         e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = 'none';
+        e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
       }}
     >
       {/* Suggestion icon */}
       {isSuggested && (
         <div style={{
           position: 'absolute',
-          top: 5,
-          left: 10,
+          top: 8,
+          left: 8,
           zIndex: 10
         }}>
-          <span style={{ fontSize: 24 }}>⭐</span>
+          <span style={{ fontSize: 20 }}>⭐</span>
         </div>
       )}
 
-      {/* Image section */}
+      {/* Logo/Image section */}
       <div style={{
         width: '100%',
-        aspectRatio: '3/2',
-        backgroundColor: '#fff',
-        borderTopLeftRadius: 17,
-        borderTopRightRadius: 17,
-        border: '1px solid #e5e7eb',
+        height: 80,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 12,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
-        marginBottom: 10
+        marginBottom: 12,
+        border: '1px solid #f1f3f4'
       }}>
         {img ? (
           <img 
             src={img} 
             alt={booth.company?.[0]?.name || 'Booth'} 
             style={{ 
-              width: '100%', 
-              height: '100%', 
+              maxWidth: '90%', 
+              maxHeight: '90%', 
               objectFit: 'contain' 
             }} 
           />
         ) : (
-          <span style={{ fontSize: 40 }}>🏪</span>
+          <span style={{ 
+            fontSize: 32, 
+            color: '#6B7280',
+            fontWeight: 600,
+            textAlign: 'center',
+            lineHeight: 1
+          }}>
+            {booth.company?.[0]?.name?.charAt(0) || '🏪'}
+          </span>
         )}
       </div>
 
       {/* Company name */}
       <div style={{ 
-        marginTop: 10, 
-        padding: '0 8px', 
+        marginBottom: 8, 
         textAlign: 'center' 
       }}>
         <h4 style={{ 
-          margin: '0 0 3px', 
+          margin: '0 0 4px', 
           fontSize: 14, 
           color: '#1E1F24',
           fontWeight: 600,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          lineHeight: 1.2
         }}>
           {booth.company?.[0]?.name || 'Company Name'}
         </h4>
       </div>
 
-      {/* Booth name with zone */}
-      <div style={{ marginTop: 3, textAlign: 'center' }}>
+      {/* Booth badge */}
+      <div style={{ textAlign: 'center' }}>
         <div style={{
           display: 'inline-block',
-          padding: '4px 8px',
-          backgroundColor: `${zoneColor}20`,
+          padding: '6px 10px',
+          backgroundColor: `${zoneColor}15`,
           color: zoneColor,
-          borderRadius: 12,
+          borderRadius: 20,
           fontSize: 12,
-          fontWeight: 500
+          fontWeight: 600,
+          border: `1px solid ${zoneColor}30`
         }}>
-          {booth.booth_name || 'Booth Name'} - Zone {zone}
+          {zone} {booth.booth_name || booth.booth_id || 'Booth'}
         </div>
       </div>
     </div>
@@ -178,17 +189,18 @@ const ZoneSection = ({ zone, booths, zoneColor, onBoothClick, visibleBooths, onS
   
   return (
     <div style={{
-      marginTop: 35,
-      padding: '24px 16px 16px',
-      borderRadius: 24,
-      backgroundColor: `${zoneColor}20`,
-      border: '1px solid #e5e7eb'
+      marginTop: 24,
+      padding: '20px 16px 20px',
+      borderRadius: 20,
+      backgroundColor: `${zoneColor}08`,
+      border: `1px solid ${zoneColor}20`,
+      marginHorizontal: 16
     }}>
       {/* Zone header */}
-      <div style={{ marginBottom: 15 }}>
+      <div style={{ marginBottom: 20 }}>
         <h3 style={{
           margin: 0,
-          fontSize: 20,
+          fontSize: 22,
           color: zoneColor,
           fontWeight: 700,
           textAlign: 'center'
@@ -201,8 +213,8 @@ const ZoneSection = ({ zone, booths, zoneColor, onBoothClick, visibleBooths, onS
       <div style={{
         display: 'flex',
         flexWrap: 'wrap',
-        gap: 12,
-        marginTop: 15
+        gap: 16,
+        justifyContent: 'space-between'
       }}>
         {booths.slice(0, boothsToShow).map((booth, index) => (
           <BoothCard
@@ -426,7 +438,7 @@ export default function Booths() {
               setCategories(allCategories.sort((a, b) => a.name.localeCompare(b.name)));
             }
             
-            console.log('✅ Loaded existing data from localStorage:', parsedData)
+                         console.log('✅ Loaded existing data from localStorage:', userData)
           } catch (parseError) {
             console.warn('Could not parse existing data from localStorage:', parseError)
           }
@@ -574,54 +586,97 @@ export default function Booths() {
 
           {/* Search */}
           <div style={{ marginTop: 25 }}>
-            <div style={{ position: 'relative' }}>
-              <input
-                type="text"
-                placeholder="Search booth name..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onFocus={() => setFocusedField('search')}
-                onBlur={() => setFocusedField(null)}
-                style={{
-                  width: '100%',
-                  height: 56,
-                  border: `1px solid ${focusedField === 'search' ? '#2a46a8' : '#e5e7eb'}`,
-                  borderRadius: 32,
-                  padding: '0 16px 0 45px',
-                  fontSize: 16,
-                  backgroundColor: focusedField === 'search' ? '#fff' : '#f8f9fa',
-                  outline: 'none',
-                  color: focusedField === 'search' || search.length > 0 ? '#2a46a8' : '#6B7280'
-                }}
-              />
-              <span style={{
-                position: 'absolute',
-                left: 16,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                fontSize: 20,
-                color: focusedField === 'search' ? '#2a46a8' : '#6B7280'
+            <div style={{ 
+              display: 'flex', 
+              gap: 12, 
+              alignItems: 'center' 
+            }}>
+              {/* Search Bar */}
+              <div style={{ 
+                position: 'relative', 
+                flex: 1 
               }}>
-                🔍
-              </span>
-              {search.length > 0 && (
-                <button
-                  onClick={() => setSearch('')}
+                <input
+                  type="text"
+                  placeholder="Search booth name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onFocus={() => setFocusedField('search')}
+                  onBlur={() => setFocusedField(null)}
                   style={{
-                    position: 'absolute',
-                    right: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    fontSize: 20,
-                    cursor: 'pointer',
-                    color: '#6B7280'
+                    width: '100%',
+                    height: 56,
+                    border: `1px solid ${focusedField === 'search' ? '#2a46a8' : '#e5e7eb'}`,
+                    borderRadius: 32,
+                    padding: '0 16px 0 45px',
+                    fontSize: 16,
+                    backgroundColor: focusedField === 'search' ? '#fff' : '#f8f9fa',
+                    outline: 'none',
+                    color: focusedField === 'search' || search.length > 0 ? '#2a46a8' : '#6B7280'
                   }}
-                >
-                  ✕
-                </button>
-              )}
+                />
+                <span style={{
+                  position: 'absolute',
+                  left: 16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: 20,
+                  color: focusedField === 'search' ? '#2a46a8' : '#6B7280'
+                }}>
+                  🔍
+                </span>
+                {search.length > 0 && (
+                  <button
+                    onClick={() => setSearch('')}
+                    style={{
+                      position: 'absolute',
+                      right: 16,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: 20,
+                      cursor: 'pointer',
+                      color: '#6B7280'
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Filter Button */}
+              <button
+                style={{
+                  width: 50,
+                  height: 56,
+                  backgroundColor: '#2a46a8',
+                  border: 'none',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(42, 70, 168, 0.3)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'scale(1.05)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(42, 70, 168, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'scale(1)';
+                  e.target.style.boxShadow = '0 2px 8px rgba(42, 70, 168, 0.3)';
+                }}
+              >
+                <span style={{
+                  fontSize: 20,
+                  color: '#fff',
+                  fontWeight: 600
+                }}>
+                  ⚙️
+                </span>
+              </button>
             </div>
           </div>
 

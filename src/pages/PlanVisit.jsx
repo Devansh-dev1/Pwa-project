@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore.js';
 import { fetchPersonalizedData } from '../api/auth.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
+import AppLayout from '../components/AppLayout.jsx';
 
 // EXACT MOBILE APP CONSTANTS - Direct from GlobalStyles
 const Padding = {
@@ -797,10 +798,12 @@ const PlanVisitFirstTime = () => {
 
 export default function PlanVisit() {
   return (
+    <AppLayout>
     <div className="mobile-frame-container">
       <div className="screen-container">
         <PlanVisitFirstTime />
       </div>
     </div>
+    </AppLayout>
   );
 }
