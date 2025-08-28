@@ -2,7 +2,9 @@ import BottomNavigation from './BottomNavigation.jsx';
 
 const AppLayout = ({ children, hideBottomNav = false }) => {
   return (
-    <div className="mobile-frame-container">
+    <div 
+    style={{ overflowY: 'auto' }}
+    className="mobile-frame-container">
       <div className="screen-container" style={{
         position: 'relative'
       }}>
@@ -11,7 +13,8 @@ const AppLayout = ({ children, hideBottomNav = false }) => {
           height: '100%',
           paddingBottom: hideBottomNav ? 0 : 110, // Space for bottom nav
           overflow: 'hidden',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          overflowY: 'auto'
         }}>
           {children}
         </div>

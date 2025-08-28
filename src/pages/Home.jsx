@@ -1,10 +1,39 @@
 import { useNavigate } from 'react-router-dom'
 import { clearToken, getToken } from '../utils/auth.js'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { getUserInfo } from '../api/auth.js'
 import useStore from '../store/useStore.js'
 import LoadingScreen from '../components/LoadingScreen.jsx'
 import AppLayout from '../components/AppLayout.jsx'
+import moment from 'moment'
+import { imagesURL } from '../api/index.js'
+
+// Helper to build Cloudflare image URL keys into full URLs
+const buildImg = (key) => {
+  if (!key) return null;
+  if (/^https?:\/\//.test(key)) return key;
+  return `${imagesURL}${key}/public`;
+}
+
+// Helper function to get highlight colors
+const getHighlightColor = (type) => {
+  switch (type) {
+    case 'Exhibitor': return '#81BBBC';
+    case 'Journey': return '#556BB9';
+    case 'GiveAway': return '#556BB9';
+    default: return '#676361';
+  }
+};
+
+// Helper function to get activity colors
+const getActivityColor = (type) => {
+  switch (type) {
+    case 'Journey': return '#556BB9';
+    case 'Scavenger Hunt': return '#A979E8';
+    case 'Giveaway': return '#81BBBC';
+    default: return '#676361';
+  }
+};
 
 const QuickActionCard = ({ title, icon, onClick }) => (
   <button
@@ -34,12 +63,15 @@ const QuickActionCard = ({ title, icon, onClick }) => (
     <span style={{ fontSize: 24 }}>{icon}</span>
     <span style={{ fontSize: 14, color: '#1E1F24', fontWeight: 500 }}>{title}</span>
   </button>
-);
+ );
 
 export default function Home() {
   const navigate = useNavigate()
   const { userInfo, clearUserData, setUserInfo } = useStore()
   const [loading, setLoading] = useState(true)
+  const [homeData, setHomeData] = useState(null)
+  const [dataLoading, setDataLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const initializeHome = async () => {
@@ -57,6 +89,18 @@ export default function Home() {
             setUserInfo(fetchedUserInfo)
           } catch (error) {
             console.warn('Could not fetch user info:', error)
+          }
+        }
+
+        // Load existing data from localStorage if available
+        const existingData = localStorage.getItem('homeData')
+        if (existingData) {
+          try {
+            const parsedData = JSON.parse(existingData)
+            setHomeData(parsedData)
+            console.log('✅ Loaded existing data from localStorage:', parsedData)
+          } catch (parseError) {
+            console.warn('Could not parse existing data from localStorage:', parseError)
           }
         }
       } catch (error) {
@@ -87,75 +131,7 @@ export default function Home() {
   return (
     <AppLayout>
       {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, #2a46a8 0%, #17275c 100%)',
-        padding: '20px 16px',
-        color: '#fff'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 600 }}>
-              {userInfo?.fName ? `Hi, ${userInfo.fName}!` : 'Welcome!'}
-            </h1>
-            <p style={{ margin: '4px 0 0', opacity: 0.9, fontSize: 14 }}>
-              Ready to explore the event?
-            </p>
-          </div>
-          
-          <div style={{ position: 'relative' }}>
-            <button 
-              style={{
-                background: 'rgba(255,255,255,0.2)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                borderRadius: '50%',
-                width: 40,
-                height: 40,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
-              }}
-              onClick={() => navigate('/profile')}
-            >
-              <span style={{ fontSize: 18 }}>👤</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Quick stats */}
-        <div style={{ display: 'flex', gap: 12 }}>
-          <div style={{ 
-            background: 'rgba(255,255,255,0.15)', 
-            padding: '8px 12px', 
-            borderRadius: 12, 
-            flex: 1,
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: 18, fontWeight: 600 }}>0</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>Booths Visited</div>
-          </div>
-          <div style={{ 
-            background: 'rgba(255,255,255,0.15)', 
-            padding: '8px 12px', 
-            borderRadius: 12, 
-            flex: 1,
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: 18, fontWeight: 600 }}>0</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>Activities</div>
-          </div>
-          <div style={{ 
-            background: 'rgba(255,255,255,0.15)', 
-            padding: '8px 12px', 
-            borderRadius: 12, 
-            flex: 1,
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: 18, fontWeight: 600 }}>0</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>Points</div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Main content */}
       <div style={{ 
@@ -164,74 +140,887 @@ export default function Home() {
         padding: '20px 16px',
         WebkitOverflowScrolling: 'touch'
       }}>
-        {/* Quick Actions */}
-        <div style={{ marginBottom: 24 }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: 18, color: '#1E1F24' }}>Quick Actions</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-            <QuickActionCard 
-              title="Find Booths"
-              icon="🏪"
-              onClick={() => navigate('/booths')}
-            />
-            <QuickActionCard 
-              title="Map & Navigation"
-              icon="🗺️"
-              onClick={() => navigate('/map')}
-            />
-            <QuickActionCard 
-              title="My Schedule"
-              icon="📅"
-              onClick={() => navigate('/plan-visit')}
-            />
-            <QuickActionCard 
-              title="Scan QR"
-              icon="📱"
-              onClick={() => navigate('/scanner')}
-            />
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div style={{ marginBottom: 24 }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: 18, color: '#1E1F24' }}>For You</h3>
-          <div style={{ background: '#f8f9fa', padding: 20, borderRadius: 12, textAlign: 'center' }}>
-            <span style={{ fontSize: 48, marginBottom: 12, display: 'block' }}>🎯</span>
-            <h4 style={{ margin: '0 0 8px', color: '#1E1F24' }}>Get Started</h4>
-            <p style={{ margin: 0, color: '#6B7280', fontSize: 14 }}>
-              Complete your profile to get personalized recommendations
-            </p>
-            <button 
+        <div style={{ 
+          padding: '24px', 
+          minHeight: '100vh',
+          background: '#f8f9fa',
+          WebkitOverflowScrolling: 'touch'
+        }}>
+          {/* Test Data Fetch Buttons */}
+          <div style={{ marginBottom: 24, textAlign: 'center' }}>
+            {/* <button
+              onClick={async () => {
+                try {
+                  setDataLoading(true);
+                  setError(null);
+                  console.log('🔄 Testing data fetch...');
+                  
+                  // Import the function dynamically to avoid issues
+                  const { handleAllData, testAllApproaches } = await import('../api/home.js');
+                  
+                  // First try the main function
+                  let data = await handleAllData();
+                  
+                  // If that fails, try all approaches
+                  if (!data) {
+                    console.log('🔄 Main function failed, trying all approaches...');
+                    data = await testAllApproaches();
+                  }
+                  
+                  if (data) {
+                    console.log('✅ Data received:', data);
+                    setHomeData(data);
+                    // Store in localStorage for now to test display
+                    localStorage.setItem('homeData', JSON.stringify(data));
+                  } else {
+                    console.log('❌ No data received');
+                    setError('No data received. All approaches failed. Check console for details.');
+                  }
+                } catch (error) {
+                  console.error('❌ Error testing data fetch:', error);
+                  setError('Error fetching data. Check console for details.');
+                } finally {
+                  setDataLoading(false);
+                }
+              }}
+              disabled={dataLoading}
               style={{
-                marginTop: 12,
-                padding: '8px 16px',
-                background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)',
+                padding: '12px 24px',
+                background: dataLoading ? '#ccc' : 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)',
                 color: '#fff',
                 border: 'none',
-                borderRadius: 20,
-                fontSize: 14,
-                cursor: 'pointer'
+                borderRadius: 25,
+                fontSize: 16,
+                cursor: dataLoading ? 'not-allowed' : 'pointer',
+                fontWeight: '600',
+                opacity: dataLoading ? 0.7 : 1,
+                marginRight: '12px'
               }}
-              onClick={() => navigate('/profile/setup')}
             >
-              Complete Profile
-            </button>
-          </div>
-        </div>
+              {dataLoading ? '🔄 Loading...' : '🧪 Test Data Fetch'}
+            </button> */}
 
-        {/* Featured */}
-        <div style={{ marginBottom: 24 }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: 18, color: '#1E1F24' }}>Featured</h3>
-          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden' }}>
-            <div style={{ height: 120, background: 'linear-gradient(45deg, #f3f4f6 0%, #e5e7eb 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 32 }}>🎪</span>
-            </div>
-            <div style={{ padding: 16 }}>
-              <h4 style={{ margin: '0 0 8px', fontSize: 16, color: '#1E1F24' }}>Welcome to the Show!</h4>
-              <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
-                Discover amazing booths, win prizes, and make the most of your visit.
-              </p>
-            </div>
+            {/* Manual Data Input Button */}
+            {/* <button
+              onClick={() => {
+                const manualData = prompt(`
+Since CORS proxies are having issues, you can manually paste the JSON data here.
+
+1. Go to: https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json
+2. Copy all the JSON content
+3. Paste it below and click OK
+
+This will bypass the CORS issue and display your data.
+                `);
+                
+                if (manualData) {
+                  try {
+                    const parsedData = JSON.parse(manualData);
+                    setHomeData(parsedData);
+                    localStorage.setItem('homeData', manualData);
+                    console.log('✅ Manual data loaded successfully:', parsedData);
+                  } catch (parseError) {
+                    console.error('❌ Error parsing manual data:', parseError);
+                    setError('Invalid JSON data. Please check the format.');
+                  }
+                }
+              }}
+              style={{
+                padding: '12px 24px',
+                background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 25,
+                fontSize: 16,
+                cursor: 'pointer',
+                fontWeight: '600'
+              }}
+            >
+              📋 Manual Data Input
+            </button> */}
+            
+            {/* <p style={{ margin: '8px 0 0', fontSize: 14, color: '#6B7280' }}>
+              Try the test button first, or use manual input if CORS proxies fail
+            </p> */}
           </div>
+
+          {/* Error Display */}
+          {error && (
+            <div style={{ 
+              background: '#fef2f2', 
+              border: '1px solid #f87171', 
+              borderRadius: 12, 
+              padding: 16, 
+              marginBottom: 24, 
+              textAlign: 'center' 
+            }}>
+              <span style={{ fontSize: 16, color: '#dc2626' }}>⚠️ {error}</span>
+            </div>
+          )}
+
+          {/* Data Display Sections */}
+          {homeData && (
+            <>
+              {/* Event Information */}
+              {homeData.event && homeData.event.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ 
+                    background: '#fff', 
+                    border: '1px solid #e5e7eb', 
+                    borderRadius: 12, 
+                    overflow: 'hidden',
+                    display: 'flex',
+                    // gap: 16,
+                    flexDirection: 'column',
+                    paddingTop:'10px',
+                  }}>
+                    {/* Event Image */}
+                    <div style={{ flex: '0 0 200px', position: 'relative' }}>
+                      {homeData.event[0]?.show_img?.[0] ? (
+                        <img 
+                          src={`${imagesURL}${homeData.event[0].show_img[0]}/public`} 
+                          alt="Event"
+                          style={{ 
+                            width: '100%', 
+                            height: '150px', 
+                            objectFit: 'cover' 
+                          }}
+                        />
+                      ) : (
+                        <div style={{ 
+                          width: '100%', 
+                          height: '150px', 
+                          background: '#f3f4f6',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <span style={{ fontSize: 32 }}>🎪</span>
+                        </div>
+                      )}
+                    
+                    </div>
+
+                    {/* Event Details */}
+                    <div style={{ flex: 1, padding: 16 }}>
+                      <div style={{ marginBottom: 12 }}>
+                        <h2 style={{ margin: '0 0 8px', fontSize: 20, color: '#1E1F24' }}>
+                          {homeData.event[0]?.title || 'Event Title'}
+                        </h2>
+                        <p style={{ margin: '0 0 8px', fontSize: 14, color: '#6B7280' }}>
+                          {homeData.event[0]?.organizer_name || 'Organizer'}
+                        </p>
+                        <div style={{ 
+                          background: '#f3f4f6', 
+                          padding: '4px 12px', 
+                          borderRadius: 16, 
+                          display: 'inline-block',
+                          fontSize: 12,
+                          color: '#374151'
+                        }}>
+                          {homeData.event[0]?.show_date?.[0]?.date ? 
+                            moment(homeData.event[0].show_date[0].date).format('D MMM, YYYY') : 
+                            'Date TBD'
+                          }
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                        <span style={{ fontSize: 16 }}>📍</span>
+                        <span style={{ fontSize: 14, color: '#6B7280' }}>
+                          {homeData.event[0]?.address ? 
+                            `${homeData.event[0].address.address_line_1 || ''}, ${homeData.event[0].address.city || ''}, ${homeData.event[0].address.state_or_region || ''}` : 
+                            'Location TBD'
+                          }
+                        </span>
+                      </div>
+
+                      {/* <button style={{
+                        background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 20,
+                        padding: '8px 16px',
+                        fontSize: 14,
+                        cursor: 'pointer'
+                      }}>
+                        Plan Visit
+                      </button> */}
+                    </div>
+
+
+                  </div>
+                </div>
+              )}
+
+              {/* Highlights Section */}
+              {homeData.Highlight && homeData.Highlight.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Highlights</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                      Discover the best of what this event has to offer
+                    </p>
+                  </div>
+                  
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                    gap: 16 
+                  }}>
+                    {homeData.Highlight.slice(0, 6).map((highlight, index) => (
+                      <div key={index} style={{
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                      >
+                        {highlight?.additional_data?.image ? (
+                          <img 
+                            // src={highlight.additional_data.image} 
+                          src={`${imagesURL}${highlight.additional_data.image}/public`} 
+
+                            alt="Highlight"
+                            style={{ 
+                              width: '100%', 
+                              height: '160px', 
+                              objectFit: 'cover' 
+                            }}
+                          />
+                        ) : (
+                          <div style={{ 
+                            width: '100%', 
+                            height: '160px', 
+                            background: '#f3f4f6',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <span style={{ fontSize: 32 }}>✨</span>
+                          </div>
+                        )}
+                        
+                        <div style={{ padding: 16 }}>
+                          <h4 style={{ margin: '0 0 8px', fontSize: 16, color: '#1E1F24' }}>
+                            {highlight?.additional_data?.name || highlight?.additional_data?.title || 'Highlight Title'}
+                          </h4>
+                          <p style={{ margin: '0 0 12px', fontSize: 14, color: '#6B7280', lineHeight: 1.4 }}>
+                            {highlight?.additional_data?.description ? 
+                              highlight.additional_data.description.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : 
+                              'Description coming soon'
+                            }
+                          </p>
+                          <div style={{
+                            background: `${getHighlightColor(highlight?.type)}25`,
+                            border: `1.5px solid ${getHighlightColor(highlight?.type)}`,
+                            borderRadius: 16,
+                            padding: '4px 12px',
+                            display: 'inline-block',
+                            fontSize: 11,
+                            color: getHighlightColor(highlight?.type),
+                            fontWeight: 500
+                          }}>
+                            {highlight?.type === 'GiveAway' ? 'Giveaway' : highlight?.type || 'Featured'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tips Section */}
+              {homeData.Tip && homeData.Tip.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Tips</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                      Helpful tips to make the most of your experience
+                    </p>
+                  </div>
+                  
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: 16, 
+                    overflowX: 'auto', 
+                    paddingBottom: 8 
+                  }}>
+                    {homeData.Tip.slice(0, 5).map((tip, index) => {
+                      const tipColor = ['#9458E2', '#FF6E95', '#6B2E3F', '#309866'][index % 4];
+                      return (
+                        <div key={index} style={{
+                          minWidth: '280px',
+                          background: `${tipColor}15`,
+                          border: `1.5px solid ${tipColor}`,
+                          borderRadius: 16,
+                          padding: 16,
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                        onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                            <h4 style={{ margin: 0, fontSize: 16, color: tipColor, flex: 1 }}>
+                              {tip.title}
+                            </h4>
+                            {tip.logo && (
+                              <div style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: '50%',
+                                border: `2px solid ${tipColor}`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <img 
+                                  // src={tip.logo} 
+                          src={`${imagesURL}${tip.logo}/public`} 
+
+                                  alt="Tip"
+                                  style={{ width: 20, height: 20, objectFit: 'contain' }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          <p style={{ 
+                            margin: 0, 
+                            fontSize: 14, 
+                            color: `${tipColor}95`, 
+                            lineHeight: 1.4,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden'
+                          }}>
+                            {tip.description ? tip.description.replace(/<[^>]*>/g, '') : 'Tip description'}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+             
+
+                        {/* Speakers Section */}
+              {homeData.speaker && homeData.speaker.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Speakers</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                      Meet the experts and thought leaders
+                    </p>
+                  </div>
+                  
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: 16, 
+                    overflowX: 'auto', 
+                    paddingBottom: 8 
+                  }}>
+                    {homeData.speaker.slice(0, 7).map((speaker, index) => (
+                      <div key={index} style={{
+                        minWidth: '80px',
+                        textAlign: 'center',
+                        cursor: 'pointer'
+                      }}>
+                        {speaker?.image ? (
+                          <img 
+                            // src={speaker.image} 
+                            src={`${imagesURL}${speaker.image}/public`} 
+                            alt={speaker.name}
+                            style={{ 
+                              width: '80px', 
+                              height: '80px', 
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '3px solid #e5e7eb'
+                            }}
+                          />
+                        ) : (
+                          <div style={{ 
+                            width: '80px', 
+                            height: '80px', 
+                            borderRadius: '50%',
+                            background: '#f3f4f6',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '3px solid #e5e7eb'
+                          }}>
+                            <span style={{ fontSize: 24 }}>👤</span>
+                          </div>
+                        )}
+                        <p style={{ 
+                          margin: '8px 0 0', 
+                          fontSize: 12, 
+                          color: '#6B7280',
+                          maxWidth: '80px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {speaker?.name || 'Speaker Name'}
+                        </p>
+                      </div>
+                    ))}
+                    
+                    {homeData.speaker.length > 1 && (
+                      <div style={{
+                        minWidth: '80px',
+                        height: '80px',
+                        borderRadius: '50%',
+                        background: '#f3f4f6',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '3px solid #e5e7eb',
+                        cursor: 'pointer'
+                      }}>
+                        <span style={{ fontSize: 14, color: '#6B7280' }}>See All</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Seminars Section */}
+              {homeData.seminars && homeData.seminars.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Upcoming Seminars</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                      Don't miss these informative sessions
+                    </p>
+                  </div>
+                  
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+                    gap: 16 
+                  }}>
+                    {homeData.seminars.slice(0, 3).map((seminar, index) => (
+                      <div key={index} style={{
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                      >
+                        {seminar?.seminar_img?.[0] ? (
+                          <img 
+                            // src={seminar.seminar_img[0]} 
+                            src={`${imagesURL}${seminar.seminar_img[0]}/public`} 
+                            alt="Seminar"
+                            style={{ 
+                              width: '100%', 
+                              height: '160px', 
+                              objectFit: 'cover' 
+                            }}
+                          />
+                        ) : (
+                          <div style={{ 
+                            width: '100%', 
+                            height: '160px', 
+                            background: '#f3f4f6',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <span style={{ fontSize: 32 }}>🎓</span>
+                          </div>
+                        )}
+                        
+                        <div style={{ padding: 16 }}>
+                          <h4 style={{ margin: '0 0 8px', fontSize: 16, color: '#1E1F24' }}>
+                            {seminar.title || 'Seminar Title'}
+                          </h4>
+                          <p style={{ margin: '0 0 12px', fontSize: 14, color: '#6B7280', lineHeight: 1.4 }}>
+                            {seminar.description ? 
+                              seminar.description.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : 
+                              'Seminar description coming soon'
+                            }
+                          </p>
+                          
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ fontSize: 12, color: '#6B7280' }}>
+                              {seminar.seminar_date ? 
+                                moment(seminar.seminar_date).format('D MMM, YYYY') : 
+                                'Date TBD'
+                              }
+                            </div>
+                            <button style={{
+                              background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: 16,
+                              padding: '6px 12px',
+                              fontSize: 12,
+                              cursor: 'pointer'
+                            }}>
+                              Add to Schedule
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Activities Section */}
+              {homeData.AllAcivity && homeData.AllAcivity.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>In-Show Activities</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                      Engage with interactive activities and games
+                    </p>
+                  </div>
+                  
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                    gap: 16 
+                  }}>
+                    {homeData.AllAcivity.slice(0, 4).map((activity, index) => {
+                      const activityColor = getActivityColor(activity?.activity_type);
+                      const img = buildImg(activity?.image || activity?.logo);
+                      const boothLabel = activity?.booth_name || activity?.zone || activity?.stage || '';
+                      return (
+                        <div key={index} style={{
+                          background: '#F6F7FF',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: 24,
+                          overflow: 'hidden',
+                          padding: 16
+                        }}>
+                          {/* Image */}
+                          <div style={{
+                            background: '#fff',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: 20,
+                            height: 220,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: 16
+                          }}>
+                            {img ? (
+                              <img src={img} alt={activity.title || 'Activity'} style={{ maxWidth: '95%', maxHeight: '95%', objectFit: 'contain' }} />
+                            ) : (
+                              <span style={{ fontSize: 40 }}>🎮</span>
+                            )}
+                          </div>
+
+                          {/* Title + Booth badge */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                            <h4 style={{ margin: 0, fontSize: 24, color: '#1E1F24', fontWeight: 800, lineHeight: 1.25 }}>
+                              {activity.title || 'Activity Title'}
+                            </h4>
+                            {boothLabel && (
+                              <div style={{
+                                padding: '6px 10px',
+                                background: '#E4EBFF',
+                                color: '#3F57D0',
+                                borderRadius: 12,
+                                fontSize: 12,
+                                fontWeight: 700
+                              }}>{boothLabel}</div>
+                            )}
+                          </div>
+
+                          {/* Type chip */}
+                          <div style={{ marginTop: 12, marginBottom: 16 }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '8px 14px',
+                              borderRadius: 24,
+                              border: `2px solid ${activityColor}`,
+                              color: activityColor,
+                              background: `${activityColor}15`,
+                              fontWeight: 600,
+                              fontSize: 14
+                            }}>
+                              {activity.activity_type || 'Activity'}
+                            </span>
+                          </div>
+
+                          {/* View Details button */}
+                          <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <button
+                              style={{
+                                width: '100%',
+                                padding: '12px 18px',
+                                background: 'transparent',
+                                color: '#3F57D0',
+                                border: '3px solid #C9D3FF',
+                                borderRadius: 999,
+                                fontSize: 18,
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => console.log('View Details clicked', activity)}
+                            >
+                              View Details
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+            
+
+              {/* Sponsors & Partners Section */}
+              {(homeData.sponsor || homeData.partners || homeData.show_exhibitor) && (
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ marginBottom: 16 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>
+                      {moment().format('YYYY')} Sponsors & Partners
+                    </h3>
+                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                      Thank you to our amazing sponsors and partners
+                    </p>
+                  </div>
+                  
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
+                    gap: 16 
+                  }}>
+                    {[
+                      ...(homeData.sponsor || []),
+                      ...(homeData.partners || []),
+                      ...(homeData.show_exhibitor?.filter(item => item.is_featured === 1) || [])
+                    ].slice(0, 8).map((item, index) => (
+                      <div key={index} style={{
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        padding: 16,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '80px',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                      >
+                        {item?.logo || item?.company?.[0]?.logo ? (
+                          <img 
+                            // src={item.logo || item.company[0].logo} 
+                            src={`${imagesURL}${item.logo || item.company[0].logo}/public`} 
+                            alt="Logo"
+                            style={{ 
+                              maxWidth: '100%', 
+                              maxHeight: '50px', 
+                              objectFit: 'contain' 
+                            }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: 24, color: '#9ca3af' }}>🏢</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Products Section */}
+              {homeData.product && homeData.product.length > 0 && (
+                <div style={{ marginBottom: 32 }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 22, color: '#1E1F24' }}>Recommended Products</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280', maxWidth: 720 }}>
+                      Manage the list of recommended products to showcase to users based on preferences, trends, or related categories.
+                    </p>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                    gap: 16
+                  }}>
+                    {homeData.product.slice(0, 4).map((product, index) => {
+                      const img = buildImg(product?.product_image?.[0]);
+                      return (
+                        <div key={index} style={{
+                          background: '#F0F7FB',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: 20,
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{ padding: 14 }}>
+                            <div style={{
+                              height: 180,
+                              background: '#fff',
+                              borderRadius: 16,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '1px solid #e5e7eb'
+                            }}>
+                              {img ? (
+                                <img
+                                  src={img}
+                                  alt={product.product_name || 'Product'}
+                                  style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }}
+                                />
+                              ) : (
+                                <span style={{ fontSize: 32 }}>📦</span>
+                              )}
+                            </div>
+
+                            <div style={{ marginTop: 14 }}>
+                              <h4 style={{
+                                margin: '0 0 8px',
+                                fontSize: 16,
+                                color: '#1E1F24',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden'
+                              }}>
+                                {product.product_name || 'Product Name'}
+                              </h4>
+                              <p style={{ margin: '0 0 14px', fontSize: 16, color: '#6B7280' }}>
+                                Price ${product.product_price || '—'}
+                              </p>
+
+                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <button
+                                  onClick={() => {
+                                    if (product?.product_url) {
+                                      window.open(product.product_url, '_blank');
+                                    }
+                                  }}
+                                  style={{
+                                    minWidth: 140,
+                                    padding: '10px 18px',
+                                    background: '#2743B8',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: 28,
+                                    fontSize: 16,
+                                    fontWeight: 700,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Buy
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+                    <button
+                      onClick={() => navigate('/products')}
+                      style={{
+                        padding: '12px 28px',
+                        background: 'transparent',
+                        color: '#4A57C7',
+                        border: '3px solid #C9D3FF',
+                        borderRadius: 999,
+                        fontSize: 20,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      View More
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Reviews Section */}
+              {homeData.reviews && homeData.reviews.length > 0 && (
+                <div style={{ marginBottom: 32 }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 22, color: '#1E1F24' }}>Reviews</h3>
+                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280', maxWidth: 720 }}>
+                      Display authentic reviews to build trust and improve the overall experience.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'grid', gap: 16 }}>
+                    {homeData.reviews.map((rev, idx) => {
+                      const title = rev.title || rev.headline || rev.subject || 'Review';
+                      const body = rev.description || rev.content || rev.review || '';
+                      const name = rev.name || rev.user_name || rev.user || 'User';
+                      const dateStr = rev.created_at || rev.date || rev.updated_at;
+                      const initials = (name || 'U')
+                        .split(' ')
+                        .map(p => p[0])
+                        .join('')
+                        .slice(0, 2)
+                        .toUpperCase();
+                      return (
+                        <div key={idx} style={{
+                          background: '#fff',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: 18,
+                          padding: 16
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                            <div style={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: '50%',
+                              background: '#E6E7EB',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#5B5E68',
+                              fontWeight: 700
+                            }}>
+                              {initials}
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 18, color: '#1E1F24', fontWeight: 700 }}>{title}</div>
+                              <div style={{ fontSize: 12, color: '#9CA3AF' }}>
+                                {dateStr ? moment(dateStr).format('MMM D, YYYY h:mm A') : ''}
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.6 }}>{body}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+           
+
+            
+            </>
+          )}
+
+        
+
+         
         </div>
       </div>
     </AppLayout>

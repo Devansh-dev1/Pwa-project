@@ -131,7 +131,7 @@ const BottomNavigation = () => {
   return (
     <div
       style={{
-        position: 'fixed',
+        position: 'absolute',
         bottom: 0,
         left: '50%',
         transform: 'translateX(-50%)',
@@ -143,11 +143,14 @@ const BottomNavigation = () => {
         borderTopRightRadius: 30,
         backgroundColor: '#fff',
         paddingTop: 30,
-        paddingBottom: 30,
+        // paddingBottom: 30,
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        zIndex: 1000
+        zIndex: 1000,
+        height: '50px'
+
+        
       }}
     >
       {tabs.map((tab, index) => (
