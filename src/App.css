@@ -1,8 +1,55 @@
+/* Import Nunito font family to match mobile app */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* FIXED MOBILE FRAME - All screens must use this */
+.mobile-frame-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 430px !important; /* FIXED MOBILE WIDTH */
+  height: 100vh !important; /* FIXED MOBILE HEIGHT */
+  max-width: 430px !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  box-sizing: border-box !important;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+/* All screens must fit within the mobile frame */
+.screen-container {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
 .logo {
@@ -39,4 +86,42 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* SignIn input styles to match mobile */
+.signin-input {
+  color: #1E1F24;
+  background: transparent;
+  caret-color: #2a46a8;
+}
+.signin-input::placeholder {
+  color: rgba(42, 70, 168, 0.46);
+  color: #2a46a875;
+  opacity: 1;
+}
+.signin-input::-webkit-input-placeholder {
+  color: rgba(42, 70, 168, 0.46);
+  opacity: 1;
+}
+.signin-input::-moz-placeholder {
+  color: rgba(42, 70, 168, 0.46);
+  opacity: 1;
+}
+.signin-input:-ms-input-placeholder {
+  color: rgba(42, 70, 168, 0.46);
+  opacity: 1;
+}
+.signin-input:-moz-placeholder {
+  color: rgba(42, 70, 168, 0.46);
+  opacity: 1;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
 }
