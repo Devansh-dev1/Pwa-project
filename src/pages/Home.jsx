@@ -74,6 +74,33 @@ export default function Home() {
   const [dataLoading, setDataLoading] = useState(false)
   const [error, setError] = useState(null)
 
+   const handleAllDataWithFetch = async () => {
+    const baseUrl = `https://d9wbof3q09tw.cloudfront.net/${EVENT_ID}.json`;
+    
+    try {
+      console.log('🔄 Trying fetch with no-cors mode...');
+      
+      // Try fetch with no-cors mode first
+      const response = await fetch(baseUrl, {
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Fetch successful:', data);
+        return data;
+      }
+    } catch (fetchError) {
+      console.log('⚠️ Fetch failed, trying CORS proxy...');
+    }
+    
+    // Fallback to CORS proxy
+    return handleAllData();
+  };
+
   useEffect(() => {
     const initializeHome = async () => {
       try {
@@ -152,117 +179,9 @@ export default function Home() {
           background: '#f8f9fa',
           WebkitOverflowScrolling: 'touch'
         }}>
-          {/* Test Data Fetch Buttons */}
-          <div style={{ marginBottom: 24, textAlign: 'center' }}>
-            {/* <button
-              onClick={async () => {
-                try {
-                  setDataLoading(true);
-                  setError(null);
-                  console.log('🔄 Testing data fetch...');
-                  
-                  // Import the function dynamically to avoid issues
-                  const { handleAllData, testAllApproaches } = await import('../api/home.js');
-                  
-                  // First try the main function
-                  let data = await handleAllData();
-                  
-                  // If that fails, try all approaches
-                  if (!data) {
-                    console.log('🔄 Main function failed, trying all approaches...');
-                    data = await testAllApproaches();
-                  }
-                  
-                  if (data) {
-                    console.log('✅ Data received:', data);
-                    setHomeData(data);
-                    // Store in localStorage for now to test display
-                    localStorage.setItem('homeData', JSON.stringify(data));
-                  } else {
-                    console.log('❌ No data received');
-                    setError('No data received. All approaches failed. Check console for details.');
-                  }
-                } catch (error) {
-                  console.error('❌ Error testing data fetch:', error);
-                  setError('Error fetching data. Check console for details.');
-                } finally {
-                  setDataLoading(false);
-                }
-              }}
-              disabled={dataLoading}
-              style={{
-                padding: '12px 24px',
-                background: dataLoading ? '#ccc' : 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 25,
-                fontSize: 16,
-                cursor: dataLoading ? 'not-allowed' : 'pointer',
-                fontWeight: '600',
-                opacity: dataLoading ? 0.7 : 1,
-                marginRight: '12px'
-              }}
-            >
-              {dataLoading ? '🔄 Loading...' : '🧪 Test Data Fetch'}
-            </button> */}
+         
 
-            {/* Manual Data Input Button */}
-            {/* <button
-              onClick={() => {
-                const manualData = prompt(`
-Since CORS proxies are having issues, you can manually paste the JSON data here.
-
-1. Go to: https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json
-2. Copy all the JSON content
-3. Paste it below and click OK
-
-This will bypass the CORS issue and display your data.
-                `);
-                
-                if (manualData) {
-                  try {
-                    const parsedData = JSON.parse(manualData);
-                    setHomeData(parsedData);
-                    localStorage.setItem('homeData', manualData);
-                    console.log('✅ Manual data loaded successfully:', parsedData);
-                  } catch (parseError) {
-                    console.error('❌ Error parsing manual data:', parseError);
-                    setError('Invalid JSON data. Please check the format.');
-                  }
-                }
-              }}
-              style={{
-                padding: '12px 24px',
-                background: 'linear-gradient(90deg, #10b981 0%, #059669 100%)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 25,
-                fontSize: 16,
-                cursor: 'pointer',
-                fontWeight: '600'
-              }}
-            >
-              📋 Manual Data Input
-            </button> */}
-            
-            {/* <p style={{ margin: '8px 0 0', fontSize: 14, color: '#6B7280' }}>
-              Try the test button first, or use manual input if CORS proxies fail
-            </p> */}
-          </div>
-
-          {/* Error Display */}
-          {error && (
-            <div style={{ 
-              background: '#fef2f2', 
-              border: '1px solid #f87171', 
-              borderRadius: 12, 
-              padding: 16, 
-              marginBottom: 24, 
-              textAlign: 'center' 
-            }}>
-              <span style={{ fontSize: 16, color: '#dc2626' }}>⚠️ {error}</span>
-            </div>
-          )}
+        
 
           {/* Data Display Sections */}
           {homeData && (
@@ -309,20 +228,25 @@ This will bypass the CORS issue and display your data.
 
                     {/* Event Details */}
                     <div style={{ flex: 1, padding: 16 }}>
-                      <div style={{ marginBottom: 12 }}>
-                        <h2 style={{ margin: '0 0 8px', fontSize: 20, color: '#1E1F24' }}>
+                      <div style={{ marginBottom: 12,display:'flex',justifyContent:'space-between' }}>
+                        <div >
+                        <h2 style={{ margin: '0 0 8px', fontSize: 13, color: '#1E1F24' }}>
                           {homeData.event[0]?.title || 'Event Title'}
                         </h2>
-                        <p style={{ margin: '0 0 8px', fontSize: 14, color: '#6B7280' }}>
+                        <p style={{ margin: '0 0 8px', fontSize: 8, color: '#6B7280' }}>
                           {homeData.event[0]?.organizer_name || 'Organizer'}
                         </p>
+                        </div>
                         <div style={{ 
-                          background: '#f3f4f6', 
-                          padding: '4px 12px', 
-                          borderRadius: 16, 
-                          display: 'inline-block',
-                          fontSize: 12,
-                          color: '#374151'
+                           background: '#81BBBC', 
+                           padding: '12px 16px', 
+                           borderRadius: 20, 
+                           display: 'inline-block',
+                           fontSize: 14,
+                           color: '#fff',
+                           fontWeight: 600,
+                           whiteSpace: 'nowrap',
+                           marginLeft: 16
                         }}>
                           {homeData.event[0]?.show_date?.[0]?.date ? 
                             moment(homeData.event[0].show_date[0].date).format('D MMM, YYYY') : 
@@ -365,7 +289,7 @@ This will bypass the CORS issue and display your data.
                   <div style={{ marginBottom: 16 }}>
                     <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Highlights</h3>
                     <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
-                      Discover the best of what this event has to offer
+                      {homeData?.event[0]?.global_test?.find(item => item?.Type === 'Highlights')?.description}
                     </p>
                   </div>
                   
@@ -523,7 +447,7 @@ This will bypass the CORS issue and display your data.
                   <div style={{ marginBottom: 16 }}>
                     <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Speakers</h3>
                     <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
-                      Meet the experts and thought leaders
+                      {homeData?.event[0]?.global_test?.find(item => item?.Type === 'Speaker')?.description || 'Meet the experts and thought leaders'}
                     </p>
                   </div>
                   

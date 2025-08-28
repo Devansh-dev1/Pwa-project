@@ -10,6 +10,7 @@ import Map from './pages/Map.jsx'
 import PlanVisit from './pages/PlanVisit.jsx'
 import Scanner from './pages/Scanner.jsx'
 import Profile from './pages/Profile.jsx'
+import TipsDetails from './pages/TipsDetails.jsx'
 import DriversLicenseSignup from './pages/DriversLicenseSignup.jsx'
 import SignupName from './pages/SignupName.jsx'
 import SignupDOB from './pages/SignupDOB.jsx'
@@ -49,6 +50,7 @@ export default function App() {
           <Route path="/signup/verify" element={<SignupVerify />} />
           <Route path="/signup/review" element={<SignupReview />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/tips" element={<TipsDetails />} />
           <Route path="/profile/information" element={<ProfileInformation />} />
           <Route path="/profile/liked-items" element={<LikedItems />} />
           <Route path="/profile/family" element={<MyFamily />} />
