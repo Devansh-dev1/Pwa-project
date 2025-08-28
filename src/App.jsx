@@ -10,6 +10,7 @@ import Map from './pages/Map.jsx'
 import PlanVisit from './pages/PlanVisit.jsx'
 import Scanner from './pages/Scanner.jsx'
 import Profile from './pages/Profile.jsx'
+import TipsDetails from './pages/TipsDetails.jsx'
 import { getToken } from './utils/auth.js'
 
 function RootRedirect() {
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="/plan-visit" element={<PlanVisit />} />
           <Route path="/scanner" element={<Scanner />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/tips" element={<TipsDetails />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     </BrowserRouter>
