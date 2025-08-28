@@ -31,7 +31,7 @@ export default function SignupName() {
     fields: { marginTop: 35 },
     label: (active) => ({ color: active ? '#2A46A8' : '#7EC8C9', fontSize: 14, fontFamily: 'Nunito-SemiBold, sans-serif',fontWeight: 600 }),
     borderWrap: (active) => ({ marginTop: 5, borderRadius: 24, border: '4px solid', borderColor: active ? '#EFE6FB' : '#eef7f7' }),
-    inputRow: (active) => ({ height: 52, borderRadius: 24, border: '1.5px solid', borderColor: active ? '#2A46A8' : '#eef7f7', background: active ? '#fff' : '#eff7f7', display: 'flex', alignItems: 'center', padding: '0 12px' }),
+    inputRow: (active) => ({ height: 52, borderRadius: 20, border: '1.5px solid', borderColor: active ? '#2A46A8' : '#eef7f7', background: active ? '#fff' : '#eff7f7', display: 'flex', alignItems: 'center', padding: '0 12px' }),
     input: { flex: 1, fontSize: 16, border: 'none', outline: 'none', background: 'transparent', color: '#413c3a', fontFamily: 'Nunito-Medium, sans-serif' },
     orRow: { display: 'flex', alignItems: 'center', margin: '0 16px' },
     orLine: { flex: 1, height: 1, background: '#C4C3C2' },
