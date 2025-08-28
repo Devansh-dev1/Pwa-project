@@ -35,6 +35,7 @@ const useStore = create(
 
     // Actions
     setUserInfo: (userInfo) => set({ userInfo, isAuthenticated: !!userInfo }),
+    mergeUserInfo: (partial) => set((state) => ({ userInfo: { ...(state.userInfo || {}), ...(partial || {}) } })),
     
     setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
     

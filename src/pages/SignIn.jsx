@@ -6,6 +6,7 @@ import { storeToken } from '../utils/indexedDB.js'
 import MagicLinkModal from '../components/MagicLinkModal.jsx'
 import ErrorScreen from '../components/ErrorScreen.jsx'
 import useStore from '../store/useStore.js'
+import AppLayout from '../components/AppLayout.jsx'
 
 export default function SignIn() {
   const navigate = useNavigate()
@@ -71,8 +72,9 @@ export default function SignIn() {
   }
 
   return (
-    <div style={{ height: 'calc(var(--vh, 1vh) * 100)', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'linear-gradient(180deg, #fff 80%, #eff7f7 100%)', boxSizing: 'border-box', overflow: 'hidden' }}>
-      <div style={{ width: '100%', maxWidth: 430, height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto', WebkitOverflowScrolling: 'touch', padding: '24px 16px', boxSizing: 'border-box' }}>
+    <AppLayout hideBottomNav={true}>
+      <div style={{ height: 'calc(var(--vh, 1vh) * 100)', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'linear-gradient(180deg, #fff 80%, #eff7f7 100%)', boxSizing: 'border-box', overflow: 'hidden' }}>
+        <div style={{ width: '100%', maxWidth: 430, height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto', WebkitOverflowScrolling: 'touch', padding: '24px 16px', boxSizing: 'border-box' }}>
       <form onSubmit={handleMagicLink} style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ margin: 0, color: '#1E1F24', textAlign: 'center' }}>Login</h2>
@@ -107,6 +109,26 @@ export default function SignIn() {
           style={{ height: 56, padding: '0 24px', borderRadius: 999, color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', border: 'none', cursor: loading || !email ? 'not-allowed' : 'pointer', width: '100%', maxWidth: 430, marginTop: 10 }}>
           {loading ? 'Sending…' : 'Send Magic Link'}
         </button>
+        <button
+          type="button"
+          onClick={() => navigate('/signup/drivers-license')}
+          style={{
+            height: 40,
+            padding: '0 24px',
+            borderRadius: 999,
+            background: 'transparent',
+            border: '1.5px solid #2a46a8',
+            color: '#2a46a8',
+            fontSize: 14,
+            width: '100%',
+            maxWidth: 430,
+            marginTop: 8,
+            fontFamily: 'Nunito-SemiBold, sans-serif'
+          }}
+        >
+            Sign Up 
+            </button>
+        {/* </button> */}
 
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginTop: 16, color: '#6B7280', fontSize: 12 }}>
           <span>By proceeding, you agree to the</span>
@@ -142,6 +164,7 @@ export default function SignIn() {
         </div>
       )}
     </div>
+    </AppLayout>
   )
 }
 
