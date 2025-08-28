@@ -7,6 +7,7 @@ import LoadingScreen from '../components/LoadingScreen.jsx'
 import AppLayout from '../components/AppLayout.jsx'
 import moment from 'moment'
 import { imagesURL } from '../api/index.js'
+import { handleAllData } from '../api/home.js'
 
 // Helper to build Cloudflare image URL keys into full URLs
 const buildImg = (key) => {
@@ -76,21 +77,21 @@ export default function Home() {
   useEffect(() => {
     const initializeHome = async () => {
       try {
-        const token = await getToken()
-        if (!token) {
-          navigate('/welcome', { replace: true })
-          return
-        }
+        // const token = await getToken()
+        // if (!token) {
+        //   navigate('/welcome', { replace: true })
+        //   return
+        // }
 
         // Try to get user info if not already loaded
-        if (!userInfo || !userInfo.auto_id) {
-          try {
-            const fetchedUserInfo = await getUserInfo()
-            setUserInfo(fetchedUserInfo)
-          } catch (error) {
-            console.warn('Could not fetch user info:', error)
-          }
-        }
+        // if (!userInfo || !userInfo.auto_id) {
+        //   try {
+        //     const fetchedUserInfo = await getUserInfo()
+        //     setUserInfo(fetchedUserInfo)
+        //   } catch (error) {
+        //     console.warn('Could not fetch user info:', error)
+        //   }
+        // }
 
         // Load existing data from localStorage if available
         const existingData = localStorage.getItem('homeData')
@@ -100,8 +101,13 @@ export default function Home() {
             setHomeData(parsedData)
             console.log('✅ Loaded existing data from localStorage:', parsedData)
           } catch (parseError) {
-            console.warn('Could not parse existing data from localStorage:', parseError)
+           
           }
+        }else{
+          const parsedData = await handleAllData()
+          localStorage.setItem('homeData', JSON.stringify(parsedData))
+          setHomeData(parsedData)
+
         }
       } catch (error) {
         console.error('Error initializing home:', error)

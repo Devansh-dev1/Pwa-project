@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:s3": "aws s3 sync dist/ s3://mobilewebside --delete --exclude 'index.html' --cache-control 'public, max-age=31536000, immutable' && aws s3 cp dist/index.html s3://mobilewebside/index.html --cache-control 'no-cache'",
+
+  "deploy:cf": "aws cloudfront create-invalidation --distribution-id YOUR_DISTRIBUTION_ID --paths '/index.html'",
+
+  "deploy": "npm run build && npm run deploy:s3"
   },
   "dependencies": {
     "axios": "^1.11.0",

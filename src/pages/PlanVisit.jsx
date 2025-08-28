@@ -1,9 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore.js';
 import { fetchPersonalizedData } from '../api/auth.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import AppLayout from '../components/AppLayout.jsx';
+import { getUserData } from '../utils/indexedDB.js';
+import { imagesURL } from '../api/index.js';
+import moment from 'moment';
 
 // EXACT MOBILE APP CONSTANTS - Direct from GlobalStyles
 const Padding = {
@@ -63,6 +66,226 @@ const Color = {
   colorDarkslateblue: '#2a46a8',
   solidsTurqoiseTurqoise400: '#00b4a6',
   solidsTurqoiseTurqoise50: '#eff7f7',
+};
+
+// Helper function to build image URLs
+const buildImg = (key) => {
+  if (!key) return null;
+  return `${imagesURL}${key}/public`;
+};
+
+// Helper function to get zone background color
+const getZoneBackgroundColor = (zoneId, boothData) => {
+  const zone = boothData?.find(item => item?.id == zoneId);
+  const zoneColor = zone?.zone_color;
+  
+  // Check if it's a valid hex color
+  const isHexColor = /^#[0-9A-F]{6}$/i;
+  return isHexColor.test(zoneColor) ? zoneColor : '#F8B737';
+};
+
+// Categories component for PlanVisit
+const PlanVisitCategories = ({ category, setCategory, addedMyDay, setAddedMyDay, setopenSignUp11 }) => (
+  <div style={{
+    backgroundColor: Color.solidsDenimDenim50,
+    padding: 4,
+    borderRadius: Border.br_81xl,
+    display: 'flex',
+    flexDirection: 'row',
+    alignSelf: 'stretch'
+  }}>
+    <button
+      onClick={() => setCategory(0)}
+      style={{
+        flex: 1,
+        paddingVertical: Padding.p_lg,
+        borderRadius: Border.br_981xl,
+        paddingHorizontal: 36,
+        justifyContent: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
+        background: category === 0 ? Color.solidsDenimDenim500 : 'transparent',
+        border: 'none',
+        cursor: 'pointer'
+      }}
+    >
+      <span style={{
+        color: category === 0 ? Color.oslerGrayWhite : Color.solidsDenimDenim300,
+        fontSize: FontSize.labelLg_size,
+        fontFamily: FontFamily.textSm
+      }}>
+        Plan Visit
+      </span>
+    </button>
+    <button
+      onClick={() => setCategory(1)}
+      style={{
+        flex: 1,
+        paddingVertical: Padding.p_lg,
+        borderRadius: Border.br_981xl,
+        paddingHorizontal: 36,
+        justifyContent: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
+        background: category === 1 ? Color.solidsDenimDenim500 : 'transparent',
+        border: 'none',
+        cursor: 'pointer'
+      }}
+    >
+      <span style={{
+        color: category === 1 ? Color.oslerGrayWhite : Color.solidsDenimDenim300,
+        fontSize: FontSize.labelLg_size,
+        fontFamily: FontFamily.textSm
+      }}>
+        My Day
+      </span>
+    </button>
+  </div>
+);
+
+// Booth card component
+const BoothCard = ({ booth, zone, zoneColor, onClick, isSuggested, onThreeDotClick }) => {
+  const img = buildImg(booth.exhibitor_image || booth.company?.[0]?.logo);
+  
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        padding: Padding.p_mini,
+        marginBottom: 10,
+        overflow: 'hidden',
+        borderColor: Color.solidsDenimDenim200,
+        borderRadius: Border.br_5xl,
+        alignSelf: 'stretch',
+        backgroundColor: Color.oslerGrayWhite,
+        border: `1.5px solid ${isSuggested ? '#CE8AEE' : Color.solidsDenimDenim200}`,
+        cursor: 'pointer',
+        transition: 'all 0.2s ease'
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = 'translateY(-2px)';
+        e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = 'translateY(0)';
+        e.target.style.boxShadow = 'none';
+      }}
+    >
+      {/* Suggestion icon */}
+      {isSuggested && (
+        <div style={{
+          position: 'absolute',
+          top: -5,
+          left: 72,
+          zIndex: 10
+        }}>
+          <span style={{ fontSize: 24 }}>⭐</span>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', height: '100%' }}>
+        {/* Image section */}
+        <div style={{
+          width: 110,
+          borderRadius: 12,
+          overflow: 'hidden',
+          aspectRatio: '3/2',
+          alignSelf: 'center',
+          justifyContent: 'space-between'
+        }}>
+          {img ? (
+            <img 
+              src={img} 
+              alt={booth.company?.[0]?.name || 'Booth'} 
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'contain' 
+              }} 
+            />
+          ) : (
+            <span style={{ fontSize: 40 }}>🏪</span>
+          )}
+        </div>
+
+        {/* Content section */}
+        <div style={{ marginLeft: 7, flex: 1 }}>
+          <div style={{ flex: 1 }}>
+            <h4 style={{
+              color: Color.solidsBlackBlack500,
+              letterSpacing: -0.1,
+              marginBottom: 10,
+              fontSize: FontSize.labelLg_size,
+              fontFamily: FontFamily.textXs,
+              margin: '0 0 10px'
+            }}>
+              {booth.company_name || 'Company Name'}
+            </h4>
+            
+            {/* Zone badge */}
+            <div style={{
+              display: 'inline-block',
+              padding: '4px 8px',
+              backgroundColor: `${zoneColor}20`,
+              color: zoneColor,
+              borderRadius: 12,
+              fontSize: FontSize.textXs_size,
+              fontWeight: 600
+            }}>
+              {booth.booth_name} - Zone {zone}
+            </div>
+          </div>
+        </div>
+
+        {/* Three dot menu */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onThreeDotClick(booth);
+          }}
+          style={{
+            borderRadius: 12,
+            backgroundColor: '#fff',
+            border: '1.5px solid #C4C3C2',
+            width: 36,
+            height: 36,
+            justifyContent: 'center',
+            alignItems: 'center',
+            cursor: 'pointer',
+            border: 'none'
+          }}
+        >
+          <span style={{ fontSize: 16 }}>⋯</span>
+        </button>
+      </div>
+
+      {/* Availability section */}
+      <div style={{
+        height: 52,
+        borderColor: '#F8B737',
+        borderWidth: '1.5px',
+        borderStyle: 'solid',
+        backgroundColor: '#FFF8EA',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 20,
+        paddingVertical: 10,
+        borderRadius: 17,
+        paddingHorizontal: Padding.p_mini,
+        justifyContent: 'space-between',
+        alignSelf: 'stretch'
+      }}>
+        <span style={{
+          color: Color.solidsBlackBlack500,
+          fontSize: FontSize.paragraphSm_size,
+          flex: 1,
+          textAlign: 'center'
+        }}>
+          Open during the whole day event
+        </span>
+      </div>
+    </div>
+  );
 };
 
 // EXACT MOBILE APP STYLES - Direct copy from PlanVisitList.js
@@ -487,7 +710,7 @@ const PlanVisitFirstTime = () => {
       let boothIds = useStore.getState().boothIds;
       const res = await fetchPersonalizedData(userInfo?.auto_id, 'Booth', boothIds ? boothIds : '', 20);
       let BoothId = res?.map(item => item.itemId) || [];
-      setBoothData(BoothId);
+      // setBoothData(BoothId);
     } catch (error) {
       console.error('Error fetching booth suggestions:', error);
     }
@@ -497,7 +720,7 @@ const PlanVisitFirstTime = () => {
     try {
       const res = await fetchPersonalizedData(userInfo?.auto_id, 'Seminar');
       let BoothId = res?.map(item => item.itemId) || [];
-      setSeminarData(BoothId);
+      // setSeminarData(BoothId);
     } catch (error) {
       console.error('Error fetching seminar suggestions:', error);
     }
@@ -518,6 +741,19 @@ const PlanVisitFirstTime = () => {
     const loadData = async () => {
       try {
         setLoading(true);
+        const existingData = localStorage.getItem('homeData')
+        if (existingData) {
+          try {
+            const userData = JSON.parse(existingData)
+            setBoothData(userData.show_exhibitor || []);
+            setSeminarData(userData.seminars || []);
+            setSampleData(userData.samples || []);
+          } catch (error) {
+            console.error('Error parsing homeData:', error);
+          }
+        }
+    
+        
         if (userInfo?.auto_id && email !== 'unknown@dev.familyone.io') {
           await Promise.all([
             suggestionsData(),
@@ -797,13 +1033,374 @@ const PlanVisitFirstTime = () => {
 };
 
 export default function PlanVisit() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState(0);
+  const [searchValues, setSearchValues] = useState('');
+  const [search, setSearch] = useState('');
+  const [focusedField, setFocusedField] = useState(null);
+  const [selectZonenames, setSelectZonenames] = useState([]);
+  const [boothData, setBoothData] = useState([]);
+  const [selectedValues, setSelectedValues] = useState([]);
+  const [diselectedItem, setDiselectedItem] = useState([]);
+  const [isHiddenArray, setIsHiddenArray] = useState([]);
+  const [isSelectedSamples, setSelectedSamples] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(4);
+  const [botamSheetOpen, setBotamSheetOpen] = useState(false);
+  const [bothamSheetData, setBothamSheetData] = useState({});
+  const [addMyDayItem, setAddMyDayItem] = useState([]);
+  const [myDayOpenModel, setMyDayOpenModel] = useState(false);
+  const [addedMyDay, setAddedMyDay] = useState(false);
+  const [openSignUp1, setopenSignUp11] = useState(false);
+  const [searchLoader, setSearchLoader] = useState(false);
+
+  // Data states
+  const [showExhibitor, setShowExhibitor] = useState([]);
+  const [boothNZone, setBoothNZone] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [seminars, setSeminars] = useState([]);
+  const [samples, setSamples] = useState([]);
+
+  const { myDayData, setMyDayData, userInfo } = useStore();
+  const { email } = userInfo || {};
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Get data from localStorage
+        const existingData = localStorage.getItem('homeData');
+        if (existingData) {
+          try {
+            const userData = JSON.parse(existingData);
+            if (userData) {
+              setShowExhibitor(userData.show_exhibitor || []);
+              setBoothNZone(userData.Booth_N_Zone || []);
+              setSeminars(userData.seminars || []);
+              setSamples(userData.sample || []);
+              
+              // Extract categories from exhibitor data
+              const allCategories = [];
+              userData.show_exhibitor?.forEach(booth => {
+                if (booth.categories && Array.isArray(booth.categories)) {
+                  booth.categories.forEach(cat => {
+                    if (cat.name) {
+                      const existingCategory = allCategories.find(c => c.name === cat.name);
+                      if (existingCategory) {
+                        existingCategory.fulldata.push(booth);
+                      } else {
+                        allCategories.push({
+                          id: cat.id,
+                          name: cat.name,
+                          fulldata: [booth]
+                        });
+                      }
+                    }
+                  });
+                }
+              });
+              
+              setCategories(allCategories.sort((a, b) => a.name.localeCompare(b.name)));
+            }
+          } catch (parseError) {
+            console.warn('Could not parse existing data from localStorage:', parseError);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading plan visit data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Group exhibitors by zone
+  const groupedByZone = useMemo(() => {
+    if (!showExhibitor.length) return [];
+
+    // Group by zones
+    let grouped = showExhibitor.reduce((acc, booth) => {
+      const zone = booth.zone || 'Unknown';
+      if (!acc[zone]) {
+        acc[zone] = [];
+      }
+      acc[zone].push(booth);
+      return acc;
+    }, {});
+
+    // Convert to array format
+    let groupedArray = Object.entries(grouped).map(([zone, booths]) => ({
+      zone,
+      booths: booths.map(booth => ({ ...booth }))
+    }));
+
+    // Apply search filter
+    if (searchValues) {
+      groupedArray = groupedArray.filter(group =>
+        searchValues.includes(group.zone)
+      );
+    }
+
+    return groupedArray.sort((a, b) => a.zone.localeCompare(b.zone));
+  }, [showExhibitor, searchValues]);
+
+  // Filter booths data
+  const finalBoothsData = useMemo(() => {
+    if (!boothNZone.length) return [];
+
+    const filteredData = boothNZone.filter((data) => {
+      // Check zone match
+      const isZoneMatch =
+        selectZonenames.length === 0 || selectZonenames.includes(data?.zone);
+
+      // Check search values
+      const isSearchMatch =
+        !searchValues ||
+        data?.booth_name?.includes(searchValues) ||
+        data?.company_name?.toLowerCase().includes(searchValues);
+
+      // Check deselected items
+      const isNotDeselected = !diselectedItem?.includes(data?.id);
+
+      // Check if the booth is not in "My Day" data
+      const isNotMyDay = !myDayData?.includes(data?.id);
+
+      return isZoneMatch && isSearchMatch && isNotDeselected && isNotMyDay;
+    });
+
+    // Separate suggested and non-suggested booths
+    const suggestedBooths = [];
+    const nonSuggestedBooths = [];
+
+    filteredData.forEach((data) => {
+      if (boothData.includes(data?.exhibitor?.booth_id)) {
+        suggestedBooths.push(data);
+      } else {
+        nonSuggestedBooths.push(data);
+      }
+    });
+
+    // Sort suggested booths according to boothData order
+    const sortedSuggestedBooths = suggestedBooths.sort((a, b) => {
+      const aIndex = boothData.indexOf(a?.exhibitor?.booth_id);
+      const bIndex = boothData.indexOf(b?.exhibitor?.booth_id);
+      return aIndex - bIndex;
+    });
+
+    // Sort non-suggested booths by other criteria
+    const sortedNonSuggestedBooths = nonSuggestedBooths.sort((a, b) => {
+      // Sort by zone name (case-insensitive)
+      const zoneComparison = (a.zone || '').toLowerCase().localeCompare((b.zone || '').toLowerCase());
+      if (zoneComparison !== 0) return zoneComparison;
+      
+      // Sort by company name (case-insensitive)
+      return (a.company_name || '').toLowerCase().localeCompare((b.company_name || '').toLowerCase());
+    });
+
+    return [...sortedSuggestedBooths, ...sortedNonSuggestedBooths];
+  }, [boothNZone, selectZonenames, searchValues, diselectedItem, myDayData, boothData]);
+
+  const displayedBooths = finalBoothsData.slice(0, visibleCount);
+
+  // Show more booths
+  const handleViewMore = () => {
+    setVisibleCount(prev => Math.min(prev + 6, finalBoothsData.length));
+  };
+
+  // Show less booths
+  const handleViewLess = () => {
+    setVisibleCount(4);
+  };
+
+  // Handle booth click
+  const handleBoothClick = (booth) => {
+    navigate(`/booths/${booth.id || booth.booth_id}`, { 
+      state: { 
+        booth,
+        zoneName: booth.zone,
+        sampleIconShow: Array.isArray(booth?.company?.[0]?.sample_ids)
+      } 
+    });
+  };
+
+  // Handle three dot menu click
+  const handleThreeDotClick = (booth) => {
+    setBothamSheetData(booth);
+    setBotamSheetOpen(true);
+  };
+
+  if (loading) {
+    return <LoadingScreen message="Loading plan visit..." />;
+  }
+
   return (
     <AppLayout>
-    <div className="mobile-frame-container">
-      <div className="screen-container">
-        <PlanVisitFirstTime />
+      <div style={{ backgroundColor: Color.oslerGrayWhite, minHeight: '100vh' }}>
+        {/* Header */}
+        <div style={{
+          background: '#fff',
+          borderBottom: '1px solid #e5e7eb',
+          padding: '20px 16px 16px'
+        }}>
+          <h1 style={{ 
+            margin: '0 0 16px', 
+            fontSize: 24, 
+            fontWeight: 600, 
+            color: '#1E1F24',
+            textAlign: 'center'
+          }}>
+            Plan Your Visit
+          </h1>
+
+          {/* Categories */}
+          <PlanVisitCategories 
+            category={category} 
+            setCategory={setCategory} 
+            addedMyDay={addedMyDay} 
+            setAddedMyDay={setAddedMyDay} 
+            setopenSignUp11={setopenSignUp11} 
+          />
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: '0 16px 16px' }}>
+          {category === 0 ? (
+            // Plan Visit view
+            <>
+              {/* Smart Suggestions */}
+              {!(email === 'unknown@dev.familyone.io') && 
+               (finalBoothsData?.length > 0 || seminars?.length > 0 || samples?.length > 0) && 
+               !searchLoader && (
+                <div style={{
+                  borderRadius: 15,
+                  border: '1.5px solid #CE8AEE',
+                  padding: 15,
+                  marginTop: 15,
+                  backgroundColor: '#F4EEFC',
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                  }}>
+                    <span style={{ fontSize: 24 }}>⭐</span>
+                    <span style={{
+                      color: '#9458E2',
+                      fontSize: 14,
+                      fontWeight: 600,
+                    }}>
+                      Smart Suggestions
+                    </span>
+                  </div>
+                  <p style={{
+                    color: '#9458E295',
+                    marginTop: 3,
+                    fontSize: 12,
+                    fontWeight: 500,
+                  }}>
+                    Items with having this icon are suggested by AI on the bases
+                    of similar attendees like you and their actions.
+                  </p>
+                </div>
+              )}
+
+              {/* Booths Section */}
+              {finalBoothsData?.length > 0 && (
+                <div style={{ marginTop: 15 }}>
+                  <div style={{ marginBottom: 15 }}>
+                    <h3 style={{
+                      margin: '0 0 8px',
+                      fontSize: 20,
+                      color: '#1E1F24',
+                      fontWeight: 600
+                    }}>
+                      Booths
+                    </h3>
+                    <p style={{
+                      margin: 0,
+                      fontSize: 13,
+                      color: '#6B7280'
+                    }}>
+                      Explore exhibitor booths and discover new products
+                    </p>
+                  </div>
+
+                  {/* Booths List */}
+                  <div>
+                    {displayedBooths.map((booth, index) => {
+                      const isSuggested = boothData.slice(0, 5).includes(booth?.exhibitor?.booth_id);
+                      const zoneColor = getZoneBackgroundColor(booth?.id, boothNZone);
+                      
+                      return (
+                        <BoothCard
+                          key={booth?.id?.toString() || index}
+                          booth={booth}
+                          zone={booth.zone}
+                          zoneColor={zoneColor}
+                          onClick={() => handleBoothClick(booth)}
+                          isSuggested={isSuggested}
+                          onThreeDotClick={handleThreeDotClick}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* View More/Less */}
+                  {finalBoothsData?.length > 4 && (
+                    <button
+                      onClick={visibleCount < finalBoothsData?.length ? handleViewMore : handleViewLess}
+                      style={{
+                        width: '100%',
+                        height: 56,
+                        border: `1.5px solid ${Color.solidsDenimDenim400}`,
+                        borderRadius: 1000,
+                        backgroundColor: 'transparent',
+                        color: Color.solidsDenimDenim400,
+                        fontSize: 18,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        marginTop: 15
+                      }}
+                    >
+                      {visibleCount < finalBoothsData?.length ? 'View More' : 'View Less'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* No Results */}
+              {finalBoothsData?.length === 0 && (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  color: '#6B7280'
+                }}>
+                  <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>🔍</span>
+                  <h3 style={{ margin: '0 0 8px', color: '#1E1F24' }}>No booths found</h3>
+                  <p style={{ margin: 0 }}>
+                    Try adjusting your search or filter criteria
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            // My Day view
+            <div style={{
+              textAlign: 'center',
+              padding: '40px 20px',
+              color: '#6B7280'
+            }}>
+              <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>📅</span>
+              <h3 style={{ margin: '0 0 8px', color: '#1E1F24' }}>My Day</h3>
+              <p style={{ margin: 0 }}>
+                Your personalized schedule and saved items will appear here
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </AppLayout>
   );
 }
