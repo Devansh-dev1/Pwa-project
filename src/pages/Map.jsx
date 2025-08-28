@@ -351,17 +351,17 @@ const MockMapView = ({ searchValue, onBoothClick }) => {
 
 export default function Map() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [legendOpen, setLegendOpen] = useState(false);
 
   useEffect(() => {
     // Simulate loading map data
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
+    // const timer = setTimeout(() => {
+    //   setLoading(false);
+    // }, 1500);
 
-    return () => clearTimeout(timer);
+    // return () => clearTimeout(timer);
   }, []);
 
   const handleBoothClick = (booth) => {
