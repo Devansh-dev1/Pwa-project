@@ -24,6 +24,7 @@ import ProfileInformation from './pages/ProfileInformation.jsx'
 import LikedItems from './pages/LikedItems.jsx'
 import MyFamily from './pages/MyFamily.jsx'
 import MyCouponsRewards from './pages/MyCouponsRewards.jsx'
+import ExhibitorDetail from './pages/ExhibitorDetail.jsx'
 
 function RootRedirect() { /* unchanged */ }
 
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/home" element={<Home />} />
           <Route path="/booths" element={<Booths />} />
+          <Route path="/booths/:id" element={<ExhibitorDetail />} />
           <Route path="/map" element={<Map />} />
           <Route path="/plan-visit" element={<PlanVisit />} />
           <Route path="/scanner" element={<Scanner />} />
