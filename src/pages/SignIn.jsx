@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { setToken } from '../utils/auth.js'
 import { linkSignup, signfromTokenUser, getUserInfo } from '../api/auth.js'
 import { storeToken } from '../utils/indexedDB.js'
@@ -10,11 +10,129 @@ import AppLayout from '../components/AppLayout.jsx'
 
 export default function SignIn() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { setUserInfo, setLoading: setGlobalLoading, setError, error } = useStore()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [showMagicLinkModal, setShowMagicLinkModal] = useState(false)
   const [apiError, setApiError] = useState(null)
+  
+  // New states for handling encoded path
+  const [encodedPath, setEncodedPath] = useState(null)
+  const [processingEncodedPath, setProcessingEncodedPath] = useState(false)
+  const [showEncodedPathLoader, setShowEncodedPathLoader] = useState(false)
+
+  // Extract parameters from URL on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search)
+    
+    // Check for encoded path (id parameter)
+    const idParam = urlParams.get('id')
+    if (idParam) {
+      console.log('Found encoded path in URL:', idParam)
+      setEncodedPath(idParam)
+      setShowEncodedPathLoader(true)
+      setProcessingEncodedPath(true)
+      
+      // Process the encoded path
+      handleEncodedPath(idParam)
+      
+      // After processing, automatically call the magic link verification
+      setTimeout(() => {
+        handleMagicLinkByUserType()
+      }, 1000) // Small delay to ensure parameters are processed
+    }
+    
+    // Check for magic link token
+    const token = urlParams.get('token') || urlParams.get('code')
+    if (token) {
+      console.log('Found magic link token in URL:', token)
+      const times = urlParams.get('times') || 'first_time'
+      
+      // Process the magic link token
+      processMagicLinkToken(token, times)
+    }
+  }, [location.search])
+
+  // Handle the encoded path from URL
+  const handleEncodedPath = async (encodedId) => {
+    try {
+      console.log('Processing encoded path:', encodedId)
+      
+      // First, decode base64 if it's base64 encoded
+      let decodedString = encodedId
+      try {
+        // Check if it's base64 encoded
+        if (encodedId.match(/^[A-Za-z0-9+/]*={0,2}$/)) {
+          decodedString = atob(encodedId)
+          console.log('Base64 decoded:', decodedString)
+        }
+      } catch (error) {
+        console.log('Not base64 encoded, using as-is')
+      }
+      
+      // Now decode URL parameters
+      let decodedPath
+      try {
+        decodedPath = decodeURIComponent(decodedString)
+        console.log('URL decoded:', decodedPath)
+      } catch (error) {
+        console.warn('Failed to URL decode, using decoded string:', error)
+        decodedPath = decodedString
+      }
+
+      // Parse the decoded string to extract individual parameters
+      const extractedParams = parseEncodedParameters(decodedPath)
+      console.log('Extracted parameters:', extractedParams)
+      
+      // Store all the extracted data
+      localStorage.setItem('pendingEncodedPath', encodedId)
+      localStorage.setItem('pendingDecodedPath', decodedPath)
+      localStorage.setItem('extractedParams', JSON.stringify(extractedParams))
+      
+      console.log('Encoded path and parameters stored for later processing')
+      
+    } catch (error) {
+      console.error('Error processing encoded path:', error)
+      setApiError({
+        title: 'Invalid Link',
+        message: 'The link you clicked appears to be invalid or expired.',
+        onRetry: () => {
+          setApiError(null)
+          setShowEncodedPathLoader(false)
+          setProcessingEncodedPath(false)
+        }
+      })
+    } finally {
+      setProcessingEncodedPath(false)
+      setShowEncodedPathLoader(false)
+    }
+  }
+
+  // Parse the decoded string to extract individual parameters
+  const parseEncodedParameters = (decodedString) => {
+    try {
+      // The decoded string looks like: user_id=4a9decc6-6436-402b-a36c-9e7e648f1369&userType=second_time&code=3xnVwZNv&time=08:28:2025, 05:10:13
+      
+      // Split by & to get individual key-value pairs
+      const pairs = decodedString.split('&')
+      const params = {}
+      
+      pairs.forEach(pair => {
+        const [key, value] = pair.split('=')
+        if (key && value) {
+          params[key] = value
+        }
+      })
+      
+      console.log('Parsed parameters:', params)
+      return params
+      
+    } catch (error) {
+      console.error('Error parsing parameters:', error)
+      return {}
+    }
+  }
 
   const handleMagicLink = async (e) => {
     e.preventDefault()
@@ -63,11 +181,243 @@ export default function SignIn() {
       // Store a guest token for skip functionality
       await setToken('guest-token'); 
       setUserInfo({ email: 'guest@showtrail.com', isGuest: true });
-      navigate('/home', { replace: true }); 
+      
+      // Check if there's a pending encoded path to redirect to
+      const pendingPath = localStorage.getItem('pendingDecodedPath')
+      if (pendingPath) {
+        console.log('Redirecting guest to pending path:', pendingPath)
+        localStorage.removeItem('pendingEncodedPath')
+        localStorage.removeItem('pendingDecodedPath')
+        navigate(pendingPath, { replace: true })
+      } else {
+        navigate('/home', { replace: true }); 
+      }
     } catch (error) {
       console.error('Guest login error:', error);
     } finally {
       setGlobalLoading(false);
+    }
+  }
+
+  // Show loader when processing encoded path
+  if (showEncodedPathLoader) {
+    return (
+      <AppLayout hideBottomNav={true}>
+        <div style={{ 
+          height: 'calc(var(--vh, 1vh) * 100)', 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          background: 'linear-gradient(180deg, #fff 80%, #eff7f7 100%)',
+          flexDirection: 'column',
+          gap: 24
+        }}>
+          <div style={{ 
+            width: 48, 
+            height: 48, 
+            border: '4px solid #E6E9FA', 
+            borderTop: '4px solid #2a46a8', 
+            borderRadius: '50%', 
+            animation: 'spin 1s linear infinite' 
+          }} />
+          <div style={{ textAlign: 'center' }}>
+            <h3 style={{ margin: '0 0 8px 0', color: '#1E1F24' }}>
+              Processing Your Link
+            </h3>
+            <p style={{ margin: 0, color: '#6B7280' }}>
+              Please wait while we prepare your experience...
+            </p>
+            {processingEncodedPath && (
+              <p style={{ margin: '8px 0 0 0', color: '#2a46a8', fontSize: '14px' }}>
+                🔄 Extracting parameters and verifying magic link...
+              </p>
+            )}
+          </div>
+          
+          <style>
+            {`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}
+          </style>
+        </div>
+      </AppLayout>
+    )
+  }
+
+  // Function to handle successful magic link verification
+  const handleMagicLinkSuccess = () => {
+    // Check if there's a pending encoded path to redirect to
+    const pendingPath = localStorage.getItem('pendingDecodedPath')
+    if (pendingPath) {
+      console.log('Redirecting authenticated user to pending path:', pendingPath)
+      localStorage.removeItem('pendingEncodedPath')
+      localStorage.removeItem('pendingDecodedPath')
+      navigate(pendingPath, { replace: true })
+    } else {
+      // Default navigation
+      navigate('/home', { replace: true })
+    }
+  }
+
+  // Function to get extracted parameters
+  const getExtractedParams = () => {
+    try {
+      return JSON.parse(localStorage.getItem('extractedParams') || '{}')
+    } catch (error) {
+      console.error('Error getting extracted params:', error)
+      return {}
+    }
+  }
+
+  // Function to use extracted parameters (e.g., for API calls)
+  const useExtractedParams = () => {
+    const params = getExtractedParams()
+    console.log('Using extracted parameters:', params)
+    
+    // Example: You can use these params for:
+    // - user_id: 4a9decc6-6436-402b-a36c-9e7e648f1369
+    // - userType: second_time
+    // - code: 3xnVwZNv
+    // - time: 08:28:2025, 05:10:13
+    
+    return params
+  }
+
+  // Function to handle magic link verification based on userType (same as NewSignLoading.js)
+  const handleMagicLinkByUserType = async () => {
+    try {
+      setGlobalLoading(true)
+      setLoading(true)
+      
+      const params = getExtractedParams()
+      const { user_id, userType, code, time } = params
+      
+      if (!user_id || !userType || !code) {
+        throw new Error('Missing required parameters')
+      }
+      
+      console.log('Processing magic link for:', { user_id, userType, code, time })
+      
+      let apiData = {}
+      
+      if (userType === 'second_time') {
+        // Login flow - same as loginPages in NewSignLoading.js
+        apiData = {
+          email: user_id,
+          second_time: 'second_time',
+          code: code
+        }
+        console.log('Login flow data:', apiData)
+      } else if (userType === 'first_time') {
+        // Register flow - same as registerPages in NewSignLoading.js
+        apiData = {
+          email: user_id,
+          code: code,
+          times: userType
+        }
+        console.log('Register flow data:', apiData)
+      } else {
+        throw new Error('Invalid userType')
+      }
+      
+      // Call the same API as NewSignLoading.js
+      const response = await signfromTokenUser(apiData)
+      console.log('signfromTokenUser response:', response)
+      
+      if (response?.result?.token || response?.token) {
+        const token = response?.result?.token || response?.token
+        localStorage.setItem('UserInfo', JSON.stringify(response?.result))
+        
+        // Store the token
+        // await storeToken(token)
+        
+        // Get user info
+        const userData = await getUserInfo()
+        setUserInfo(userData)
+        
+        // Redirect based on userType and response
+        if (userType === 'second_time') {
+          // Second time user - go to home page
+          console.log('Redirecting second time user to home')
+          navigate('/home', { replace: true })
+        } else if (userType === 'first_time') {
+          // First time user - go to drivers-license page
+          console.log('Redirecting first time user to drivers-license')
+          navigate('/signup/drivers-license', { replace: true })
+        }
+        
+        // Clear stored parameters
+        localStorage.removeItem('pendingEncodedPath')
+        localStorage.removeItem('pendingDecodedPath')
+        localStorage.removeItem('extractedParams')
+        
+      } else {
+        throw new Error('No token received from API')
+      }
+      
+    } catch (error) {
+      console.error('Magic link verification error:', error)
+      // setApiError({
+      //   title: 'Link Verification Failed',
+      //   message: 'The magic link is invalid or has expired. Please request a new one.',
+      //   onRetry: () => {
+      //     setApiError(null)
+      //     setShowMagicLinkModal(true)
+      //   }
+      // })
+    } finally {
+      setGlobalLoading(false)
+      setLoading(false)
+    }
+  }
+
+  // Function to process magic link token (called when user clicks email link)
+  const processMagicLinkToken = async (token, times = 'first_time') => {
+    try {
+      setGlobalLoading(true)
+      setLoading(true)
+      
+      console.log('Processing magic link token:', token)
+      
+      // Verify the token with the API
+      const response = await signfromTokenUser({
+        email: email,
+        code: token,
+        times: times
+      })
+      
+      console.log('Magic link verification response:', response)
+      
+      if (response?.status === 200 || response?.statusCode === 200) {
+        // Store the token
+        await storeToken(response.token || response.access_token)
+        
+        // Get user info
+        const userData = await getUserInfo()
+        setUserInfo(userData)
+        
+        // Redirect to pending path or default
+        handleMagicLinkSuccess()
+      } else {
+        throw new Error('Invalid or expired magic link')
+      }
+      
+    } catch (error) {
+      console.error('Magic link verification error:', error)
+      setApiError({
+        title: 'Link Verification Failed',
+        message: 'The magic link is invalid or has expired. Please request a new one.',
+        onRetry: () => {
+          setApiError(null)
+          setShowMagicLinkModal(true)
+        }
+      })
+    } finally {
+      setGlobalLoading(false)
+      setLoading(false)
     }
   }
 
@@ -85,6 +435,8 @@ export default function SignIn() {
           <p style={{ margin: '10px 0 0', color: '#6B7280', textAlign: 'center' }}>
             Enter your email to receive a Magic Link for quick and secure access
           </p>
+          
+       
         </div>
 
         <div style={{ alignSelf: 'stretch' }}>
@@ -109,7 +461,7 @@ export default function SignIn() {
           style={{ height: 56, padding: '0 24px', borderRadius: 999, color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', border: 'none', cursor: loading || !email ? 'not-allowed' : 'pointer', width: '100%', maxWidth: 430, marginTop: 10 }}>
           {loading ? 'Sending…' : 'Send Magic Link'}
         </button>
-        <button
+        {/* <button
           type="button"
           onClick={() => navigate('/signup/drivers-license')}
           style={{
@@ -127,7 +479,7 @@ export default function SignIn() {
           }}
         >
             Sign Up 
-            </button>
+            </button> */}
         {/* </button> */}
 
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginTop: 16, color: '#6B7280', fontSize: 12 }}>
@@ -141,6 +493,8 @@ export default function SignIn() {
         <button type="button" onClick={handleGuestLogin} style={{ background: 'none', border: 'none', color: '#556BB9', borderBottom: '4px solid #556BB9', marginTop: 20, cursor: 'pointer' }}>
           Skip To Homepage
         </button>
+        
+      
       </form>
       </div>
       

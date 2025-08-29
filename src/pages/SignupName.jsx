@@ -17,6 +17,8 @@ export default function SignupName() {
   const [focused, setFocused] = useState(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const userInfos = localStorage.getItem('UserInfo')
+  console.log('userInfouserInfouserInfouserInfouserInfo',userInfo)
 
   useEffect(() => {
     if (prefill.firstName) setFirstName(prefill.firstName)
@@ -71,13 +73,13 @@ export default function SignupName() {
       // Update local store first
       const updatedUserInfo = {
         ...(userInfo || {}),
-        email:'pushkar.webnexus@gmail.com',
+         email:JSON.parse(userInfos)?.email || userInfo?.email || '',
         first_name: trimmedFName, 
         last_name: trimmedLName, 
         version: userInfo?.version ? Number(userInfo?.version) + 1 : 1,
-        event_id: EVENT_ID, // Required for IndexedDB Users store
-        auto_id:'4a9decc6-6436-402b-a36c-9e7e648f1369', //userInfo?.auto_id || userInfo?.visitor_id, // Ensure auto_id is present
-        sub: userInfo?.sub || userInfo?.cognito_id // Ensure sub is present
+        //event_id: EVENT_ID, // Required for IndexedDB Users store
+        auto_id:JSON.parse(userInfos)?.auto_id //userInfo?.auto_id || userInfo?.visitor_id, // Ensure auto_id is present
+        //sub: userInfo?.sub || userInfo?.cognito_id // Ensure sub is present
       }
       
       console.log('Updated user info for storage:', updatedUserInfo)
