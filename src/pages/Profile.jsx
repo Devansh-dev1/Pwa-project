@@ -294,7 +294,9 @@ export default function Profile() {
 
   return (
     <div className="mobile-frame-container">
-      <div className="screen-container">
+      <div className="screen-container" style={{
+        padding: '24px 16px',
+      }}>
         <div style={{
           ...styles.profileafterAddingFriends,
           width: '100%',
