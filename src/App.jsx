@@ -33,7 +33,7 @@ export default function App() {
   return (
     <BrowserRouter>
               <Routes>
-          <Route path="/" element={<RootRedirect />} />
+          <Route path="/" element={<Welcome />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/signin" element={<SignIn />} />

@@ -75,35 +75,29 @@ export default function Home() {
   const [error, setError] = useState(null)
 
    const handleAllDataWithFetch = async () => {
-    const baseUrl = `https://d9wbof3q09tw.cloudfront.net/${EVENT_ID}.json`;
+    const baseUrl = `https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json`;
     
     try {
-      console.log('🔄 Trying fetch with no-cors mode...');
       
-      // Try fetch with no-cors mode first
-      const response = await fetch(baseUrl, {
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Fetch successful:', data);
-        return data;
-      }
+      fetch('https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json')
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+      })
+      .then(json => setData(json))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
     } catch (fetchError) {
       console.log('⚠️ Fetch failed, trying CORS proxy...');
     }
     
-    // Fallback to CORS proxy
-    return handleAllData();
+    
   };
 
   useEffect(() => {
     const initializeHome = async () => {
       try {
+        console.log('🔄 Initializing home...000',await handleAllDataWithFetch())
         // const token = await getToken()
         // if (!token) {
         //   navigate('/welcome', { replace: true })

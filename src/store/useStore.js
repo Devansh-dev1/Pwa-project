@@ -34,7 +34,7 @@ const useStore = create(
     screenHistory: [],
 
     // Actions
-    setUserInfo: (userInfo) => set({ userInfo, isAuthenticated: !!userInfo }),
+    setUserInfo: (userInfo) => set({ userInfo }),
     mergeUserInfo: (partial) => set((state) => ({ userInfo: { ...(state.userInfo || {}), ...(partial || {}) } })),
     
     setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),

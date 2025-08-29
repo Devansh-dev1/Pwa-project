@@ -36,7 +36,7 @@ export default function SignupReview() {
             <div style={styles.row}><span>Phone</span><span>{userInfo?.phone || '-'}</span></div>
           </div>
 
-          <button style={styles.saveBtn} onClick={()=>navigate('/profile/information')}>Save & Close</button>
+          <button style={styles.saveBtn} onClick={()=>navigate('/home')}>Save & Close</button>
         </div>
       </div>
     </AppLayout>

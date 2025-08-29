@@ -26,6 +26,7 @@ export const linkSignup = async (email) => {
     const response = await axiosInstance.post('/userCreate', {
       username: email,
       platformKey: 'showtrail',
+      address:'local'
     });
     console.log('Create user response:', response.data);
     return response.data;
@@ -67,43 +68,42 @@ export const signfromTokenUser = async (data) => {
 // Get user info by visitor ID
 export const getUserInfo = async (forceRefresh = false) => {
   try {
-    const token = await getToken();
-    const decodedToken = decodeToken(token);
-    
-    if (!decodedToken || !decodedToken.visitor_id) {
-      throw new Error('Invalid token or missing visitor_id');
-    }
+    // const token = await getToken();
+     const userInfo = localStorage.getItem('UserInfo')
 
-    console.log('Fetching user data for visitor_id:', decodedToken.visitor_id);
+    
+    console.log('userInfouserInfouserInfouserInfouserInfo',userInfo?.visitor_id,userInfo)
+    
+   
 
     const response = await axiosInstance.post('/getUserByIdShowtrail', {
       show_id: EVENT_ID,
-      auto_id: decodedToken.visitor_id,
+      auto_id: JSON.parse(userInfo)?.visitor_id,
       showtrail: true
     }, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${JSON.parse(userInfo)?.token}`,
         'Content-Type': 'application/json'
       }
     });
     
     const jsonData = response.data?.result;
    
-    if (jsonData?.visitor_id) {
-      jsonData.auto_id = jsonData.visitor_id;
-      delete jsonData.visitor_id;
-    }
-    if (jsonData?.cognito_id) {
-      jsonData.sub = jsonData.cognito_id;
-      delete jsonData.cognito_id;
-    }
+    // if (jsonData?.visitor_id) {
+    //   jsonData.auto_id = jsonData.visitor_id;
+    //   delete jsonData.visitor_id;
+    // }
+    // if (jsonData?.cognito_id) {
+    //   jsonData.sub = jsonData.cognito_id;
+    //   delete jsonData.cognito_id;
+    // }
 
-    console.log('User data fetched from server');
+    // console.log('User data fetched from server');
 
-    // Store in IndexedDB
-    if (jsonData) {
-      await storeUserData(jsonData);
-    }
+    // // Store in IndexedDB
+    // if (jsonData) {
+    //   await storeUserData(jsonData);
+    // }
 
     return jsonData;
   } catch (error) {
@@ -314,7 +314,8 @@ export const syncUserData = async (data) => {
       })),
     };
 
-    await storeUserData(finalData?.records[0]);
+   // await storeUserData(finalData?.records[0]);
+    console.log('User data stored locally in IndexedDB successfully',finalData)
     
     const response = await axiosInstance.post('/ShowTrailSync/sync-data', finalData);
     

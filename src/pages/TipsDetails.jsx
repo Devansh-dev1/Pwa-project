@@ -285,3 +285,4 @@ const TipsDetails = () => {
 };
 
 export default TipsDetails;
+
