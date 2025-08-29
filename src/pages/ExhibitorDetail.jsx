@@ -94,13 +94,13 @@ export default function ExhibitorDetail() {
 
   useEffect(() => {
     // If no booth data from navigation, try to load from localStorage
-    if (!booth && id) {
+    if (id) {
       const existingData = localStorage.getItem('homeData');
       if (existingData) {
         try {
           const userData = JSON.parse(existingData);
           const foundBooth = userData.show_exhibitor?.find(
-            exhibitor => exhibitor.booth_id === id || exhibitor.exhibitor_id === id
+            exhibitor => exhibitor.exhibitor_id === id
           );
           if (foundBooth) {
             setBooth(foundBooth);
@@ -113,7 +113,7 @@ export default function ExhibitorDetail() {
       }
       setLoading(false);
     }
-  }, [id, booth]);
+  }, []);
 
   // Handle scroll events
   const handleScroll = (e) => {
@@ -1079,7 +1079,7 @@ export default function ExhibitorDetail() {
                   loading="lazy"
                   allowFullScreen
                   referrerPolicy="no-referrer-when-downgrade"
-                  src={`https://www.google.com/maps/embed/v1/view?key=AIzaSyD-PLACEHOLDER&center=${booth.company[0].location.latitude},${booth.company[0].location.longitude}&zoom=16&maptype=roadmap`}
+                  src={`https://www.google.com/maps/embed/v1/view?key=AIzaSyBY-3hXliLps97YEsKntRQ-ht3gwNxEujI&center=${booth.company[0].location.latitude},${booth.company[0].location.longitude}&zoom=16&maptype=roadmap`}
                 />
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 12, background: '#fff', borderTop: '1px solid #e5e7eb' }}>
                   <img src="/assets/iconlocation2.png" alt="loc" style={{ width: 18, height: 18 }} />

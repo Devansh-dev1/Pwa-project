@@ -549,7 +549,7 @@ export default function Booths() {
 
   // Handle booth click
   const handleBoothClick = (booth) => {
-    navigate(`/booths/${booth.booth_id || booth.exhibitor_id}`, { 
+    navigate(`/booths/${ booth.exhibitor_id}`, { 
       state: { 
         booth,
         zoneName: booth.zone,

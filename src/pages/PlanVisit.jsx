@@ -144,7 +144,8 @@ const PlanVisitCategories = ({ category, setCategory, addedMyDay, setAddedMyDay,
 
 // Booth card component
 const BoothCard = ({ booth, zone, zoneColor, onClick, isSuggested, onThreeDotClick }) => {
-  const img = buildImg(booth.exhibitor_image || booth.company?.[0]?.logo);
+  // const img = buildImg(booth.exhibitor_image || booth.company?.[0]?.logo);
+  console.log('booth.company?.[0]?.logo',booth);
   
   return (
     <div
@@ -192,9 +193,11 @@ const BoothCard = ({ booth, zone, zoneColor, onClick, isSuggested, onThreeDotCli
           alignSelf: 'center',
           justifyContent: 'space-between'
         }}>
-          {img ? (
+          {booth.company_logo ? (
             <img 
-              src={img} 
+              // src={img} 
+              src={`${imagesURL}${booth?.company_logo}/public`}
+              // src={buildImg(booth.exhibitor_image || booth.company?.[0]?.logo)}
               alt={booth.company?.[0]?.name || 'Booth'} 
               style={{ 
                 width: '100%', 
@@ -1215,7 +1218,10 @@ export default function PlanVisit() {
 
   // Handle booth click
   const handleBoothClick = (booth) => {
-    navigate(`/booths/${booth.id || booth.booth_id}`, { 
+    console.log('booth-->',booth?.company_id    );
+    let exhibitorId = showExhibitor?.find(item=>item?.company?.[0]?.company_id == booth?.company_id)
+    console.log('exhibitorId-->',exhibitorId);
+    navigate(`/booths/${exhibitorId?.exhibitor_id}`, { 
       state: { 
         booth,
         zoneName: booth.zone,

@@ -89,51 +89,15 @@ export default function SignupPhone() {
   }
 
   const onSkip = async () => {
-    setIsLoading(true)
-    setGlobalLoading(true)
-    
-    try {
-      // Update local store with empty phone
-      const updatedUserInfo = {
-        ...(userInfo || {}),
-        phone: '',
-        version: userInfo?.version ? Number(userInfo?.version) + 1 : 1,
-        event_id: EVENT_ID,
-        auto_id: userInfo?.auto_id || userInfo?.visitor_id,
-        sub: userInfo?.sub || userInfo?.cognito_id
-      }
-      
-      console.log('Updated user info for skipped phone:', updatedUserInfo)
-      
-      // Update local store
-      mergeUserInfo(updatedUserInfo)
-      
-      // Store in IndexedDB
-      await replaceUserInfo(updatedUserInfo)
+  
 
       // Sync with API
-      try {
-        const syncData = {
-          ...updatedUserInfo,
-          consent: { signUp: 'phone_skipped' }
-        }
-        await syncUserData(syncData)
-        console.log("API sync response for skipped phone:", syncData)
-      } catch (syncError) {
-        console.warn('API sync failed for skipped phone, but proceeding with local data:', syncError)
-      }
+   
       
       // Navigate directly to review page
       navigate('/signup/review')
       
-    } catch (e) {
-      console.error('Error processing skipped phone:', e)
-      setError('Failed to skip phone step. Please try again.')
-      setStoreError(e.message || 'Processing failed')
-    } finally {
-      setIsLoading(false)
-      setGlobalLoading(false)
-    }
+   
   }
 
   return (
