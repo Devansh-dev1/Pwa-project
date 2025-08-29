@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { clearToken, getToken } from '../utils/auth.js'
+import { clearToken, } from '../utils/auth.js'
 import { useEffect, useState, useMemo } from 'react'
 import { getUserInfo } from '../api/auth.js'
 import useStore from '../store/useStore.js'
@@ -8,6 +8,7 @@ import AppLayout from '../components/AppLayout.jsx'
 import moment from 'moment'
 import { imagesURL } from '../api/index.js'
 import { handleAllData } from '../api/home.js'
+import { getUserInfo as getIndexedDBUserInfo } from '../utils/indexedDB.js'
 
 // Helper to build Cloudflare image URL keys into full URLs
 const buildImg = (key) => {
@@ -73,6 +74,7 @@ export default function Home() {
   const [homeData, setHomeData] = useState(null)
   const [dataLoading, setDataLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [localUserInfo, setLocalUserInfo] = useState(null)
 
    const handleAllDataWithFetch = async () => {
     const baseUrl = `https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json`;
@@ -94,10 +96,39 @@ export default function Home() {
     
   };
 
+  // Get user info from IndexedDB
+  const getUserInfoFromDB = async () => {
+    try {
+      const userData = await getIndexedDBUserInfo()
+      setLocalUserInfo(userData)
+      console.log('User info loaded from IndexedDB:', userData)
+    } catch (error) {
+      console.warn('Could not load user info from IndexedDB:', error)
+    }
+  }
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!localUserInfo) return 'U'
+    
+    const firstName = localUserInfo.first_name || localUserInfo.firstName || ''
+    const lastName = localUserInfo.last_name || localUserInfo.lastName || ''
+    
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+    } else if (firstName) {
+      return firstName.charAt(0).toUpperCase()
+    } else if (lastName) {
+      return lastName.charAt(0).toUpperCase()
+    }
+    
+    return 'U'
+  }
+
   useEffect(() => {
     const initializeHome = async () => {
       try {
-        console.log('🔄 Initializing home...000',await handleAllDataWithFetch())
+       
         // const token = await getToken()
         // if (!token) {
         //   navigate('/welcome', { replace: true })
@@ -113,6 +144,9 @@ export default function Home() {
         //     console.warn('Could not fetch user info:', error)
         //   }
         // }
+
+        // Get user info from IndexedDB
+        await getUserInfoFromDB()
 
         // Load existing data from localStorage if available
         const existingData = localStorage.getItem('homeData')
@@ -132,7 +166,7 @@ export default function Home() {
         }
       } catch (error) {
         console.error('Error initializing home:', error)
-        navigate('/welcome', { replace: true })
+      
       } finally {
         setLoading(false)
       }
@@ -141,15 +175,7 @@ export default function Home() {
     initializeHome()
   }, [navigate])
 
-  const handleLogout = async () => {
-    try {
-      await clearToken()
-      clearUserData()
-      navigate('/welcome', { replace: true })
-    } catch (error) {
-      console.error('Logout error:', error)
-    }
-  }
+ 
 
   if (loading) {
     return <LoadingScreen message="Loading your dashboard..." />
@@ -157,8 +183,52 @@ export default function Home() {
 
   return (
     <AppLayout>
-      {/* Header */}
-      
+      {/* User Avatar Header */}
+      {localUserInfo && (
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          // background: 'linear-gradient(135deg, #2a46a8 0%, #17275c 100%)',
+          padding: '16px 20px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          // boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          {/* Welcome Text */}
+          
+
+          {/* User Avatar */}
+          <div style={{
+            width: 48,
+            height: 48,
+            borderRadius: '50%',
+            background: 'rgba(0, 0, 0, 0.5)',
+            border: '2px solid rgba(255, 255, 255, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontSize: 18,
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.3)'
+            e.target.style.transform = 'scale(1.05)'
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.2)'
+            e.target.style.transform = 'scale(1)'
+          }}
+          onClick={() => navigate('/profile')}
+          >
+            {getUserInitials()}
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <div style={{ 

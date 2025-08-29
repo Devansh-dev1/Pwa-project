@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { clearToken, getToken } from '../utils/auth.js';
+import { clearToken, } from '../utils/auth.js';
 import useStore from '../store/useStore.js';
-import { clearAllData } from '../utils/indexedDB.js';
+import { clearAllData, getUserInfo } from '../utils/indexedDB.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 
 export default function Profile() {
@@ -10,28 +10,33 @@ export default function Profile() {
   const { userInfo, clearUserData, setUserInfo } = useStore();
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [localUserInfo, setLocalUserInfo] = useState(null);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const loadUserData = async () => {
       try {
-        const token = await getToken();
-        if (!token) {
-          navigate('/welcome', { replace: true });
+        // Get user data from IndexedDB
+        const userData = await getUserInfo();
+        if (userData) {
+          setLocalUserInfo(userData);
+          console.log('User data loaded in Profile:', userData);
+        } else {
+          // If no user data, redirect to welcome
+          console.log('No user data found, redirecting to welcome');
+          // navigate('/welcome', { replace: true });
         }
       } catch (error) {
-        console.error('Error checking auth:', error);
+        console.error('Error loading user data:', error);
         navigate('/welcome', { replace: true });
       }
     };
-    checkAuth();
+    
+    loadUserData();
   }, [navigate]);
 
   const handleLogout = async () => {
     try {
       setLoading(true);
-      await clearToken();
-      await clearAllData();
-      clearUserData();
       navigate('/welcome', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
@@ -43,10 +48,8 @@ export default function Profile() {
   const handleDeleteAccount = async () => {
     try {
       setLoading(true);
-      // Here you would call the delete user API
-      await clearToken();
-      await clearAllData();
-      clearUserData();
+     
+      console.log('Account deleted successfully');
       navigate('/welcome', { replace: true });
     } catch (error) {
       console.error('Delete account error:', error);
@@ -420,29 +423,7 @@ export default function Profile() {
                   </div>
                 </button>
 
-                {/* Invite Others */}
-                <button
-                  onClick={handleInviteOthers}
-                  style={styles.listItem1}
-                >
-                  <div style={styles.userLinks}>
-                    <div style={styles.icon}>
-                      <img
-                        style={styles.iconmoreLayout}
-                        src="/assets/iconinvite.png"
-                        alt="Invite"
-                      />
-                    </div>
-                    <span style={styles.iWannaReduce1}>
-                      Invite Others
-                    </span>
-                    <div style={styles.tagMaster1}>
-                      <span style={styles.sendInvite}>
-                        Send Invite
-                      </span>
-                    </div>
-                  </div>
-                </button>
+              
               </div>
             </div>
 

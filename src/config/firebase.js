@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase, connectDatabaseEmulator } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging,  onMessage } from 'firebase/messaging';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -51,10 +51,7 @@ export const requestFCMPermission = async () => {
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      const token = await getToken(messaging, {
-        vapidKey: 'BHdBpI8bTYcQjOhWGU6FXHM6SAQrN5_HzYhM7-e5tFOTkTpYZLQkW3XBOV-fF7m0YWm5wH7RRfS3S5NvlJ2LPqM'
-      });
-      return token;
+    
     }
     return null;
   } catch (error) {

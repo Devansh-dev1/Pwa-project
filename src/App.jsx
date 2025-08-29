@@ -19,7 +19,7 @@ import SignupAddress from './pages/SignupAddress.jsx'
 import SignupPhone from './pages/SignupPhone.jsx'
 import SignupVerify from './pages/SignupVerify.jsx'
 import SignupReview from './pages/SignupReview.jsx'
-import { getToken } from './utils/auth.js'
+
 import ProfileInformation from './pages/ProfileInformation.jsx'
 import LikedItems from './pages/LikedItems.jsx'
 import MyFamily from './pages/MyFamily.jsx'

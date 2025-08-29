@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { setToken } from '../utils/auth.js'
-import { linkSignup, signfromTokenUser, getUserInfo } from '../api/auth.js'
-import { storeToken } from '../utils/indexedDB.js'
+import { linkSignup, signfromTokenUser } from '../api/auth.js'
+import { replaceUserInfo } from '../utils/indexedDB.js'
 import MagicLinkModal from '../components/MagicLinkModal.jsx'
 import ErrorScreen from '../components/ErrorScreen.jsx'
 import useStore from '../store/useStore.js'
@@ -34,24 +34,16 @@ export default function SignIn() {
       setShowEncodedPathLoader(true)
       setProcessingEncodedPath(true)
       
-      // Process the encoded path
+     
       handleEncodedPath(idParam)
       
-      // After processing, automatically call the magic link verification
-      setTimeout(() => {
+     
+     
         handleMagicLinkByUserType()
-      }, 1000) // Small delay to ensure parameters are processed
+     
     }
     
-    // Check for magic link token
-    const token = urlParams.get('token') || urlParams.get('code')
-    if (token) {
-      console.log('Found magic link token in URL:', token)
-      const times = urlParams.get('times') || 'first_time'
-      
-      // Process the magic link token
-      processMagicLinkToken(token, times)
-    }
+   
   }, [location.search])
 
   // Handle the encoded path from URL
@@ -272,19 +264,7 @@ export default function SignIn() {
     }
   }
 
-  // Function to use extracted parameters (e.g., for API calls)
-  const useExtractedParams = () => {
-    const params = getExtractedParams()
-    console.log('Using extracted parameters:', params)
-    
-    // Example: You can use these params for:
-    // - user_id: 4a9decc6-6436-402b-a36c-9e7e648f1369
-    // - userType: second_time
-    // - code: 3xnVwZNv
-    // - time: 08:28:2025, 05:10:13
-    
-    return params
-  }
+
 
   // Function to handle magic link verification based on userType (same as NewSignLoading.js)
   const handleMagicLinkByUserType = async () => {
@@ -325,18 +305,10 @@ export default function SignIn() {
       
       // Call the same API as NewSignLoading.js
       const response = await signfromTokenUser(apiData)
-      console.log('signfromTokenUser response:', response)
+      
       
       if (response?.result?.token || response?.token) {
-        const token = response?.result?.token || response?.token
-        localStorage.setItem('UserInfo', JSON.stringify(response?.result))
-        
-        // Store the token
-        // await storeToken(token)
-        
-        // Get user info
-        const userData = await getUserInfo()
-        setUserInfo(userData)
+      await replaceUserInfo(response?.result)
         
         // Redirect based on userType and response
         if (userType === 'second_time') {
@@ -374,52 +346,7 @@ export default function SignIn() {
     }
   }
 
-  // Function to process magic link token (called when user clicks email link)
-  const processMagicLinkToken = async (token, times = 'first_time') => {
-    try {
-      setGlobalLoading(true)
-      setLoading(true)
-      
-      console.log('Processing magic link token:', token)
-      
-      // Verify the token with the API
-      const response = await signfromTokenUser({
-        email: email,
-        code: token,
-        times: times
-      })
-      
-      console.log('Magic link verification response:', response)
-      
-      if (response?.status === 200 || response?.statusCode === 200) {
-        // Store the token
-        await storeToken(response.token || response.access_token)
-        
-        // Get user info
-        const userData = await getUserInfo()
-        setUserInfo(userData)
-        
-        // Redirect to pending path or default
-        handleMagicLinkSuccess()
-      } else {
-        throw new Error('Invalid or expired magic link')
-      }
-      
-    } catch (error) {
-      console.error('Magic link verification error:', error)
-      setApiError({
-        title: 'Link Verification Failed',
-        message: 'The magic link is invalid or has expired. Please request a new one.',
-        onRetry: () => {
-          setApiError(null)
-          setShowMagicLinkModal(true)
-        }
-      })
-    } finally {
-      setGlobalLoading(false)
-      setLoading(false)
-    }
-  }
+
 
   return (
     <AppLayout hideBottomNav={true}>

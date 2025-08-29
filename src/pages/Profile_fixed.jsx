@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { clearToken, getToken } from '../utils/auth.js';
+import { clearToken, } from '../utils/auth.js';
 import useStore from '../store/useStore.js';
 import { clearAllData } from '../utils/indexedDB.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
@@ -14,7 +14,7 @@ export default function Profile() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = await getToken();
+        const token = ''//await getToken();
         if (!token) {
           navigate('/welcome', { replace: true });
         }

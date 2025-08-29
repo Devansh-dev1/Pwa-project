@@ -1,5 +1,4 @@
 import axiosInstance, { EVENT_ID, URL } from './index.js';
-import { getToken, storeToken, deleteToken, storeUserData } from '../utils/indexedDB.js';
 
 // Utility function to decode JWT token
 const decodeToken = (token) => {
@@ -26,7 +25,7 @@ export const linkSignup = async (email) => {
     const response = await axiosInstance.post('/userCreate', {
       username: email,
       platformKey: 'showtrail',
-      address:'local'
+      address:'webside'  //webside ||local
     });
     console.log('Create user response:', response.data);
     return response.data;
@@ -69,7 +68,7 @@ export const signfromTokenUser = async (data) => {
 export const getUserInfo = async (forceRefresh = false) => {
   try {
     // const token = await getToken();
-     const userInfo = localStorage.getItem('UserInfo')
+      const userInfo = await getUserInfo()
 
     
     console.log('userInfouserInfouserInfouserInfouserInfo',userInfo?.visitor_id,userInfo)
@@ -78,11 +77,11 @@ export const getUserInfo = async (forceRefresh = false) => {
 
     const response = await axiosInstance.post('/getUserByIdShowtrail', {
       show_id: EVENT_ID,
-      auto_id: JSON.parse(userInfo)?.visitor_id,
+      auto_id: userInfo?.auto_id,
       showtrail: true
     }, {
       headers: {
-        'Authorization': `Bearer ${JSON.parse(userInfo)?.token}`,
+        'Authorization': `Bearer ${userInfo?.token}`,
         'Content-Type': 'application/json'
       }
     });
@@ -189,7 +188,7 @@ export const handleUpdateUserDetail = async (data) => {
 // Send OTP
 export const sendOTP = async (phone, subId) => {
   try {
-    const token = await getToken();
+    const token = ''
     if (!token) {
       return {
         statusCode: 401,
@@ -236,7 +235,7 @@ export const sendOTP = async (phone, subId) => {
 // Verify OTP
 export const verifyOTP = async (phone, otp, subId) => {
   try {
-    const token = await getToken();
+    const token = ''//();
     if (!token) {
       return {
         success: false,
@@ -357,7 +356,7 @@ export const syncActivityData = async (data) => {
 // Logout
 export const logout = async () => {
   try {
-    await deleteToken();
+    // await deleteToken();
     // Could also clear other user data if needed
     console.log('User logged out successfully');
     return true;
@@ -370,7 +369,7 @@ export const logout = async () => {
 // Fetch personalized data - exact mobile app API
 export const fetchPersonalizedData = async (userId, type, boothIds = '', limit = 20) => {
   try {
-    const token = await getToken();
+    const token = ''//await getToken();
     if (!token) {
       throw new Error('No authentication token found');
     }
@@ -406,7 +405,7 @@ export const fetchPersonalizedData = async (userId, type, boothIds = '', limit =
 // Check if user is authenticated
 export const isAuthenticated = async () => {
   try {
-    const token = await getToken();
+    const token = ''//await getToken();
     if (!token) return false;
     
     const decodedToken = decodeToken(token);
@@ -415,7 +414,7 @@ export const isAuthenticated = async () => {
     // Check if token is expired
     const now = Date.now() / 1000;
     if (decodedToken.exp < now) {
-      await deleteToken();
+      // await deleteToken();
       return false;
     }
     

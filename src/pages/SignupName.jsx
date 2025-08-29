@@ -4,27 +4,35 @@ import AppLayout from '../components/AppLayout.jsx'
 import useStore from '../store/useStore.js'
 import { syncUserData } from '../api/auth.js'
 import { EVENT_ID } from '../api/index.js'
-import { storeUserData } from '../utils/indexedDB.js'
+import { getUserInfo, replaceUserInfo } from '../utils/indexedDB.js'
+// import { storeUserData } from '../utils/indexedDB.js'
 
 export default function SignupName() {
   const navigate = useNavigate()
   const location = useLocation()
   const prefill = (location.state && location.state.prefill) || {}
-  const { mergeUserInfo, userInfo, setLoading, setError: setStoreError } = useStore()
+  const { mergeUserInfo,  setLoading, setError: setStoreError } = useStore()
   const [firstName, setFirstName] = useState('')
   const [middleName, setMiddleName] = useState('')
   const [lastName, setLastName] = useState('')
   const [focused, setFocused] = useState(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const userInfos = localStorage.getItem('UserInfo')
-  console.log('userInfouserInfouserInfouserInfouserInfo',userInfo)
+  const [userInfo, setUserInfo] = useState(null)
+  
 
+const  getUserInfos=async()=>{
+  const userInfo = await getUserInfo()
+  setUserInfo(userInfo)
+  if (userInfo?.first_name) setFirstName(userInfo?.first_name)
+    
+    if (userInfo?.last_name) setLastName(userInfo?.last_name)
+      
+}
   useEffect(() => {
-    if (prefill.firstName) setFirstName(prefill.firstName)
-    if (prefill.middleName) setMiddleName(prefill.middleName)
-    if (prefill.lastName) setLastName(prefill.lastName)
-  }, [prefill])
+    
+      getUserInfos()
+  }, [])
 
   const styles = useMemo(() => ({
     screen: { height: 'calc(var(--vh, 1vh) * 100)', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #fff 80%, #eff7f7 100%)' },
@@ -69,21 +77,20 @@ export default function SignupName() {
       // Trim names before saving
       const trimmedFName = firstName.trim() + (middleName ? ` ${middleName.trim()}` : '')
       const trimmedLName = lastName.trim()
+      console.log('trimmedFName',trimmedFName)
+      console.log('trimmedLName',trimmedLName)
       
       // Update local store first
       const updatedUserInfo = {
         ...(userInfo || {}),
-         email:JSON.parse(userInfos)?.email || userInfo?.email || '',
+        
         first_name: trimmedFName, 
         last_name: trimmedLName, 
         version: userInfo?.version ? Number(userInfo?.version) + 1 : 1,
-        //event_id: EVENT_ID, // Required for IndexedDB Users store
-        auto_id:JSON.parse(userInfos)?.auto_id //userInfo?.auto_id || userInfo?.visitor_id, // Ensure auto_id is present
-        //sub: userInfo?.sub || userInfo?.cognito_id // Ensure sub is present
+      
       }
       
-      console.log('Updated user info for storage:', updatedUserInfo)
-      mergeUserInfo(updatedUserInfo)
+    
 
  
 
@@ -102,6 +109,7 @@ export default function SignupName() {
       try {
         // Sync with API
         const updateData = await syncUserData(syncData)
+        await replaceUserInfo(updatedUserInfo)
         console.log("API sync response:", updateData)
       } catch (syncError) {
         console.warn('API sync failed, but proceeding with local data:', syncError)

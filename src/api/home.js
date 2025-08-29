@@ -1,5 +1,5 @@
 import axiosInstance, { EVENT_ID } from './index.js';
-import { getUserData, storeUserData } from '../utils/indexedDB.js';
+import {   } from '../utils/indexedDB.js';
 import axios from 'axios';
 
 // Get all home page data (booths, events, etc.)
@@ -45,7 +45,7 @@ export const handleAllData = async () => {
       
       // Store data in IndexedDB for offline access
       try {
-        await storeUserData(jsonData);
+        // await storeUserData(jsonData);
         console.log('✅ Data stored in IndexedDB');
       } catch (dbError) {
         console.warn('⚠️ Could not store data in IndexedDB:', dbError);

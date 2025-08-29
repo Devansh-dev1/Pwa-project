@@ -4,12 +4,12 @@ import AppLayout from '../components/AppLayout.jsx'
 import useStore from '../store/useStore.js'
 import { syncUserData } from '../api/auth.js'
 import { EVENT_ID } from '../api/index.js'
-import { storeUserData } from '../utils/indexedDB.js'
+import { getUserInfo, replaceUserInfo } from '../utils/indexedDB.js'
 import { getAddressSuggestions } from '../api/AddressValidation.js'
 
 export default function SignupAddress() {
   const navigate = useNavigate()
-  const { mergeUserInfo, userInfo, setLoading, setError: setStoreError } = useStore()
+  const { mergeUserInfo,  setLoading, setError: setStoreError } = useStore()
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
   const [state, setState] = useState('')
@@ -25,6 +25,16 @@ export default function SignupAddress() {
     isValidating: false
   })
   const [addressSuggestions, setAddressSuggestions] = useState([])
+  const [userInfo, setUserInfo] = useState(null)
+  const  getUserInfos=async()=>{
+    const userInfo = await getUserInfo()
+    setUserInfo(userInfo)
+  
+        
+  }
+  useEffect(() => {
+    getUserInfos()
+  }, [])
 
   const styles = useMemo(() => ({
     screen: { height: 'calc(var(--vh, 1vh) * 100)', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #fff 80%, #eff7f7 100%)' },
@@ -204,23 +214,21 @@ export default function SignupAddress() {
       }
       
       console.log('Updated user info for skipped address:', updatedUserInfo)
+      
+      // Update local store
       mergeUserInfo(updatedUserInfo)
+      
+      // Store in IndexedDB
+      await replaceUserInfo(updatedUserInfo)
 
-      // Prepare data for API sync
-      const syncData = {
-        "records": [
-          { 
-            ...updatedUserInfo,
-            consent: { signUp: 'address_skipped' }
-          }
-        ],
-        "show_id": EVENT_ID
-      }
-
+      // Sync with API
       try {
-        // Sync with API
-        const updateData = await syncUserData(syncData)
-        console.log("API sync response for skipped address:", updateData)
+        const syncData = {
+          ...updatedUserInfo,
+          consent: { signUp: 'address_skipped' }
+        }
+        await syncUserData(syncData)
+        console.log("API sync response for skipped address:", syncData)
       } catch (syncError) {
         console.warn('API sync failed for skipped address, but proceeding with local data:', syncError)
       }
@@ -245,7 +253,7 @@ export default function SignupAddress() {
     setLoading(true)
     
     try {
-      // Update local store first
+      // Create updated user info
       const updatedUserInfo = {
         ...(userInfo || {}),
         address: { addressline1: address, city, state, postalcode: postal },
@@ -256,25 +264,21 @@ export default function SignupAddress() {
       }
       
       console.log('Updated user info for address storage:', updatedUserInfo)
+      
+      // Update local store
       mergeUserInfo(updatedUserInfo)
+      
+      // Store in IndexedDB
+      await replaceUserInfo(updatedUserInfo)
 
-     
-
-      // Prepare data for API sync
-      const syncData = {
-        "records": [
-          { 
-            ...updatedUserInfo,
-            consent: { signUp: 'address' }
-          }
-        ],
-        "show_id": EVENT_ID
-      }
-
+      // Sync with API
       try {
-        // Sync with API
-        const updateData = await syncUserData(syncData)
-        console.log("API sync response for address:", updateData)
+        const syncData = {
+          ...updatedUserInfo,
+          consent: { signUp: 'address' }
+        }
+        await syncUserData(syncData)
+        console.log("API sync response for address:", syncData)
       } catch (syncError) {
         console.warn('API sync failed for address, but proceeding with local data:', syncError)
       }

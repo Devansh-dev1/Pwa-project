@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
-import { getUserData } from '../utils/indexedDB.js';
+
 import { imagesURL } from '../api/index.js';
 
 // Helper function to build image URLs
@@ -405,7 +405,7 @@ export default function Booths() {
     const loadData = async () => {
       try {
         // Get data from localStorage
-        // const userData = await getUserData();
+         const userData = ''//await getUserData();
         const existingData = localStorage.getItem('homeData')
         if (existingData) {
           try {
