@@ -2,17 +2,21 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import AppLayout from '../components/AppLayout.jsx'
 import useStore from '../store/useStore.js'
+import { syncUserData } from '../api/auth.js'
+import { EVENT_ID } from '../api/index.js'
+import { storeUserData } from '../utils/indexedDB.js'
 
 export default function SignupName() {
   const navigate = useNavigate()
   const location = useLocation()
   const prefill = (location.state && location.state.prefill) || {}
-  const { mergeUserInfo } = useStore()
+  const { mergeUserInfo, userInfo, setLoading, setError: setStoreError } = useStore()
   const [firstName, setFirstName] = useState('')
   const [middleName, setMiddleName] = useState('')
   const [lastName, setLastName] = useState('')
   const [focused, setFocused] = useState(null)
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (prefill.firstName) setFirstName(prefill.firstName)
@@ -38,6 +42,7 @@ export default function SignupName() {
     orText: { margin: '0 8px', color: '#807C7B', fontWeight: 700, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase' },
     nextBtn: { height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', cursor: 'pointer', fontFamily: 'Nunito-ExtraBold, sans-serif' },
     disabledBtn: { height: 56, width: '100%', borderRadius: 999, border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#9ca3af', cursor: 'not-allowed' },
+    loadingBtn: { height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #6b7280 0%, #4b5563 100%)', cursor: 'not-allowed', fontFamily: 'Nunito-ExtraBold, sans-serif', opacity: 0.7 },
     error: { marginTop: 6, color: '#ff3333', fontSize: 12 },
     footer: { marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }
   }), [])
@@ -48,14 +53,70 @@ export default function SignupName() {
     return firstName && lastName && !validateName(firstName) && !validateName(lastName) && firstName.trim() && lastName.trim()
   }
 
-  const onNext = () => {
+  const onNext = async () => {
     const fErr = validateName(firstName)
     const lErr = validateName(lastName)
     if (fErr) return setError(fErr)
     if (lErr) return setError(lErr)
     setError('')
-    mergeUserInfo({ firstName, middleName, lastName })
-    navigate('/signup/dob')
+    
+    setIsLoading(true)
+    setLoading(true)
+    
+    try {
+      // Trim names before saving
+      const trimmedFName = firstName.trim() + (middleName ? ` ${middleName.trim()}` : '')
+      const trimmedLName = lastName.trim()
+      
+      // Update local store first
+      const updatedUserInfo = {
+        ...(userInfo || {}),
+        email:'pushkar.webnexus@gmail.com',
+        first_name: trimmedFName, 
+        last_name: trimmedLName, 
+        version: userInfo?.version ? Number(userInfo?.version) + 1 : 1,
+        event_id: EVENT_ID, // Required for IndexedDB Users store
+        auto_id:'4a9decc6-6436-402b-a36c-9e7e648f1369', //userInfo?.auto_id || userInfo?.visitor_id, // Ensure auto_id is present
+        sub: userInfo?.sub || userInfo?.cognito_id // Ensure sub is present
+      }
+      
+      console.log('Updated user info for storage:', updatedUserInfo)
+      mergeUserInfo(updatedUserInfo)
+
+ 
+
+      // Prepare data for API sync
+      const syncData = {
+        "records": [
+          { 
+            ...updatedUserInfo,
+            
+            consent: { signUp: 'name' }
+          }
+        ],
+        "show_id": EVENT_ID
+      }
+
+      try {
+        // Sync with API
+        const updateData = await syncUserData(syncData)
+        console.log("API sync response:", updateData)
+      } catch (syncError) {
+        console.warn('API sync failed, but proceeding with local data:', syncError)
+        // Continue with local data even if API sync fails
+      }
+      
+      // Navigate to next step regardless of API sync result
+     navigate('/signup/dob')
+      
+    } catch (e) {
+      console.error('Error processing user data:', e)
+      setError('Failed to save your information. Please try again.')
+      setStoreError(e.message || 'Processing failed')
+    } finally {
+      setIsLoading(false)
+      setLoading(false)
+    }
   }
 
   return (
@@ -106,7 +167,13 @@ export default function SignupName() {
 
         <div style={styles.footer}>
           {canNext() ? (
-            <button style={styles.nextBtn} onClick={onNext}>Next</button>
+            <button 
+              style={isLoading ? styles.loadingBtn : styles.nextBtn} 
+              onClick={onNext}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Saving...' : 'Next'}
+            </button>
           ) : (
             <button style={styles.disabledBtn} disabled>Next</button>
           )}

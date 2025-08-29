@@ -252,7 +252,7 @@ const BoothCard = ({ booth, zone, zoneColor, onClick, isSuggested, onThreeDotCli
             justifyContent: 'center',
             alignItems: 'center',
             cursor: 'pointer',
-            border: 'none'
+            // border: 'none'
           }}
         >
           <span style={{ fontSize: 16 }}>⋯</span>

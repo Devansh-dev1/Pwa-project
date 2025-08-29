@@ -314,7 +314,8 @@ export const syncUserData = async (data) => {
       })),
     };
 
-    await storeUserData(finalData?.records[0]);
+   // await storeUserData(finalData?.records[0]);
+    console.log('User data stored locally in IndexedDB successfully',finalData)
     
     const response = await axiosInstance.post('/ShowTrailSync/sync-data', finalData);
     
