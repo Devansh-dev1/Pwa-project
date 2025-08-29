@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from '../utils/indexedDB.js';
+// import { getToken } from '../utils/indexedDB.js';
 
 // Production Client Configuration
 export let EVENT_ID = 'bc2a58dc-e740-4217-b2c0-f06eb3c508fe';
@@ -22,7 +22,7 @@ const axiosInstance = axios.create({
 // Request interceptor to add auth token
 axiosInstance.interceptors.request.use(async (config) => {
   try {
-    const token = await getToken();
+    const token = ''//await getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {

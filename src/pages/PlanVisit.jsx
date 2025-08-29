@@ -4,7 +4,6 @@ import useStore from '../store/useStore.js';
 import { fetchPersonalizedData } from '../api/auth.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import AppLayout from '../components/AppLayout.jsx';
-import { getUserData } from '../utils/indexedDB.js';
 import { imagesURL } from '../api/index.js';
 import moment from 'moment';
 

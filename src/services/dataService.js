@@ -19,17 +19,15 @@ class DataService {
   }
 
   // User Data Management
-  async getUserData() {
-    return await this.dbManager.getUserData();
-  }
+
 
   async setUserData(userData) {
-    return await this.dbManager.storeUserData(userData);
+    // return await this.dbManager.storeUserData(userData);
   }
 
   async syncUserData() {
     try {
-      const token = await this.dbManager.getToken();
+      const token =''// await this.dbManager.getToken();
       if (!token) {
         throw new Error('No token available for sync');
       }
@@ -66,7 +64,7 @@ class DataService {
 
   async syncHomeData() {
     try {
-      const userData = await this.getUserData();
+      const userData ='' //await this.getUserData();
       if (!userData?.auto_id) {
         throw new Error('User data not available');
       }
@@ -165,7 +163,7 @@ class DataService {
   // Coupons Data Management
   async getCouponsData() {
     try {
-      const userData = await this.getUserData();
+      const userData ='' //await this.getUserData();
       if (!userData?.auto_id) {
         return [];
       }

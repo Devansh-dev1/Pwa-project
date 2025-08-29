@@ -3,6 +3,8 @@ import Picker from 'react-mobile-picker'
 import { useNavigate } from 'react-router-dom'
 import AppLayout from '../components/AppLayout.jsx'
 import useStore from '../store/useStore.js'
+import { syncUserData } from '../api/auth.js'
+import { getUserInfo, replaceUserInfo } from '../utils/indexedDB.js'
 
 export default function SignupDOB() {
   const navigate = useNavigate()
@@ -10,7 +12,17 @@ export default function SignupDOB() {
   const [month, setMonth] = useState('January')
   const [day, setDay] = useState(1)
   const [year, setYear] = useState(new Date().getFullYear() - 24)
+  const [userInfo, setUserInfo] = useState(null)
 
+  const  getUserInfos=async()=>{
+    const userInfo = await getUserInfo()
+    setUserInfo(userInfo)
+  
+        
+  }
+  useEffect(() => {
+    getUserInfos()
+  }, [])
   const styles = useMemo(() => ({
     screen: { height: 'calc(var(--vh, 1vh) * 100)', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #fff 80%, #eff7f7 100%)' },
     frame: { width: '100%', maxWidth: 430, margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 16px', boxSizing: 'border-box' },
@@ -32,13 +44,31 @@ export default function SignupDOB() {
   const validDays = daysInMonth(month, year)
   useEffect(() => { if (day > validDays) setDay(validDays) }, [month, year])
 
-  const onNext = () => {
+  const onNext = async() => {
+    try{
     const mm = String(months.indexOf(month) + 1).padStart(2, '0')
     const dd = String(day).padStart(2, '0')
     const yyyy = String(year)
     const iso = `${yyyy}-${mm}-${dd}`
-    mergeUserInfo({ dob: iso })
+    // mergeUserInfo({ dob: iso })
+    const syncData = {
+      "records": [
+        { 
+          ...userInfo,
+          dob: iso,
+          version: userInfo?.version ? Number(userInfo?.version) + 1 : 1,
+          
+          consent: { signUp: 'name' }
+        }
+      ],
+     
+    }
+    const updateData = await syncUserData(syncData)
+    await replaceUserInfo({...userInfo,dob: iso})
     navigate('/signup/gender')
+  }catch(error){
+    console.log('error',error)
+  }
   }
 
   return (

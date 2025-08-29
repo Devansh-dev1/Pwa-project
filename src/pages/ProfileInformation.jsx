@@ -1,12 +1,34 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
+import { getUserInfo } from '../utils/indexedDB';
 
 export default function ProfileInformation() {
   const navigate = useNavigate();
-  const location = useLocation();
+  
   const [imageUrl, setImageUrl] = useState(null);
   const [showPhotoSheet, setShowPhotoSheet] = useState(false);
   const fileInputRef = useRef(null);
+
+  const [userInfo, setUserInfo] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const getUserInfos = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const userInfo = await getUserInfo()
+      setUserInfo(userInfo)
+      console.log('🔍 ProfileInformation - User data loaded:', userInfo)
+    } catch (error) {
+      console.error('❌ ProfileInformation - Error loading user data:', error)
+      setError('Failed to load user data. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  useEffect(() => {
+    getUserInfos()
+  }, [])
 
   useEffect(() => {
     const setVhVar = () => {
@@ -264,8 +286,26 @@ export default function ProfileInformation() {
     closePhotoSheet();
   };
 
-  const EditIcon = ({ onClick }) => (
-    <button onClick={onClick} style={styles.editBtn} aria-label="Edit">
+  const EditIcon = ({ onClick, tooltip }) => (
+    <button 
+      onClick={onClick} 
+      style={{
+        ...styles.editBtn,
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        position: 'relative'
+      }} 
+      aria-label="Edit"
+      title={tooltip}
+      onMouseEnter={(e) => {
+        e.target.style.transform = 'scale(1.1)';
+        e.target.style.backgroundColor = '#f0f0f0';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = 'scale(1)';
+        e.target.style.backgroundColor = 'transparent';
+      }}
+    >
       <img src="/assets/iconedit.png" alt="Edit" style={{ width: 24, height: 24 }} />
     </button>
   );
@@ -286,89 +326,199 @@ export default function ProfileInformation() {
           </div>
 
           <div style={styles.middle}>
-            <div onClick={openPhotoSheet} style={styles.avatarWrap}>
-              <img
-                src={imageUrl || '/assets/porifle.png'}
-                alt="Profile"
-                style={styles.avatarImg}
-              />
-              <div style={styles.editBubble}>
-                <img src="/assets/editPopup.png" alt="" style={{ width: 28, height: 28 }} />
+            {/* Loading State */}
+            {isLoading && (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+                color: '#666'
+              }}>
+                <div style={{ fontSize: '18px', marginBottom: '10px' }}>Loading profile information...</div>
+                <div style={{ fontSize: '14px' }}>Please wait while we fetch your data</div>
               </div>
-            </div>
+            )}
+
+            {/* Error State */}
+            {error && !isLoading && (
+              <div style={{
+                textAlign: 'center',
+                padding: '20px',
+                margin: '20px',
+                backgroundColor: '#ffebee',
+                border: '1px solid #f44336',
+                borderRadius: '8px',
+                color: '#c62828'
+              }}>
+                <div style={{ fontSize: '16px', marginBottom: '10px' }}>⚠️ Error</div>
+                <div style={{ fontSize: '14px', marginBottom: '15px' }}>{error}</div>
+                <button 
+                  onClick={getUserInfos}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#f44336',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {/* Profile Content - Only show when not loading and no error */}
+            {!isLoading && !error && userInfo ? (
+              <>
+                <div onClick={openPhotoSheet} style={styles.avatarWrap}>
+                  <img
+                    src={imageUrl || '/assets/porifle.png'}
+                    alt="Profile"
+                    style={styles.avatarImg}
+                  />
+                  <div style={styles.editBubble}>
+                    <img src="/assets/editPopup.png" alt="" style={{ width: 28, height: 28 }} />
+                  </div>
+                </div>
 
             <div style={styles.fieldsBlock}>
-              <div style={styles.fieldGroup}>
-                <div style={styles.label}>First Name <span style={styles.asterisk}>*</span></div>
-                <div style={styles.inputRow}>
-                  <input style={styles.input} value={(location.state && location.state.prefill && location.state.prefill.firstName) || 'John'} readOnly />
-                  <EditIcon onClick={() => {}} />
-                </div>
-              </div>
+                                <div style={styles.fieldGroup}>
+                    <div style={styles.label}>First Name <span style={styles.asterisk}>*</span></div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.first_name || userInfo?.firstName || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/name')} 
+                        tooltip="Edit Name Information"
+                      />
+                    </div>
+                  </div>
 
-              <div style={styles.fieldGroup}>
-                <div style={styles.label}>Middle Name</div>
-                <div style={styles.inputRow}>
-                  <input style={styles.input} value={(location.state && location.state.prefill && location.state.prefill.middleName) || 'A.'} readOnly />
-                  <EditIcon onClick={() => {}} />
-                </div>
-              </div>
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>Middle Name</div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.middle_name || userInfo?.middleName || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/name')} 
+                        tooltip="Edit Name Information"
+                      />
+                    </div>
+                  </div>
 
-              <div style={styles.fieldGroup}>
-                <div style={styles.label}>Last Name <span style={styles.asterisk}>*</span></div>
-                <div style={styles.inputRow}>
-                  <input style={styles.input} value={(location.state && location.state.prefill && location.state.prefill.lastName) || 'Walker'} readOnly />
-                  <EditIcon onClick={() => {}} />
-                </div>
-              </div>
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>Last Name <span style={styles.asterisk}>*</span></div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.last_name || userInfo?.lastName || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/name')} 
+                        tooltip="Edit Name Information"
+                      />
+                    </div>
+                  </div>
 
-              <div style={styles.fieldGroup}>
-                <div style={styles.label}>Gender <span style={styles.asterisk}>*</span></div>
-                <div style={styles.inputRow}>
-                  <input style={styles.input} value={(location.state && location.state.prefill && location.state.prefill.gender) || 'Male'} readOnly />
-                  <EditIcon onClick={() => {}} />
-                </div>
-              </div>
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>Gender <span style={styles.asterisk}>*</span></div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.gender || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/gender')} 
+                        tooltip="Edit Gender"
+                      />
+                    </div>
+                  </div>
 
-              <div style={styles.fieldGroup}>
-                <div style={styles.label}>Date of Birth <span style={styles.asterisk}>*</span></div>
-                <div style={styles.inputRow}>
-                  <input style={styles.input} value={(location.state && location.state.prefill && location.state.prefill.dob) || '01-01-1990'} readOnly />
-                  <EditIcon onClick={() => {}} />
-                </div>
-              </div>
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>Date of Birth <span style={styles.asterisk}>*</span></div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.dob || userInfo?.date_of_birth || userInfo?.birth_date || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/dob')} 
+                        tooltip="Edit Date of Birth"
+                      />
+                    </div>
+                  </div>
 
-              <div style={styles.fieldGroup}>
-                <div style={styles.label}>Address <span style={styles.asterisk}>*</span></div>
-                <div style={styles.inputRow}>
-                  <input style={styles.input} value={(location.state && location.state.prefill && location.state.prefill.address1) || '3522 Fork Street'} readOnly />
-                  <EditIcon onClick={() => {}} />
-                </div>
-              </div>
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>Address <span style={styles.asterisk}>*</span></div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.address || userInfo?.address1 || userInfo?.street_address || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/address')} 
+                        tooltip="Edit Address Information"
+                      />
+                    </div>
+                  </div>
 
-              <div style={styles.fieldGroup}>
-                <div style={styles.label}>City & State <span style={styles.asterisk}>*</span></div>
-                <div style={styles.inputRow}>
-                  <input style={styles.input} value={((location.state && location.state.prefill && location.state.prefill.city) ? `${location.state.prefill.city}, ${location.state.prefill.state || ''}` : 'New York, NY')} readOnly />
-                  <EditIcon onClick={() => {}} />
-                </div>
-              </div>
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>City <span style={styles.asterisk}>*</span></div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.city || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/address')} 
+                        tooltip="Edit Address Information"
+                      />
+                    </div>
+                  </div>
 
-              <div style={styles.fieldGroup}>
-                <div style={styles.label}>Postal Code <span style={styles.asterisk}>*</span></div>
-                <div style={styles.inputRow}>
-                  <input style={styles.input} value={(location.state && location.state.prefill && location.state.prefill.postal) || '10001'} readOnly />
-                  <EditIcon onClick={() => {}} />
-                </div>
-              </div>
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>State/Province <span style={styles.asterisk}>*</span></div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.state || userInfo?.province || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/address')} 
+                        tooltip="Edit Address Information"
+                      />
+                    </div>
+                  </div>
 
-              <div style={styles.fieldGroup}>
-                <div style={styles.label}>Phone Number</div>
-                <div style={styles.inputRow}>
-                  <input style={styles.input} value="(555) 123-4567" readOnly />
-                  <EditIcon onClick={() => {}} />
-                </div>
-              </div>
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>Postal Code <span style={styles.asterisk}>*</span></div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.postal_code || userInfo?.postal || userInfo?.zip_code || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/address')} 
+                        tooltip="Edit Address Information"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>Country</div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.country || 'Canada'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/address')} 
+                        tooltip="Edit Address Information"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>Phone Number</div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.phone || userInfo?.phone_number || userInfo?.mobile || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/phone')} 
+                        tooltip="Edit Phone Number"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={styles.fieldGroup}>
+                    <div style={styles.label}>Email</div>
+                    <div style={styles.inputRow}>
+                      <input style={styles.input} value={userInfo?.email || 'Not provided'} readOnly />
+                      <EditIcon 
+                        onClick={() => navigate('/signup/name')} 
+                        tooltip="Edit Email"
+                      />
+                    </div>
+                  </div>
+
+            
+
+             
+
+           
             </div>
 
             <div style={styles.saveBtnWrap}>
@@ -376,28 +526,36 @@ export default function ProfileInformation() {
                 Save & Close
               </button>
             </div>
+              </>
+            ) : !isLoading && !error && !userInfo ? (
+              // No user data state
+              <div style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+                color: '#666'
+              }}>
+                <div style={{ fontSize: '18px', marginBottom: '10px' }}>No Profile Data</div>
+                <div style={{ fontSize: '14px', marginBottom: '20px' }}>No user information found in your profile</div>
+                <button 
+                  onClick={() => navigate('/welcome')}
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#2a46a8',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '16px'
+                  }}
+                >
+                  Go to Welcome
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
 
-        {showPhotoSheet && (
-          <div style={styles.photoSheetOverlay} onClick={closePhotoSheet}>
-            <div style={styles.photoSheet} onClick={(e) => e.stopPropagation()}>
-              <div style={styles.sheetHandle} />
-              <button style={styles.sheetBtn} onClick={() => handlePick(true)}>
-                Take Photo
-              </button>
-              <button style={styles.sheetBtn} onClick={() => handlePick(false)}>
-                Choose from Library
-              </button>
-              <button style={styles.sheetBtn} onClick={removePhoto}>
-                Remove Photo
-              </button>
-              <button style={{ ...styles.sheetBtn, borderColor: '#c4c3c2' }} onClick={closePhotoSheet}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+      
 
         <input
           ref={fileInputRef}

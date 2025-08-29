@@ -4,11 +4,11 @@ import AppLayout from '../components/AppLayout.jsx'
 import useStore from '../store/useStore.js'
 import { sendOTP, syncUserData } from '../api/auth.js'
 import { EVENT_ID } from '../api/index.js'
-import { storeUserData } from '../utils/indexedDB.js'
+import { replaceUserInfo } from '../utils/indexedDB.js'
 
 export default function SignupPhone() {
   const navigate = useNavigate()
-  const { mergeUserInfo, userInfo, setLoading: setGlobalLoading, setError: setStoreError } = useStore()
+  const { mergeUserInfo,  setLoading: setGlobalLoading, setError: setStoreError } = useStore()
   const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -48,31 +48,21 @@ export default function SignupPhone() {
       }
       
       console.log('Updated user info for phone storage:', updatedUserInfo)
+      
+      // Update local store
       mergeUserInfo(updatedUserInfo)
+      
+      // Store in IndexedDB
+      await replaceUserInfo(updatedUserInfo)
 
-      // Store in IndexedDB for local persistence
+      // Sync with API
       try {
-        await storeUserData(updatedUserInfo)
-        console.log('User phone data stored locally in IndexedDB successfully')
-      } catch (dbError) {
-        console.warn('Failed to store phone in IndexedDB:', dbError)
-      }
-
-      // Prepare data for API sync
-      const syncData = {
-        "records": [
-          { 
-            ...updatedUserInfo,
-            consent: { signUp: 'phone' }
-          }
-        ],
-        "show_id": EVENT_ID
-      }
-
-      try {
-        // Sync with API
-        const updateData = await syncUserData(syncData)
-        console.log("API sync response for phone:", updateData)
+        const syncData = {
+          ...updatedUserInfo,
+          consent: { signUp: 'phone' }
+        }
+        await syncUserData(syncData)
+        console.log("API sync response for phone:", syncData)
       } catch (syncError) {
         console.warn('API sync failed for phone, but proceeding with local data:', syncError)
       }
@@ -114,23 +104,21 @@ export default function SignupPhone() {
       }
       
       console.log('Updated user info for skipped phone:', updatedUserInfo)
+      
+      // Update local store
       mergeUserInfo(updatedUserInfo)
+      
+      // Store in IndexedDB
+      await replaceUserInfo(updatedUserInfo)
 
-      // Prepare data for API sync
-      const syncData = {
-        "records": [
-          { 
-            ...updatedUserInfo,
-            consent: { signUp: 'phone_skipped' }
-          }
-        ],
-        "show_id": EVENT_ID
-      }
-
+      // Sync with API
       try {
-        // Sync with API
-        const updateData = await syncUserData(syncData)
-        console.log("API sync response for skipped phone:", updateData)
+        const syncData = {
+          ...updatedUserInfo,
+          consent: { signUp: 'phone_skipped' }
+        }
+        await syncUserData(syncData)
+        console.log("API sync response for skipped phone:", syncData)
       } catch (syncError) {
         console.warn('API sync failed for skipped phone, but proceeding with local data:', syncError)
       }

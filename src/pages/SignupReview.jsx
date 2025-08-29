@@ -1,12 +1,23 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppLayout from '../components/AppLayout.jsx'
-import useStore from '../store/useStore.js'
+
+import { getUserInfo } from '../utils/indexedDB.js'
 
 export default function SignupReview() {
   const navigate = useNavigate()
-  const { userInfo } = useStore()
+  const [userInfo, setUserInfo] = useState(null)
 
+  const  getUserInfos=async()=>{
+    const userInfo = await getUserInfo()
+    setUserInfo(userInfo)
+  
+        
+  }
+  useEffect(() => {
+    getUserInfos()
+  }, [])
+   console.log('userInfouserInfouserInfouserInfouserInfo',userInfo)
   const styles = useMemo(() => ({
     screen: { height: 'calc(var(--vh, 1vh) * 100)', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #fff 80%, #eff7f7 100%)' },
     frame: { width: '100%', maxWidth: 430, margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 16px', boxSizing: 'border-box' },
