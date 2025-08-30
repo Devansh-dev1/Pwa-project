@@ -1056,7 +1056,7 @@ export default function ExhibitorDetail() {
         {booth?.company?.[0] && (
           <div style={{
             margin: '0 16px 16px',
-            backgroundColor: '#fff',
+            backgroundColor: '#f3f3f3',
             border: '1.5px solid #e5e7eb',
             borderRadius: 24,
             padding: 16
@@ -1103,13 +1103,15 @@ export default function ExhibitorDetail() {
             )}
 
             {(booth.company[0].email || booth.company[0].phone) && (
-              <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+              <div style = {{color: '#1E1F24', fontWeight: 600, display: 'flex', flexDirection: 'column',gap: 5 ,marginTop: 12}}> Contact Information
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {booth.company[0].email && (
-                  <a href={`mailto:${booth.company[0].email}`} style={{ color: '#2a46a8', fontWeight: 700, textDecoration: 'none' }}>{booth.company[0].email}</a>
+                  <a href={`mailto:${booth.company[0].email}`} style={{ color: '#a8a5a4', fontWeight: 700, textDecoration: 'none',fontSize: 14 }}>{booth.company[0].email}</a>
                 )}
                 {booth.company[0].phone && (
-                  <a href={`tel:${booth.company[0].phone}`} style={{ color: '#2a46a8', fontWeight: 700, textDecoration: 'none' }}>{booth.company[0].phone}</a>
+                  <a href={`tel:${booth.company[0].phone}`} style={{ color: '#a8a5a4', fontWeight: 700, textDecoration: 'none',fontSize: 14 }}>{booth.company[0].phone}</a>
                 )}
+              </div>
               </div>
             )}
 
