@@ -16,6 +16,9 @@ export default function SignupGender() {
   const  getUserInfos=async()=>{
     const userInfo = await getUserInfo()
     setUserInfo(userInfo)
+    if(userInfo?.gender){
+      setGender(userInfo?.gender)
+    }
   
         
   }
@@ -161,13 +164,6 @@ export default function SignupGender() {
             {isLoading ? 'Saving...' : 'Next'}
           </button>
 
-          <button 
-            style={styles.skipBtn} 
-            onClick={onSkip}
-            disabled={isLoading}
-          >
-            Skip Gender
-          </button>
         </div>
       </div>
     </AppLayout>

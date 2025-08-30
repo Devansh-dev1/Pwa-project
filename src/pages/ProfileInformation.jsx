@@ -273,11 +273,26 @@ export default function ProfileInformation() {
     fileInputRef.current.click();
   };
 
-  const onFileChange = (e) => {
+  const onFileChange = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
     setImageUrl(url);
+  
+    try {
+      const userInfo = await getUserInfo();
+      const updatedUserInfo = {
+        ...userInfo,
+        profilePhoto: url, // Save image URL
+        version: (userInfo?.version || 0) + 1
+      };
+  
+      await replaceUserInfo(updatedUserInfo);
+      console.log('Profile photo saved to IndexedDB:', url);
+    } catch (err) {
+      console.error('Failed to save profile photo:', err);
+    }
+  
     closePhotoSheet();
   };
 
@@ -437,60 +452,33 @@ export default function ProfileInformation() {
                     </div>
                   </div>
 
-                  <div style={styles.fieldGroup}>
-                    <div style={styles.label}>Address <span style={styles.asterisk}>*</span></div>
-                    <div style={styles.inputRow}>
-                      <input style={styles.input} value={userInfo?.address || userInfo?.address1 || userInfo?.street_address || 'Not provided'} readOnly />
-                      <EditIcon 
-                        onClick={() => navigate('/signup/address')} 
-                        tooltip="Edit Address Information"
-                      />
-                    </div>
-                  </div>
-
-                  <div style={styles.fieldGroup}>
-                    <div style={styles.label}>City <span style={styles.asterisk}>*</span></div>
-                    <div style={styles.inputRow}>
-                      <input style={styles.input} value={userInfo?.city || 'Not provided'} readOnly />
-                      <EditIcon 
-                        onClick={() => navigate('/signup/address')} 
-                        tooltip="Edit Address Information"
-                      />
-                    </div>
-                  </div>
-
-                  <div style={styles.fieldGroup}>
-                    <div style={styles.label}>State/Province <span style={styles.asterisk}>*</span></div>
-                    <div style={styles.inputRow}>
-                      <input style={styles.input} value={userInfo?.state || userInfo?.province || 'Not provided'} readOnly />
-                      <EditIcon 
-                        onClick={() => navigate('/signup/address')} 
-                        tooltip="Edit Address Information"
-                      />
-                    </div>
-                  </div>
-
-                  <div style={styles.fieldGroup}>
-                    <div style={styles.label}>Postal Code <span style={styles.asterisk}>*</span></div>
-                    <div style={styles.inputRow}>
-                      <input style={styles.input} value={userInfo?.postal_code || userInfo?.postal || userInfo?.zip_code || 'Not provided'} readOnly />
-                      <EditIcon 
-                        onClick={() => navigate('/signup/address')} 
-                        tooltip="Edit Address Information"
-                      />
-                    </div>
-                  </div>
-
-                  <div style={styles.fieldGroup}>
-                    <div style={styles.label}>Country</div>
-                    <div style={styles.inputRow}>
-                      <input style={styles.input} value={userInfo?.country || 'Canada'} readOnly />
-                      <EditIcon 
-                        onClick={() => navigate('/signup/address')} 
-                        tooltip="Edit Address Information"
-                      />
-                    </div>
-                  </div>
+                 <div style={styles.fieldGroup}>
+  <div style={styles.label}>Address <span style={styles.asterisk}>*</span></div>
+  <div style={styles.inputRow}>
+    <input 
+      style={styles.input} 
+      value={
+        userInfo?.address?.addressline1 || userInfo?.address1 || userInfo?.street_address
+          ? [
+              userInfo?.address?.addressline1 || userInfo?.address1 || userInfo?.street_address,
+              [
+                userInfo?.address?.city || userInfo?.city,
+                userInfo?.address?.state || userInfo?.address?.province || userInfo?.state || userInfo?.province
+              ].filter(Boolean).join(', '),
+              userInfo?.address?.postalcode || userInfo?.postal_code || userInfo?.postal || userInfo?.zip_code
+            ]
+            .filter(Boolean)
+            .join(', ')
+          : 'Not provided'
+      }
+      readOnly 
+    />
+    <EditIcon 
+      onClick={() => navigate('/signup/address')} 
+      tooltip="Edit Address Information"
+    />
+  </div>
+</div>
 
                   <div style={styles.fieldGroup}>
                     <div style={styles.label}>Phone Number</div>
@@ -502,23 +490,6 @@ export default function ProfileInformation() {
                       />
                     </div>
                   </div>
-
-                  <div style={styles.fieldGroup}>
-                    <div style={styles.label}>Email</div>
-                    <div style={styles.inputRow}>
-                      <input style={styles.input} value={userInfo?.email || 'Not provided'} readOnly />
-                      <EditIcon 
-                        onClick={() => navigate('/signup/name')} 
-                        tooltip="Edit Email"
-                      />
-                    </div>
-                  </div>
-
-            
-
-             
-
-           
             </div>
 
             <div style={styles.saveBtnWrap}>

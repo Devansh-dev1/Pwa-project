@@ -8,7 +8,7 @@ import { replaceUserInfo } from '../utils/indexedDB.js'
 
 export default function SignupPhone() {
   const navigate = useNavigate()
-  const { mergeUserInfo,  setLoading: setGlobalLoading, setError: setStoreError } = useStore()
+  const { mergeUserInfo,  setLoading: setGlobalLoading, setError: setStoreError, userInfo } = useStore()
   const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false)

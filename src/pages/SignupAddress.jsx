@@ -5,7 +5,7 @@ import useStore from '../store/useStore.js'
 import { syncUserData } from '../api/auth.js'
 import { EVENT_ID } from '../api/index.js'
 import { getUserInfo, replaceUserInfo } from '../utils/indexedDB.js'
-import { getAddressSuggestions } from '../api/AddressValidation.js'
+import { getAddressSuggestions, getCanadaAddressSuggestions, validateCanadianPostalCode, formatCanadianPostalCode } from '../api/AddressValidation.js'
 
 export default function SignupAddress() {
   const navigate = useNavigate()
@@ -25,12 +25,22 @@ export default function SignupAddress() {
     isValidating: false
   })
   const [addressSuggestions, setAddressSuggestions] = useState([])
+  const [postalCodeValidation, setPostalCodeValidation] = useState({
+    isValid: null,
+    error: null,
+    isValidating: false
+  })
   const [userInfo, setUserInfo] = useState(null)
   const  getUserInfos=async()=>{
     const userInfo = await getUserInfo()
     setUserInfo(userInfo)
-  
-        
+    const savedAddress = userInfo?.address || {}
+    if (savedAddress?.addressline1) setAddress(savedAddress.addressline1)
+    const savedCity = savedAddress?.city || ''
+    const savedState = savedAddress?.state || savedAddress?.province || ''
+    if (savedCity || savedState) setCity([savedCity, savedState].filter(Boolean).join(', '))
+    if (savedState) setState(savedState)
+    if (savedAddress?.postalcode) setPostal(savedAddress.postalcode)
   }
   useEffect(() => {
     getUserInfos()
@@ -100,9 +110,38 @@ export default function SignupAddress() {
     }
   }
 
-  // Select address suggestion
+  // Select address suggestion (mirror mobile logic)
   const selectAddressSuggestion = (suggestion) => {
-    setAddress(suggestion.Text || suggestion.Description || '')
+    const addressText = suggestion?.Text || ''
+    const description = suggestion?.Description || ''
+    const parts = String(description)
+      .split(',')
+      .map((p) => (p || '').trim())
+      .filter(Boolean)
+    
+    // Value before last comma → City, Province (e.g., "Toronto, ON")
+    const valueBeforeLastComma = parts.slice(0, -1).join(', ')
+    // Last part → Postal code
+    const valueAfterLastComma = parts[parts.length - 1] || ''
+
+    // Set Address Line 1
+    setAddress(addressText)
+
+    // Auto-fill City & Province
+    if (valueBeforeLastComma) {
+      handleCityChange(valueBeforeLastComma)
+    }
+
+    // Auto-fill Postal Code (formatted)
+    const formattedPostal = formatCanadianPostalCode(valueAfterLastComma)
+    if (formattedPostal) {
+      setPostal(formattedPostal)
+    }
+    
+    // Set postal validation state
+    const isValidPc = formattedPostal && validateCanadianPostalCode(formattedPostal)
+    setPostalCodeValidation({ isValid: !!isValidPc, error: isValidPc ? null : postalCodeValidation.error, isValidating: false })
+
     setShowAddressSuggestions(false)
   }
 
@@ -195,6 +234,94 @@ export default function SignupAddress() {
         isValidating: false
       })
       setShowCitySuggestions(false)
+    }
+  }
+
+  // Postal code validation and autofill
+  const handlePostalChange = async (value) => {
+    const cleanedValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    let formattedValue = cleanedValue
+    
+    // Format as user types (A1A 1A1)
+    if (cleanedValue.length > 3) {
+      formattedValue = `${cleanedValue.slice(0, 3)} ${cleanedValue.slice(3, 6)}`
+    }
+    
+    setPostal(formattedValue)
+    
+    if (cleanedValue.length === 6) {
+      setPostalCodeValidation({
+        isValid: null,
+        error: null,
+        isValidating: true
+      })
+      
+      try {
+        const isValidFormat = validateCanadianPostalCode(formattedValue)
+        
+        if (!isValidFormat) {
+          setPostalCodeValidation({
+            isValid: false,
+            error: 'Invalid Canadian postal code format',
+            isValidating: false
+          })
+          return
+        }
+
+        // Try to get address suggestions based on postal code
+        try {
+          const response = await getCanadaAddressSuggestions({
+            searchTerm: '',
+            postalcode: formattedValue,
+            maxResults: 5
+          })
+          
+          if (response?.body && response.body.length > 0) {
+            const firstSuggestion = response.body[0]
+            console.log('Postal code suggestion:', firstSuggestion)
+            
+            // Auto-populate city and state from the first suggestion
+            if (firstSuggestion.Description) {
+              const parts = firstSuggestion.Description.split(',').map(part => part.trim())
+              if (parts.length >= 2) {
+                const cityName = parts[0]
+                const provinceName = parts[parts.length - 1]
+                const cityStateValue = `${cityName}, ${provinceName}`
+                
+                setCity(cityStateValue)
+                setState(provinceName)
+                setCityValidation({
+                  isValid: true,
+                  error: null,
+                  isValidating: false
+                })
+                setShowCitySuggestions(false)
+              }
+            }
+          }
+        } catch (apiError) {
+          console.warn('API call failed, but postal code format is valid:', apiError)
+        }
+
+        setPostalCodeValidation({
+          isValid: true,
+          error: null,
+          isValidating: false
+        })
+        
+      } catch (error) {
+        setPostalCodeValidation({
+          isValid: false,
+          error: 'Validation failed',
+          isValidating: false
+        })
+      }
+    } else {
+      setPostalCodeValidation({
+        isValid: null,
+        error: null,
+        isValidating: false
+      })
     }
   }
 
@@ -355,25 +482,6 @@ export default function SignupAddress() {
               </div>
             )}
             {/* Debug info */}
-            <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-              Debug: {showAddressSuggestions ? 'Showing' : 'Hidden'} | 
-              Count: {addressSuggestions.length} | 
-              Input: "{address}"
-            </div>
-            <button 
-              onClick={testAddressSearch}
-              style={{ 
-                marginTop: 8, 
-                padding: '4px 8px', 
-                fontSize: 10, 
-                background: '#f0f0f0', 
-                border: '1px solid #ccc',
-                borderRadius: 4,
-                cursor: 'pointer'
-              }}
-            >
-              Test Address Search
-            </button>
           </div>
 
           <div style={styles.label}>Select City & State <span style={{ color: '#ff6e95' }}>*</span></div>
@@ -405,7 +513,19 @@ export default function SignupAddress() {
           )}
 
           <div style={styles.label}>Postal Code <span style={{ color: '#ff6e95' }}>*</span></div>
-          <div style={styles.fieldPill}><div style={styles.inputRow}><input style={styles.input} value={postal} onChange={(e)=>setPostal(e.target.value)} placeholder="Enter Postal code (e.g., M5H 2M9)"/></div></div>
+          <div style={styles.fieldPill}><div style={styles.inputRow}><input style={styles.input} value={postal} onChange={(e)=>handlePostalChange(e.target.value)} placeholder="Enter Postal code (e.g., M5H 2M9)"/></div></div>
+          
+          {postalCodeValidation.error && (
+            <div style={{ color: '#ff3333', fontSize: 12, marginTop: 4, marginLeft: 16 }}>
+              {postalCodeValidation.error}
+            </div>
+          )}
+          
+          {postalCodeValidation.isValidating && (
+            <div style={{ color: '#2a46a8', fontSize: 12, marginTop: 4, marginLeft: 16 }}>
+              Validating postal code...
+            </div>
+          )}
 
           <div style={styles.consent}>We use your address to personalize your experience and, in some cases, to confirm your eligibility for specific offers. We never share this information without your explicit permission, and always follow our Privacy Policy, Terms of Service, and local laws.</div>
           <button style={isLoading ? styles.loadingBtn : styles.nextBtn} onClick={onNext} disabled={isLoading}>
