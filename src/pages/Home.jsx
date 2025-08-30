@@ -3,7 +3,7 @@ import { clearToken, } from '../utils/auth.js'
 import { useEffect, useState, useMemo } from 'react'
 import { getUserInfo } from '../api/auth.js'
 import useStore from '../store/useStore.js'
-import LoadingScreen from '../components/LoadingScreen.jsx'
+
 import AppLayout from '../components/AppLayout.jsx'
 import moment from 'moment'
 import { imagesURL } from '../api/index.js'
@@ -76,6 +76,8 @@ export default function Home() {
   const [dataLoading, setDataLoading] = useState(false)
   const [error, setError] = useState(null)
   const [localUserInfo, setLocalUserInfo] = useState(null)
+  const [selectedTip, setSelectedTip] = useState(null)
+  const [showTipModal, setShowTipModal] = useState(false)
 
    const handleAllDataWithFetch = async () => {
     const baseUrl = `https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json`;
@@ -179,14 +181,14 @@ export default function Home() {
  
 
   if (loading) {
-    return <LoadingScreen message="Loading your dashboard..." />
+    return <GlobalLoader visible={true} />
   }
 
   return (
     <AppLayout>
-      {/* <GlobalLoader visible={true} /> */}
+    
 
-
+     
    
       {localUserInfo && (
         <div style={{
@@ -462,6 +464,11 @@ export default function Home() {
                         }}
                         onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                         onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                        onClick={() => {
+                          // Show tip details in a modal or expand the tip
+                          setSelectedTip(tip);
+                          setShowTipModal(true);
+                        }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                             <h4 style={{ margin: 0, fontSize: 16, color: tipColor, flex: 1 }}>
@@ -500,6 +507,17 @@ export default function Home() {
                           }}>
                             {tip.description ? tip.description.replace(/<[^>]*>/g, '') : 'Tip description'}
                           </p>
+                          
+                          {/* Click indicator */}
+                          <div style={{
+                            marginTop: 12,
+                            textAlign: 'center',
+                            fontSize: 12,
+                            color: `${tipColor}80`,
+                            fontWeight: 500
+                          }}>
+                            Click to see details →
+                          </div>
                         </div>
                       );
                     })}
@@ -526,11 +544,22 @@ export default function Home() {
                     paddingBottom: 8 
                   }}>
                     {homeData.speaker.slice(0, 7).map((speaker, index) => (
-                      <div key={index} style={{
-                        minWidth: '80px',
-                        textAlign: 'center',
-                        cursor: 'pointer'
-                      }}>
+                      <div 
+                        key={index} 
+                        style={{
+                          minWidth: '80px',
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onClick={() => navigate('/speakers')}
+                        onMouseEnter={(e) => {
+                          e.target.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.transform = 'scale(1)';
+                        }}
+                      >
                         {speaker?.image ? (
                           <img 
                             // src={speaker.image} 
@@ -573,18 +602,30 @@ export default function Home() {
                     ))}
                     
                     {homeData.speaker.length > 1 && (
-                      <div style={{
-                        minWidth: '80px',
-                        height: '80px',
-                        borderRadius: '50%',
-                        background: '#f3f4f6',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '3px solid #e5e7eb',
-                        cursor: 'pointer'
-                      }}>
-                        <span style={{ fontSize: 14, color: '#6B7280' }}>See All</span>
+                      <div 
+                        style={{
+                          minWidth: '80px',
+                          height: '80px',
+                          borderRadius: '50%',
+                          background: '#f3f4f6',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '3px solid #e5e7eb',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onClick={() => navigate('/speakers')}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = '#e5e7eb';
+                          e.target.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = '#f3f4f6';
+                          e.target.style.transform = 'scale(1)';
+                        }}
+                      >
+                        <span style={{ fontSize: 14, color: '#6B7280', fontWeight: '500' }}>See All</span>
                       </div>
                     )}
                   </div>
@@ -1014,6 +1055,187 @@ export default function Home() {
 
             
             </>
+          )}
+
+          {/* Tip Detail Modal */}
+          {showTipModal && selectedTip && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px'
+            }}>
+              <div style={{
+                background: '#fff',
+                borderRadius: '20px',
+                maxWidth: '500px',
+                width: '100%',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative'
+              }}>
+                {/* Close button */}
+                <button
+                  onClick={() => setShowTipModal(false)}
+                  style={{
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    background: 'rgba(0, 0, 0, 0.1)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    color: '#666'
+                  }}
+                >
+                  ✕
+                </button>
+
+                {/* Tip content */}
+                <div style={{ padding: '24px' }}>
+                  {/* Header */}
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '16', 
+                    marginBottom: '20',
+                    flexWrap: 'wrap'
+                  }}>
+                    <h2 style={{ 
+                      margin: 0, 
+                      fontSize: '24px', 
+                      color: '#1E1F24',
+                      flex: 1,
+                      minWidth: '200px'
+                    }}>
+                      {selectedTip.title}
+                    </h2>
+                    {selectedTip.logo && (
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        border: '3px solid #e5e7eb',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <img 
+                          src={`${imagesURL}${selectedTip.logo}/public`}
+                          alt="Tip"
+                          style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <p style={{ 
+                      margin: 0, 
+                      fontSize: '16px', 
+                      color: '#4B5563', 
+                      lineHeight: '1.6',
+                      whiteSpace: 'pre-wrap'
+                    }}>
+                      {selectedTip.description ? 
+                        selectedTip.description.replace(/<[^>]*>/g, '') : 
+                        'No description available for this tip.'
+                      }
+                    </p>
+                  </div>
+
+                  {/* Additional details if available */}
+                  {selectedTip.additional_data && (
+                    <div style={{ 
+                      background: '#f8f9fa', 
+                      borderRadius: '12px', 
+                      padding: '16px',
+                      marginBottom: '20px'
+                    }}>
+                      <h4 style={{ 
+                        margin: '0 0 12px', 
+                        fontSize: '18px', 
+                        color: '#1E1F24' 
+                      }}>
+                        Additional Information
+                      </h4>
+                      {Object.entries(selectedTip.additional_data).map(([key, value]) => {
+                        if (key !== 'description' && key !== 'name' && key !== 'title' && value) {
+                          return (
+                            <div key={key} style={{ marginBottom: '8px' }}>
+                              <strong style={{ color: '#374151' }}>
+                                {key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')}:
+                              </strong>
+                              <span style={{ color: '#6B7280', marginLeft: '8px' }}>
+                                {typeof value === 'string' ? value : JSON.stringify(value)}
+                              </span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: '12px', 
+                    justifyContent: 'flex-end',
+                    flexWrap: 'wrap'
+                  }}>
+                    <button
+                      onClick={() => setShowTipModal(false)}
+                      style={{
+                        padding: '12px 24px',
+                        background: '#f3f4f6',
+                        color: '#374151',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={() => {
+                        // You can add more actions here like sharing, bookmarking, etc.
+                        console.log('Tip action clicked:', selectedTip);
+                      }}
+                      style={{
+                        padding: '12px 24px',
+                        background: '#3B82F6',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Save Tip
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
         
