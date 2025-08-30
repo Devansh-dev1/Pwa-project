@@ -9,6 +9,7 @@ import moment from 'moment'
 import { imagesURL } from '../api/index.js'
 import { handleAllData } from '../api/home.js'
 import { getUserInfo as getIndexedDBUserInfo } from '../utils/indexedDB.js'
+import GlobalLoader from '../components/GlobalLoader.jsx'
 
 // Helper to build Cloudflare image URL keys into full URLs
 const buildImg = (key) => {
@@ -183,7 +184,10 @@ export default function Home() {
 
   return (
     <AppLayout>
-      {/* User Avatar Header */}
+      {/* <GlobalLoader visible={true} /> */}
+
+
+   
       {localUserInfo && (
         <div style={{
           position: 'sticky',

@@ -25,7 +25,7 @@ export const linkSignup = async (email) => {
     const response = await axiosInstance.post('/userCreate', {
       username: email,
       platformKey: 'showtrail',
-      address:'webside'  //webside ||local
+      address:'local'  //webside ||local
     });
     console.log('Create user response:', response.data);
     return response.data;
