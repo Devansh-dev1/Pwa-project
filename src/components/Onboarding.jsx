@@ -26,7 +26,7 @@ const slides = [
     progress: 80
   },
   {
-    img: '/onboarding/Onboard6.jpg',
+    img: '/onboarding/Onboard6.2.jpg',
     title: 'Ready to Explore?',
     text: "Let's get started and make the most of your show experience!",
     progress: 100,
@@ -48,31 +48,32 @@ export default function Onboarding({ onFinish }) {
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', height: 'calc(var(--vh, 1vh) * 100)', background: '#F3F6FE', overflow: 'hidden' }}>
-      <div style={{ width: '100%', maxWidth: 430, height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', background: current.isFinal ? '#ffffff' : '#F3F6FE', flex: 1, minHeight: 0 }}>
-          <img src={current.img} alt={current.title} style={{ width: '70%', height: 'auto', objectFit: 'contain' }} onClick={next} />
+    <div className='onboardingUpr'>
+      <div className='onboardingInr'>
+        <div className='onboardingBnr'>
+          <img src={current.img} alt={current.title} onClick={next} className={current.isFinal ? "onboardingFinal" : ""}  />
         </div>
 
-        <div style={{ width: '100%', background: '#fff', padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, boxSizing: 'border-box' }}>
-          <div style={{ width: 180, height: 8, background: '#E6E9FA', borderRadius: 8 }}>
-            <div style={{ width: `${current.progress}%`, height: 8, background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', borderRadius: 8 }} />
+        <div className='onboardingSlides onboardingSlidesBg'>
+          <div className='onboardingSlidesBar'>
+            <div style={{ width: `${current.progress}%`, height: 8, background: 'linear-gradient(90deg, #d37cfb 0%, #7d4dfc 100%)', borderRadius: 8 }} />
           </div>
-          <h2 style={{ margin: 0, color: '#1E1F24', textAlign: 'center' }}>{current.title}</h2>
-          <p style={{ margin: 0, color: '#6B7280', textAlign: 'center' }}>{current.text}</p>
+          <h2>{current.title}</h2>
+          <p>{current.text}</p>
 
           {current.isFinal ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-              <button onClick={() => navigate('/signin')} style={{ height: 56, padding: '0 24px', borderRadius: 999, color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', border: 'none', cursor: 'pointer' }}>Create An Account</button>
-              <button onClick={() => navigate('/home')} style={{ height: 56, padding: '0 24px', borderRadius: 999, background: '#EFF7F7', border: 'none', cursor: 'pointer', color: '#556BB9' }}>Skip For Now</button>
-              <div style={{ color: '#6B7280' }}>
-                Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/signin') }} style={{ color: '#1E1F24' }}>Log In.</a>
+            <div className='onboardingSlidesBtns'>
+              <button className='onboardingBtnsCreatAc' onClick={() => navigate('/signin')}><label>Create An Account</label><img src="/assets/iconarrow-right.png" alt="" title="" /></button>
+              <button className='onboardingBtnsSkipAc' onClick={() => navigate('/home')}>Skip For Now</button>
+              <div className='onboardingSlidesHaveBtns'>
+                Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); navigate('/signin') }}>Log In.</a>
               </div>
             </div>
           ) : (
-            <img src="/onboarding/ButtonArrow.png" alt="Next" width={70} height={70} style={{ cursor: 'pointer' }} onClick={next} />
+            <img src="/onboarding/ButtonArrow.png" alt="Next" width={70} height={70} onClick={next} className='onboardingSlidesNext' />
           )}
         </div>
+
       </div>
     </div>
   )

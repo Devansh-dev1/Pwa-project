@@ -107,7 +107,7 @@ export default function DriversLicenseSignup() {
       flexDirection: 'column',
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch',
-      padding: '24px 16px',
+      padding: '16px 16px',
       boxSizing: 'border-box'
     },
     heroWrap: {
@@ -120,19 +120,19 @@ export default function DriversLicenseSignup() {
       objectFit: 'cover',
       background: '#f0eaff'
     },
-    title: { margin: '16px 0 0', textAlign: 'center', color: '#413C3A', fontSize: 24, fontWeight: 800, fontFamily: 'Nunito-ExtraBold, sans-serif' },
-    body: { marginTop: 12, textAlign: 'center', color: '#807C7B', fontSize: 16, lineHeight: '22px' },
-    bold: { color: '#413C3A', fontWeight: 700 },
+    title: { margin: '8px 0 0', textAlign: 'center', color: '#413C3A', fontSize: 24 },
+    body: { marginTop: 10, textAlign: 'center', color: '#807C7B', fontSize: 16, lineHeight: '20px', fontWeight: 500 },
+    bold: { color: '#413C3A' },
     footerWrap: { width: '95%', position: 'fixed', bottom: 8, left: '50%', transform: 'translateX(-50%)', maxWidth: 430, padding: '0 4px' },
     animatedContainer: { position: 'relative', height: 50, padding: '10px 0' },
     animatedBtn: { position: 'relative', height: 56, borderRadius: 999, border: '1.5px solid #2a46a8', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', overflow: 'hidden' },
-    animatedInner: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: 'Nunito-SemiBold, sans-serif', color: '#2a46a8', letterSpacing: '-0.1px' },
+    animatedInner: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#2a46a8', letterSpacing: '-0.1px' },
     startSpark: { position: 'absolute', right: 0, top: -24, width: 30, height: 30 },
     cameraIcon: { width: 24, height: 24, marginLeft: 7 },
-    orRow: { display: 'flex', flexDirection: 'row', alignItems: 'center', margin: '0 16px' },
+    orRow: { display: 'flex', flexDirection: 'row', alignItems: 'center', margin: '14px 16px', fontWeight: 'bold' },
     orLine: { flex: 1, height: 1, background: '#C4C3C2' },
-    orText: { margin: '0 12px', color: '#807C7B', fontWeight: 700 },
-    primary: { height: 56, borderRadius: 999, width: '100%', border: 'none', color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', cursor: 'pointer', fontFamily: 'Nunito-ExtraBold, sans-serif' },
+    orText: { margin: '0 12px', color: '#413C3A' },
+    primary: { height: 56, borderRadius: 999, width: '100%', border: 'none', color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', cursor: 'pointer', fontWeight: 'bold' },
     videoWrap: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
     video: { width: '100%', maxWidth: 480, borderRadius: 12 },
     scanFrame: { position: 'absolute', width: 260, height: 160, border: '3px solid #2a46a8', borderRadius: 12 },
@@ -210,14 +210,14 @@ function AnimatedButtonWeb({ onClick }) {
   }
 
   return (
-    <div ref={outerRef} style={{ position: 'relative', width: '100%' }}>
-      <div style={{ padding: '0 16px' }}>
-        <button onClick={onClick} style={{ height: 56, width: '100%', borderRadius: 999, background: '#fff', border: '1.5px solid #2a46a8', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', color: '#2a46a8', fontFamily: 'Nunito-SemiBold, sans-serif' }}>
+    <div className='extractDlUpr' ref={outerRef}>
+      <div className='extractDlInr'>
+        <button className='extractDlBtn' onClick={onClick}>
+          <div className='extractDlBtnDiv'>
             Extract from Driver’s License
-            <img src="/assets/iconcamera.png" alt="camera" style={{ width: 24, height: 24, marginLeft: 7 }} />
+            <img src="/assets/iconcamera.png" alt="camera" />
           </div>
-          <img src="/assets/start.png" alt="spark" style={{ position: 'absolute', right: 0, top: -24, width: 30, height: 30 }} />
+          <img className='extractDlBtnSprk' src="/assets/start.png" alt="spark" />
         </button>
       </div>
     </div>

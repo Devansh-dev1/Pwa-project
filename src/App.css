@@ -34,9 +34,12 @@ body {
   overflow: hidden !important;
   background: #ffffff !important;
   box-sizing: border-box !important;
-  border-left: 1px solid #e5e7eb;
+  /* border-left: 1px solid #e5e7eb;
   border-right: 1px solid #e5e7eb;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-shadow: 0 0 20px rgba(0,0,0,0.1); */
+  box-shadow: 0 0 20px rgb(166 166 166 / 10%);
+  border-left: 1px solid #a6a6a61a;
+  border-right: 1px solid #a6a6a61a;
 }
 
 /* All screens must fit within the mobile frame */
@@ -125,3 +128,503 @@ body {
 .loading-spinner {
   animation: spin 1s linear infinite;
 }
+
+
+.divSignIn {
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+.AddSpcDiv {
+  padding: 24px 28px;
+}
+.divSignInForm{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  align-items: center;
+}
+.divSignInFormUpr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.divSignInFormUpr h2{
+  margin: 0px;
+  text-align: center;
+  font-weight: 800;
+  color: #413C3A;
+  font-size: 28px;
+  line-height: 36px;
+}
+.divSignInFormOr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+span.OrSpan {
+  color: #413C3A;
+  font-size: 28px;
+  line-height: 36px;
+}
+span.SgnFreeSpan {
+  font-weight: 800;
+  color: #413C3A;
+  font-size: 28px;
+  line-height: 36px;
+}
+.divSignInFormUpr p {
+  margin: 10px 0px 0px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+  color: #807C7B;
+}
+.signinInputUpr{
+  align-self: stretch;
+}
+.signinInputUpr label {
+  display: block;
+  color: rgb(42, 70, 168);
+  font-size: 14px;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+.signinDivUpr {
+  border-radius: 9999px;
+  border: 4px solid rgb(230, 233, 250);
+}
+.signinDivInr {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 9999px;
+  border: 1.5px solid rgb(42, 70, 168);
+  padding: 0px 12px;
+  background: rgb(255, 255, 255);
+}
+.signinDivInr span {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(42, 70, 168);
+}
+.signinDivInr input {
+  flex: 1 1 0%;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  background: transparent;
+  caret-color: #2a46a8;
+  font-weight: 700;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+button.magicLinkBtn {
+  height: 56px;
+  padding: 0px 24px;
+  border-radius: 999px;
+  color: rgb(255, 255, 255);
+  background: linear-gradient(90deg, rgb(42, 70, 168) 0%, rgb(23, 39, 92) 100%);
+  border: none;
+  width: 100%; 
+  max-width: 430px;
+  margin-top: 10px;
+  font-weight: bold;
+}
+button.signUpLinkBtn {
+  height: 40px;
+  padding: 0px 24px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1.5px solid rgb(42, 70, 168);
+  color: rgb(42, 70, 168);
+  font-size: 14px;
+  width: 100%;
+  max-width: 430px;
+  margin-top: 8px;
+  font-weight: bold;
+}
+.proceedUpr {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  color: rgb(107, 114, 128);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 12px;
+}
+.proceedUpr a {
+  color: rgb(30, 31, 36);
+}
+button.SkipHomeBtn {
+  background: none;
+  border-top: none;
+  border-right: none;
+  border-left: none;
+  border-image: initial;
+  color: rgb(85, 107, 185);
+  margin-top: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  border: none !important;
+}
+/* --- */
+
+.extractDlUpr {
+  position: relative;
+  width: 100%;
+}
+.extractDlInr {
+  padding: 0px 16px;
+}
+button.extractDlBtn {
+  height: 56px;
+  width: 100%;
+  border-radius: 999px;
+  background: rgb(255, 255, 255);
+  border: 1.5px solid rgb(42, 70, 168);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-family: 'Nunito-ExtraBold, sans-serif';
+}
+.extractDlBtnDiv {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: #556BB9;
+  font-weight: bold;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+.extractDlBtnDiv img {
+  width: 24px;
+  height: 24px;
+  margin-left: 7px;
+}
+img.extractDlBtnSprk {
+  position: absolute;
+  right: 0px;
+  top: -24px;
+  width: 30px;
+  height: 30px;
+}
+
+.AddFontFamily input {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.AddFontFamily input::-webkit-input-placeholder { 
+  color: #B7D8D8;
+}
+.AddFontFamily input::-moz-placeholder { 
+  color: #B7D8D8;
+}
+.AddFontFamily input:-ms-input-placeholder { 
+  color: #B7D8D8;
+}
+.AddFontFamily input:-moz-placeholder { 
+  color: #B7D8D8;
+}
+
+
+/* -- Start of Welcome Screen css ----- */
+
+.welcomeContianer{
+  background: linear-gradient(rgb(255, 255, 255) 80%, rgb(239, 247, 247) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.welcomeContianerIner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.welcomeContianerRow {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.welcomeContianerRow h2 {
+  margin: 10px 0px 4px;
+  color: rgb(30, 31, 36);
+}
+
+.welcomeContianerRow p{
+  margin-top: 7px;
+  color: rgb(107, 114, 128);
+}
+
+.welcomeMidSlide {
+  flex: 1 1 0%;
+  min-height: 0px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0px 30px;
+}
+.welcomeMidSlide img {
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  object-fit: contain;
+}
+.welcomeBtm{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.welcomeBtmStarted {
+  height: 56px;
+  border-radius: 999px;
+  padding: 0px 24px;
+  color: rgb(255, 255, 255);
+  background: linear-gradient(90deg, rgb(42, 70, 168) 0%, rgb(23, 39, 92) 100%);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 800;
+}
+.welcomeBtmHaveAc {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: rgb(107, 114, 128);
+  font-weight: 700;
+}
+.welcomeBtmHaveAc a {
+  color: rgb(30, 31, 36);
+  font-weight: 700;
+}
+
+/* -- End of Welcome Screen css ----- */
+
+/* Onboarding Screen */
+
+.onboardingUpr {
+  display: flex;
+  justify-content: center;
+  height: calc(var(--vh, 1vh) * 100);
+  /* background: rgb(243, 246, 254); */
+  background: #fff;
+}
+.onboardingInr {
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 20px rgb(166 166 166 / 10%);
+}
+.onboardingBnr {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgb(243, 246, 254);
+  flex: 1 1 0%;
+  padding-top: 10px;
+  margin-bottom: -135px;
+}   
+.onboardingSlides {
+  width: 100%;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
+}
+.onboardingSlidesBar {
+  width: 180px;
+  height: 8px;
+  background: rgb(230, 233, 250);
+  border-radius: 8px;
+  margin-bottom: 5px;
+}
+
+.onboardingSlides h2 {
+  margin: 0px;
+  text-align: center;
+  font-weight: 800;
+  color: #413C3A;
+  line-height: 26px;
+}
+
+.onboardingSlides p {
+  margin: 0px;
+  color: rgb(107, 114, 128);
+  text-align: center;
+  font-weight: 500;
+}
+.onboardingSlidesHaveBtns{
+  color: #807C7B;
+  font-weight: 700;
+}
+.onboardingBnr img {
+  width: 70%;
+  height: auto;
+  object-fit: contain;
+}
+img.onboardingSlidesNext {
+  cursor: pointer;
+}
+.onboardingSlidesBg{
+  background-image: url('/assets/circleBg.png');
+  background-size: cover;
+  background-position: top center;
+  padding-top: 44px;
+}
+img.onboardingFinal {
+  width: 100%;
+}
+button.onboardingBtnsCreatAc {
+  height: 56px;
+  padding: 0px 24px;
+  border-radius: 999px;
+  color: rgb(255, 255, 255);
+  background: linear-gradient(90deg, rgb(42, 70, 168) 0%, rgb(23, 39, 92) 100%);
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+button.onboardingBtnsSkipAc {
+  height: 56px;
+  padding: 0px 24px;
+  border-radius: 999px;
+  background: rgb(239, 247, 247);
+  border: none;
+  cursor: pointer;
+  color: rgb(85, 107, 185);
+  font-weight: 800;
+}
+.onboardingSlidesHaveBtns a {
+  color: #413C3A;
+  cursor: pointer;
+  font-weight: 700;
+}
+.onboardingSlidesBtns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+button.onboardingBtnsCreatAc img {
+  height: 22px;
+}
+
+/* Check you inbox */
+h2.checkInbox {
+  margin: 20px 0px 12px;
+  color: rgb(30, 31, 36);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 800;
+}
+p.sentMagic {
+  color: #807C7B;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+  margin: 0px;
+}
+p.sentMagicEmail {
+  margin: 0px;
+  color: #2A46A8;
+  font-size: 16px;
+  font-weight: 700;
+}
+p.sentMagicProcess {
+  color: #807C7B;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+  margin: 0px 0px 28px;
+}
+button.sentMagicBtnsReSend {
+  height: 56px;
+  padding: 0px 24px;
+  border-radius: 999px;
+  color: rgb(255, 255, 255);
+  background: linear-gradient(90deg, rgb(42, 70, 168) 0%, rgb(23, 39, 92) 100%);
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 800;
+}
+.sentMagicBtns {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.sentMagicBtnsClose{
+  height: 56px;
+  padding: 0px 24px;
+  border-radius: 999px;
+  background: rgb(239, 247, 247);
+  border: none;
+  cursor: pointer;
+  color: rgb(85, 107, 185);
+  font-size: 16px;
+  font-weight: 800;
+}
+p.sentMagicDontRcv {
+  margin: 20px 0px 0px;
+  color: rgb(156, 163, 175);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.checkInboxBnr img {
+  width: 100%;
+}
+
+/* End of Check you inbox */
+
+.progressBarCstm {
+  width: 80%;
+  margin: 0px !important;
+}
+.topProgressBarUpr {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .mobile-frame-container, .commonContainer {
+      width: 100% !important;
+      max-width: 100% !important;
+  }
+}
+
+
+
