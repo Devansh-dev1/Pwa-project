@@ -5,7 +5,7 @@ const AppLayout = ({ children, hideBottomNav = false }) => {
     <div 
     style={{ overflowY: 'auto' }}
     className="mobile-frame-container">
-      <div className="111 screen-container" style={{
+      <div className="screen-container" style={{
         position: 'relative'
       }}>
         {/* Main content area */}

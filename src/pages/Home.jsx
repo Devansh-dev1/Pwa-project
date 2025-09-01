@@ -363,9 +363,6 @@ export default function Home() {
   return (
     <AppLayout>
     
-
-     
-   
       {localUserInfo && (
         <div style={{
           position: 'sticky',
@@ -413,87 +410,42 @@ export default function Home() {
       )}
 
       {/* Main content */}
-      <div style={{ 
-        flex: 1, 
-        overflowY: 'auto', 
-        padding: '20px 16px',
-        WebkitOverflowScrolling: 'touch'
-      }}>
-        <div style={{ 
-          padding: '24px', 
-          minHeight: '100vh',
-          background: '#f8f9fa',
-          WebkitOverflowScrolling: 'touch'
-        }}>
-         
-
+      <div className='mainContentCstm'>
+        <div className='mainContentCstmIner'>
         
-
           {/* Data Display Sections */}
           {homeData && (
             <>
               {/* Event Information */}
               {homeData.event && homeData.event.length > 0 && (
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ 
-                    background: '#fff', 
-                    border: '1px solid #e5e7eb', 
-                    borderRadius: 12, 
-                    overflow: 'hidden',
-                    display: 'flex',
-                    // gap: 16,
-                    flexDirection: 'column',
-                    paddingTop:'10px',
-                  }}>
+                <div className='eventInfoDivUpr'>
+                  <div className='eventInfoDiv'>
                     {/* Event Image */}
-                    <div style={{ flex: '0 0 200px', position: 'relative' }}>
+                    <div className='eventImgDiv'>
                       {homeData.event[0]?.show_img?.[0] ? (
                         <img 
                           src={`${imagesURL}${homeData.event[0].show_img[0]}/public`} 
-                          alt="Event"
-                          style={{ 
-                            width: '100%', 
-                            height: '150px', 
-                            objectFit: 'cover' 
-                          }}
-                        />
+                          alt="Event" />
                       ) : (
-                        <div style={{ 
-                          width: '100%', 
-                          height: '150px', 
-                          background: '#f3f4f6',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <span style={{ fontSize: 32 }}>🎪</span>
+                        <div className='eventDivShw'>
+                          <span>🎪</span>
                         </div>
                       )}
                     
                     </div>
 
                     {/* Event Details */}
-                    <div style={{ flex: 1, padding: 16 }}>
-                      <div style={{ marginBottom: 12,display:'flex',justifyContent:'space-between' }}>
-                        <div >
-                        <h2 style={{ margin: '0 0 8px', fontSize: 13, color: '#1E1F24' }}>
+                    <div className='eventDetails'>
+                      <div className='eventDetailsIner'>
+                        <div className='eventDetailsData'>
+                        <h2>
                           {homeData.event[0]?.title || 'Event Title'}
                         </h2>
-                        <p style={{ margin: '0 0 8px', fontSize: 8, color: '#6B7280' }}>
+                        <p>
                           {homeData.event[0]?.organizer_name || 'Organizer'}
                         </p>
                         </div>
-                        <div style={{ 
-                           background: '#81BBBC', 
-                           padding: '12px 16px', 
-                           borderRadius: 20, 
-                           display: 'inline-block',
-                           fontSize: 14,
-                           color: '#fff',
-                           fontWeight: 600,
-                           whiteSpace: 'nowrap',
-                           marginLeft: 16
-                        }}>
+                        <div className='eventDateTBD'>
                           {homeData.event[0]?.show_date?.[0]?.date ? 
                             moment(homeData.event[0].show_date[0].date).format('D MMM, YYYY') : 
                             'Date TBD'
@@ -501,9 +453,9 @@ export default function Home() {
                         </div>
                       </div>
                       
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                        <span style={{ fontSize: 16 }}>📍</span>
-                        <span style={{ fontSize: 14, color: '#6B7280' }}>
+                      <div className='eventDateLoc'>
+                        <span className='eventDateLocFrstSpan'>📍</span>
+                        <span className='eventDateLocFrstTxt'>
                           {homeData.event[0]?.address ? 
                             `${homeData.event[0].address.address_line_1 || ''}, ${homeData.event[0].address.city || ''}, ${homeData.event[0].address.state_or_region || ''}` : 
                             'Location TBD'
@@ -532,28 +484,17 @@ export default function Home() {
               {/* Highlights Section */}
               {/* Highlights Section */}
               {homeData.Highlight && homeData.Highlight.length > 0 && (
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Highlights</h3>
-                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                <div className='highlightSection'>
+                  <div className='highlightSectionInr'>
+                    <h3>Highlights</h3>
+                    <p>
                       {homeData?.event[0]?.global_test?.find(item => item?.Type === 'Highlights')?.description}
                     </p>
                   </div>
                   
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-                    gap: 16 
-                  }}>
+                  <div className='highlightSectionGrid'>
                     {homeData.Highlight.slice(0, 6).map((highlight, index) => (
-                      <div key={index} style={{
-                        background: '#fff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 12,
-                        overflow: 'hidden',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s ease'
-                      }}
+                      <div className='highlightSectionGridInr' key={index}
                       onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                       onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                                              onClick={()=>{
@@ -607,25 +548,20 @@ export default function Home() {
                           </div>
                         )}
                         
-                        <div style={{ padding: 16 }}>
-                          <h4 style={{ margin: '0 0 8px', fontSize: 16, color: '#1E1F24' }}>
+                        <div className='highlightTitleSec'>
+                          <h4>
                             {highlight?.additional_data?.name || highlight?.additional_data?.title || 'Highlight Title'}
                           </h4>
-                          <p style={{ margin: '0 0 12px', fontSize: 14, color: '#6B7280', lineHeight: 1.4 }}>
+                          <p>
                             {highlight?.additional_data?.description ? 
                               highlight.additional_data.description.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : 
                               'Description coming soon'
                             }
                           </p>
-                          <div style={{
+                          <div className='highlightTypeSec' style={{
                             background: `${getHighlightColor(highlight?.type)}25`,
                             border: `1.5px solid ${getHighlightColor(highlight?.type)}`,
-                            borderRadius: 16,
-                            padding: '4px 12px',
-                            display: 'inline-block',
-                            fontSize: 11,
                             color: getHighlightColor(highlight?.type),
-                            fontWeight: 500
                           }}>
                             {highlight?.type === 'GiveAway' ? 'Giveaway' : highlight?.type || 'Featured'}
                           </div>
@@ -638,31 +574,22 @@ export default function Home() {
 
               {/* Tips Section */}
               {homeData.Tip && homeData.Tip.length > 0 && (
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Tips</h3>
-                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                <div className='tipsUpr'>
+                  <div className='tipsUprIner'>
+                    <h3>Tips</h3>
+                    <p>
                       Helpful tips to make the most of your experience
                     </p>
                   </div>
                   
-                  <div style={{ 
-                    display: 'flex', 
-                    gap: 16, 
-                    overflowX: 'auto', 
-                    paddingBottom: 8 
-                  }}>
+                  <div className='tipsMapContent'>
                     {homeData.Tip.slice(0, 5).map((tip, index) => {
                       const tipColor = ['#9458E2', '#FF6E95', '#6B2E3F', '#309866'][index % 4];
                       return (
-                        <div key={index} style={{
+                        <div key={index} className='tipsMapTxt' style={{
                           minWidth: '280px',
                           background: `${tipColor}15`,
                           border: `1.5px solid ${tipColor}`,
-                          borderRadius: 16,
-                          padding: 16,
-                          cursor: 'pointer',
-                          transition: 'transform 0.2s ease'
                         }}
                         onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                         onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
@@ -677,26 +604,16 @@ export default function Home() {
                           });
                         }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                          <div className='tipsTxtPara' style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                             <h4 style={{ margin: 0, fontSize: 16, color: tipColor, flex: 1 }}>
                               {tip.title}
                             </h4>
                             {tip.logo && (
-                              <div style={{
-                                width: 32,
-                                height: 32,
-                                borderRadius: '50%',
-                                border: `2px solid ${tipColor}`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}>
+                              <div className='tipsTxtLogo' style={{ border: `2px solid ${tipColor}`}}>
                                 <img 
                                   // src={tip.logo} 
-                          src={`${imagesURL}${tip.logo}/public`} 
-
+                                  src={`${imagesURL}${tip.logo}/public`} 
                                   alt="Tip"
-                                  style={{ width: 20, height: 20, objectFit: 'contain' }}
                                 />
                               </div>
                             )}
