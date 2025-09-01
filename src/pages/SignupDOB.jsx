@@ -11,6 +11,7 @@ export default function SignupDOB() {
   const [month, setMonth] = useState('November')
   const [day, setDay] = useState(11)
   const [year, setYear] = useState(2023)
+  const [userInfo,setUserInfo] = useState(null)
 
   const  getUserInfos=async()=>{
     const userInfo = await getUserInfo()
