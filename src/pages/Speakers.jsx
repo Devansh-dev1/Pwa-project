@@ -62,7 +62,12 @@ export default function Speakers() {
   }
 
   return (
-    <AppLayout>
+    <div style={{
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      background: '#f8f9fa'
+    }}>
       {/* Header */}
       <div style={{
         position: 'sticky',
@@ -398,6 +403,6 @@ export default function Speakers() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </div>
   );
 }

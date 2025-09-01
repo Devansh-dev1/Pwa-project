@@ -656,6 +656,7 @@ export default function Home() {
                         cursor: 'pointer',
                         transition: 'transform 0.2s ease'
                       }}
+                      onClick={() => navigate('/seminars')}
                       onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                       onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                       >
@@ -716,6 +717,40 @@ export default function Home() {
                         </div>
                       </div>
                     ))}
+                    
+                    {/* View All Seminars Button */}
+                    {homeData.seminars.length > 3 && (
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        marginTop: '20px' 
+                      }}>
+                        <button
+                          onClick={() => navigate('/seminars')}
+                          style={{
+                            padding: '12px 28px',
+                            background: 'transparent',
+                            color: '#4A57C7',
+                            border: '3px solid #C9D3FF',
+                            borderRadius: '999px',
+                            fontSize: '18px',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = '#4A57C7';
+                            e.target.style.color = '#fff';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'transparent';
+                            e.target.style.color = '#4A57C7';
+                          }}
+                        >
+                          View All Seminars
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
