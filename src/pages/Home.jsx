@@ -237,6 +237,7 @@ export default function Home() {
             {key === 'Exhibitor' && 'Discover all participating brands and exhibitors'}
           </p>
         </div>
+
         
         <div style={{ 
           display: 'grid', 
@@ -363,54 +364,64 @@ export default function Home() {
   return (
     <AppLayout>
     
-      {localUserInfo && (
-        <div style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          // background: 'linear-gradient(135deg, #2a46a8 0%, #17275c 100%)',
-          padding: '16px 20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          // boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          {/* Welcome Text */}
-          
-
-          {/* User Avatar */}
-          <div style={{
-            width: 48,
-            height: 48,
-            borderRadius: '50%',
-            background: 'rgba(0, 0, 0, 0.5)',
-            border: '2px solid rgba(255, 255, 255, 0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontSize: 18,
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.3)'
-            e.target.style.transform = 'scale(1.05)'
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.2)'
-            e.target.style.transform = 'scale(1)'
-          }}
-          onClick={() => navigate('/profile')}
-          >
-            {getUserInitials()}
-          </div>
-        </div>
-      )}
-
       {/* Main content */}
       <div className='mainContentCstm'>
+
+
+        <div className='homeHeader'>
+           <div>
+            {localUserInfo ? (
+              <div style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 100,
+                // background: 'linear-gradient(135deg, #2a46a8 0%, #17275c 100%)',
+                padding: '16px 20px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                // boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}>
+                {/* Welcome Text */}
+                
+
+                {/* User Avatar */}
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  border: '2px solid rgba(255, 255, 255, 0.6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  fontSize: 18,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'rgba(255, 255, 255, 0.3)'
+                  e.target.style.transform = 'scale(1.05)'
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'rgba(255, 255, 255, 0.2)'
+                  e.target.style.transform = 'scale(1)'
+                }}
+                onClick={() => navigate('/profile')}
+                >
+                  {getUserInitials()}
+                </div>
+              </div>
+            ) : <img src="/assets/profile-pic.png" alt="" title="" /> }
+           </div>
+
+          <img src="/assets/notify.svg" alt="" title="" />
+
+        </div>
+
+
         <div className='mainContentCstmIner'>
         
           {/* Data Display Sections */}
