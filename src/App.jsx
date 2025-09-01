@@ -27,13 +27,13 @@ import LikedItems from './pages/LikedItems.jsx'
 import MyFamily from './pages/MyFamily.jsx'
 import MyCouponsRewards from './pages/MyCouponsRewards.jsx'
 import ExhibitorDetail from './pages/ExhibitorDetail.jsx'
-import Products from './pages/Products.jsx'
-import useFirebaseVersion from './hooks/useFirebaseVersion.js'
+import HighlightsDetails from './pages/HighlightsDetails.jsx'
+import GiveawayDetails from './pages/GiveawayDetails.jsx'
 
 function RootRedirect() { /* unchanged */ }
 
 export default function App() {
-  useFirebaseVersion()
+  /* unchanged useEffect */
   return (
     <BrowserRouter>
               <Routes>
@@ -44,7 +44,6 @@ export default function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/booths" element={<Booths />} />
           <Route path="/booths/:id" element={<ExhibitorDetail />} />
-          <Route path="/products" element={<Products />} />
           <Route path="/map" element={<Map />} />
           <Route path="/plan-visit" element={<PlanVisit />} />
           <Route path="/scanner" element={<Scanner />} />
@@ -64,6 +63,8 @@ export default function App() {
           <Route path="/profile/liked-items" element={<LikedItems />} />
           <Route path="/profile/family" element={<MyFamily />} />
           <Route path="/profile/coupons" element={<MyCouponsRewards />} />
+          <Route path="/highlights-details" element={<HighlightsDetails />} />
+          <Route path="/giveaway-details" element={<GiveawayDetails />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     </BrowserRouter>
