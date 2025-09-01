@@ -39,15 +39,15 @@ export default function SignupReview() {
     screen: { height: 'calc(var(--vh, 1vh) * 100)', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #fff 80%, #eff7f7 100%)', overflowY: 'auto' },
     frame: { width: '100%', maxWidth: 430, margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 16px', boxSizing: 'border-box' },
     backBtn: { borderRadius: 18, width: 48, height: 48, border: '1.5px solid #c4c3c2', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer' },
-    title: { marginTop: 24, fontFamily: 'Nunito-ExtraBold, sans-serif', fontSize: 24, color: '#2a2a2a', fontWeight: 800 },
-    helperText: { marginTop: 12, color: '#1E1F24', fontFamily: 'Nunito-ExtraBold, sans-serif', fontSize: 18, lineHeight: '28px' },
+    title: { marginTop: 10, fontSize: 24, color: '#2a2a2a', fontWeight: 800 },
+    helperText: { marginTop: 2, color: '#1E1F24', fontSize: 18, lineHeight: '23px', fontWeight: 500 },
     sectionHeading: { fontSize: 20, fontWeight: 700, color: '#000', margin: '12px 0 8px 0' },
     list: { display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 },
     listItem: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: '#EFF7F7', borderRadius: 24, border: '1.5px solid #E5F1F1', cursor: 'pointer' },
-    listLabel: { color: '#2A46A8', fontSize: 16, fontFamily: 'Nunito-ExtraBold, sans-serif',fontWeight: 700 },
-    listValue: { color: '#1E1F24', fontSize: 16, fontFamily: 'Nunito, sans-serif', marginTop: 4 },
+    listLabel: { color: '#2A46A8', fontSize: 16,fontWeight: 700 },
+    listValue: { color: '#1E1F24', fontSize: 16, marginTop: 4 },
     listItemLeft: { display: 'flex', flexDirection: 'column', gap: 2 },
-    saveBtn: { marginTop: 'auto', height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', cursor: 'pointer', fontFamily: 'Nunito-ExtraBold, sans-serif' }
+    saveBtn: { marginTop: 17, height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', cursor: 'pointer', fontWeight: 800 }
   }), [])
 
   return (
