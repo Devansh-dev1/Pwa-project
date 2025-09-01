@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { imagesURL } from '../api/index.js';
 import { handleAllData } from '../api/home.js';
-import AppLayout from '../components/AppLayout.jsx';
 import GlobalLoader from '../components/GlobalLoader.jsx';
 import moment from 'moment';
 

@@ -656,7 +656,7 @@ export default function Home() {
                         cursor: 'pointer',
                         transition: 'transform 0.2s ease'
                       }}
-                      onClick={() => navigate('/seminars')}
+                      onClick={() => navigate(`/seminars/${seminar.seminar_id}`, { state: { item: seminar } })}
                       onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                       onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                       >

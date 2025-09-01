@@ -5,6 +5,7 @@ import { fetchPersonalizedData } from '../api/auth.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import AppLayout from '../components/AppLayout.jsx';
 import { imagesURL } from '../api/index.js';
+import { useGetPearksData } from '../utils/index.js';
 import moment from 'moment';
 
 // EXACT MOBILE APP CONSTANTS - Direct from GlobalStyles
@@ -113,7 +114,7 @@ const PlanVisitCategories = ({ category, setCategory, addedMyDay, setAddedMyDay,
         fontSize: FontSize.labelLg_size,
         fontFamily: FontFamily.textSm
       }}>
-        Plan Visit
+        List
       </span>
     </button>
     <button
@@ -249,42 +250,16 @@ const BoothCard = ({ booth, zone, zoneColor, onClick, isSuggested, onThreeDotCli
             borderRadius: 12,
             backgroundColor: '#fff',
             border: '1.5px solid #C4C3C2',
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             justifyContent: 'center',
             alignItems: 'center',
             cursor: 'pointer',
             // border: 'none'
           }}
         >
-          <span style={{ fontSize: 16 }}>⋯</span>
+          <span style={{ fontSize: 16 , color: '#1E1F24'}}>⋯</span>
         </button>
-      </div>
-
-      {/* Availability section */}
-      <div style={{
-        height: 52,
-        borderColor: '#F8B737',
-        borderWidth: '1.5px',
-        borderStyle: 'solid',
-        backgroundColor: '#FFF8EA',
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 20,
-        paddingVertical: 10,
-        borderRadius: 17,
-        paddingHorizontal: Padding.p_mini,
-        justifyContent: 'space-between',
-        alignSelf: 'stretch'
-      }}>
-        <span style={{
-          color: Color.solidsBlackBlack500,
-          fontSize: FontSize.paragraphSm_size,
-          flex: 1,
-          textAlign: 'center'
-        }}>
-          Open during the whole day event
-        </span>
       </div>
     </div>
   );
@@ -939,17 +914,6 @@ const PlanVisitFirstTime = () => {
               <div style={{
                 marginBottom: 15,
               }}>
-                {/* <h3 style={{
-                  fontSize: FontSize.textXl_size,
-                  letterSpacing: -0.2,
-                  color: Color.solidsBlackBlack500,
-                  fontFamily: FontFamily.textXxs,
-                  textAlign: 'left',
-                  margin: '0 0 5px',
-                  fontWeight: 900,
-                }}>
-                  Booths
-                </h3> */}
                 <p style={{
                   fontFamily: FontFamily.paragraphXs,
                   fontSize: FontSize.paragraphXs_size,
@@ -960,72 +924,6 @@ const PlanVisitFirstTime = () => {
                   Explore exhibitor booths and displays
                 </p>
               </div>
-              
-              {/* Mock booth item */}
-              {/* <div style={{
-                marginTop: 15,
-                padding: Padding.p_mini,
-                borderRadius: Border.br_5xl,
-                borderWidth: 1.5,
-                borderStyle: 'solid',
-                borderColor: Color.solidsDenimDenim200,
-                backgroundColor: Color.oslerGrayWhite,
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ 
-                      margin: '0 0 4px', 
-                      fontSize: 16, 
-                      color: Color.solidsBlackBlack500,
-                      fontFamily: FontFamily.textSm,
-                      fontWeight: 700,
-                    }}>
-                      Sample Boothekh
-                    </h4>
-                    <p style={{ 
-                      margin: 0, 
-                      fontSize: 14, 
-                      color: Color.solidsBlackBlack400,
-                      fontFamily: FontFamily.paragraphSm,
-                    }}>
-                      Discover amazing products and services
-                    </p>
-                  </div>
-                </div>
-              </div> */}
-
-              {/* <button style={{
-                borderColor: Color.solidsDenimDenim400,
-                borderWidth: 1.5,
-                borderStyle: 'solid',
-                marginTop: 15,
-                minHeight: 48,
-                alignSelf: 'stretch',
-                backgroundColor: 'transparent',
-                borderRadius: Border.br_981xl,
-                justifyContent: 'center',
-                flexDirection: 'row',
-                alignItems: 'center',
-                display: 'flex',
-                cursor: 'pointer',
-                outline: 'none',
-                width: '100%',
-              }}>
-                <span style={{
-                  color: Color.solidsDenimDenim400,
-                  fontSize: FontSize.paragraphSm_size,
-                  lineHeight: '15px',
-                  fontFamily: FontFamily.textXl,
-                  textAlign: 'center',
-                  fontWeight: 700,
-                }}>
-                  View More
-                </span>
-              </button> */}
             </div>
           </div>
         )}
@@ -1038,6 +936,7 @@ export default function PlanVisit() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState(0);
+  const [listCategory, setListCategory] = useState('All');
   const [searchValues, setSearchValues] = useState('');
   const [search, setSearch] = useState('');
   const [focusedField, setFocusedField] = useState(null);
@@ -1063,6 +962,8 @@ export default function PlanVisit() {
   const [categories, setCategories] = useState([]);
   const [seminars, setSeminars] = useState([]);
   const [samples, setSamples] = useState([]);
+  const [visibleSeminars, setVisibleSeminars] = useState(3);
+  const [visibleSamples, setVisibleSamples] = useState(3);
 
   const { myDayData, setMyDayData, userInfo } = useStore();
   const { email } = userInfo || {};
@@ -1078,8 +979,8 @@ export default function PlanVisit() {
             if (userData) {
               setShowExhibitor(userData.show_exhibitor || []);
               setBoothNZone(userData.Booth_N_Zone || []);
-              setSeminars(userData.seminars || []);
-              setSamples(userData.sample || []);
+              setSeminars(userData.seminars || userData.Seminars || []);
+              setSamples(userData.sample || userData.samples || []);
               
               // Extract categories from exhibitor data
               const allCategories = [];
@@ -1117,6 +1018,24 @@ export default function PlanVisit() {
 
     loadData();
   }, []);
+
+  // Also mirror mobile hook source of truth so seminars render even if storage keys differ
+  const parksdata = useGetPearksData();
+  useEffect(() => {
+    // prefer loaded state; if empty, hydrate from hook
+    if ((!seminars || seminars.length === 0) && parksdata?.seminars?.length) {
+      setSeminars(parksdata.seminars);
+    }
+    if ((!samples || samples.length === 0) && parksdata?.sample?.length) {
+      setSamples(parksdata.sample);
+    }
+    if ((!showExhibitor || showExhibitor.length === 0) && parksdata?.show_exhibitor?.length) {
+      setShowExhibitor(parksdata.show_exhibitor);
+    }
+    if ((!boothNZone || boothNZone.length === 0) && parksdata?.Booth_N_Zone?.length) {
+      setBoothNZone(parksdata.Booth_N_Zone);
+    }
+  }, [parksdata]);
 
   // Group exhibitors by zone
   const groupedByZone = useMemo(() => {
@@ -1206,6 +1125,33 @@ export default function PlanVisit() {
 
   const displayedBooths = finalBoothsData.slice(0, visibleCount);
 
+  // Filter seminars and samples similar to mobile
+  const finalSeminarsData = useMemo(() => {
+    let list = seminars || [];
+    if (!list?.length) return [];
+    if (searchValues) {
+      const q = searchValues.toLowerCase();
+      list = list.filter(item =>
+        item?.title?.toLowerCase()?.includes(q) ||
+        item?.speaker?.toLowerCase?.()?.includes(q)
+      );
+    }
+    return list;
+  }, [seminars, searchValues]);
+
+  const finalSamplesData = useMemo(() => {
+    let list = samples || [];
+    if (!list?.length) return [];
+    if (searchValues) {
+      const q = searchValues.toLowerCase();
+      list = list.filter(item =>
+        item?.title?.toLowerCase()?.includes(q) ||
+        item?.company_name?.toLowerCase?.()?.includes(q)
+      );
+    }
+    return list;
+  }, [samples, searchValues]);
+
   // Show more booths
   const handleViewMore = () => {
     setVisibleCount(prev => Math.min(prev + 6, finalBoothsData.length));
@@ -1229,6 +1175,47 @@ export default function PlanVisit() {
       } 
     });
   };
+
+  // Helpers for seminar/sample display
+  const formatDateTime = (val) => {
+    if (!val) return '';
+    const m = moment(val);
+    if (!m.isValid()) return '';
+    return m.format('MMM D, h:mm A');
+  };
+
+  const parseSeminarTimes = (item) => {
+    // Derive date and hours as shown in mobile
+    let dateSource = item?.seminar_date || item?.date || item?.start_time || item?.end_time;
+    let dateText = '';
+    if (dateSource) {
+      const d = moment(dateSource);
+      if (d.isValid()) {
+        dateText = d.format('DD MMM YYYY');
+      }
+    }
+
+    const parseTime = (t) => {
+      if (!t) return '';
+      const iso = moment(t);
+      if (iso.isValid()) return iso.format('HH:mm');
+      const hm = moment(t, ['HH:mm', 'H:mm', 'hh:mm A'], true);
+      if (hm.isValid()) return hm.format('HH:mm');
+      return '';
+    };
+
+    const startH = parseTime(item?.start_time);
+    const endH = parseTime(item?.end_time);
+    const hoursText = startH && endH ? `${startH} - ${endH}` : '';
+
+    return { dateText, hoursText };
+  };
+
+  // View more/less handlers for seminars and samples
+  const handleSeminarMore = () => setVisibleSeminars(prev => Math.min(prev + 3, finalSeminarsData.length));
+  const handleSeminarLess = () => setVisibleSeminars(3);
+  const handleSampleMore = () => setVisibleSamples(prev => Math.min(prev + 3, finalSamplesData.length));
+  const handleSampleLess = () => setVisibleSamples(3);
 
   // Handle three dot menu click
   const handleThreeDotClick = (booth) => {
@@ -1272,8 +1259,44 @@ export default function PlanVisit() {
         {/* Content */}
         <div style={{ padding: '0 16px 16px' }}>
           {category === 0 ? (
-            // Plan Visit view
             <>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                {[
+                  { name: 'All', values: finalBoothsData.length + finalSeminarsData.length + finalSamplesData.length },
+                  { name: 'Booths', values: finalBoothsData.length },
+                  { name: 'Seminars', values: finalSeminarsData.length },
+                  ...(samples?.length > 0 ? [{ name: 'Samples', values: finalSamplesData.length }] : []),
+                ].map(tab => (
+                  <button
+                    key={tab.name}
+                    onClick={() => setListCategory(tab.name)}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: 22,
+                      border: listCategory === tab.name ? '1.5px solid #2A46A8' : '1.5px solid #E6E9FA',
+                      backgroundColor: listCategory === tab.name ? '#2A46A8' : '#F0F2FA',
+                      color: listCategory === tab.name ? '#fff' : '#556bb9',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span style={{ fontWeight: 700 }}>{tab.name}</span>
+                    <span style={{
+                      padding: '2px 8px',
+                      background: '#fff',
+                      color: '#2A46A8',
+                      borderRadius: 14,
+                      fontSize: 12,
+                      fontWeight: 800,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>{tab.values}</span>
+                  </button>
+                ))}
+              </div>
               {/* Smart Suggestions */}
               {!(email === 'unknown@dev.familyone.io') && 
                (finalBoothsData?.length > 0 || seminars?.length > 0 || samples?.length > 0) && 
@@ -1312,7 +1335,7 @@ export default function PlanVisit() {
               )}
 
               {/* Booths Section */}
-              {finalBoothsData?.length > 0 && (
+              {['All', 'Booths'].includes(listCategory) && finalBoothsData?.length > 0 && (
                 <div style={{ marginTop: 15 }}>
                   <div style={{ marginBottom: 15 }}>
                     <h3 style={{
@@ -1375,8 +1398,173 @@ export default function PlanVisit() {
                 </div>
               )}
 
+              {/* Seminars Section */}
+              {['All', 'Seminars'].includes(listCategory) && finalSeminarsData?.length > 0 && (
+                <div style={{ marginTop: 20 }}>
+                  <div style={{ marginBottom: 15 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 20, color: '#1E1F24', fontWeight: 600 }}>Seminars</h3>
+                    <p style={{ margin: 0, fontSize: 13, color: '#6B7280' }}>Discover sessions and talks</p>
+                  </div>
+
+                  <div>
+                    {finalSeminarsData.slice(0, visibleSeminars).map((item, index) => {
+                      const { dateText, hoursText } = parseSeminarTimes(item);
+                      // booth and zone via booth_stage_id like mobile
+                      const booth = boothNZone?.find(b => String(b?.id) === String(item?.booth_stage_id));
+                      const zoneColor = booth?.zone_color ? booth.zone_color : '#A6B3DA';
+                      const zoneName = booth?.zone || '';
+                      const boothName = booth?.booth_name || '';
+                      const img = Array.isArray(item?.seminar_img) && item.seminar_img[0]
+                        ? `${imagesURL}${item.seminar_img[0]}/public`
+                        : null;
+
+                      return (
+                        <div key={item?.seminar_id?.toString() || index} style={{
+                          padding: 15,
+                          marginBottom: 10,
+                          borderRadius: 24,
+                          border: `1.5px solid ${zoneColor}55`,
+                          backgroundColor: '#fff'
+                        }} onClick ={()=> navigate(`/seminars/${item?.seminar_id}`, { state: { item } })}
+                        >
+                          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                            <div style={{ width: 72, height: 56, borderRadius: 12, overflow: 'hidden', background: '#f8f9fa' }}>
+                              {img ? (
+                                <img src={img} alt={item?.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : (
+                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🗓️</div>
+                              )}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <h4 style={{ margin: 0, color: '#1E1F24' }}>{item?.title}</h4>
+                              {/* Zone badge like mobile */}
+                              {(zoneName || boothName) && (
+                                <div style={{
+                                  display: 'inline-block', padding: '2px 8px', marginTop: 6,
+                                  backgroundColor: `${zoneColor}20`, color: zoneColor, borderRadius: 12, fontSize: 12, fontWeight: 700
+                                }}>
+                                  {boothName} {zoneName && `• ${zoneName}`}
+                                </div>
+                              )}
+                            </div>
+                            <button 
+        onClick={(e) => {
+        }} 
+        style={{
+          border: '1.5px solid #C4C3C2',
+          background: '#fff',
+          borderRadius: 12,
+          width: 36,
+          height: 36,
+          cursor: 'pointer',
+          color: '#1E1F24',
+          fontSize: 18
+        }}
+      >
+        ⋯
+      </button>
+                          </div>
+
+                          <div style={{
+                            display: 'flex',
+                            gap: 12,
+                            marginTop: 12,
+                            background: '#F7F9FF',
+                            border: `1.5px solid ${zoneColor}40`,
+                            borderRadius: 17,
+                            padding: '10px 15px'
+                          }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>Date</div>
+                              <div style={{ fontWeight: 700, color: '#1E1F24' }}>{dateText}</div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>Hours</div>
+                              <div style={{ fontWeight: 700, color: '#1E1F24' }}>{hoursText}</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {finalSeminarsData.length > 3 && (
+                    <button
+                      onClick={visibleSeminars < finalSeminarsData.length ? handleSeminarMore : handleSeminarLess}
+                      style={{
+                        width: '100%', height: 56, border: '1.5px solid #556bb9', borderRadius: 1000,
+                        backgroundColor: 'transparent', color: '#556bb9', fontSize: 18, fontWeight: 700, cursor: 'pointer', marginTop: 15
+                      }}
+                    >
+                      {visibleSeminars < finalSeminarsData.length ? 'View More' : 'View Less'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Samples Section */}
+              {['All', 'Samples'].includes(listCategory) && finalSamplesData?.length > 0 && (
+                <div style={{ marginTop: 20 }}>
+                  <div style={{ marginBottom: 15 }}>
+                    <h3 style={{ margin: '0 0 8px', fontSize: 20, color: '#1E1F24', fontWeight: 600 }}>Samples</h3>
+                    <p style={{ margin: 0, fontSize: 13, color: '#6B7280' }}>Taste and try samples available at booths</p>
+                  </div>
+
+                  <div>
+                    {finalSamplesData.slice(0, visibleSamples).map((item, index) => {
+                      const img = item?.sample_image ? `${imagesURL}${item.sample_image}/public` : null;
+                      const start = item?.sample_start || item?.starttime || item?.create_at;
+                      const end = item?.sample_end || item?.endtime || item?.update_at;
+                      const startTime = start ? formatDateTime(start) : 'Available throughout';
+                      const endTime = end ? formatDateTime(end) : 'Available throughout';
+                      return (
+                        <div key={item?.sample_id?.toString() || index} style={{
+                          padding: 15,
+                          marginBottom: 10,
+                          borderRadius: 24,
+                          border: '1.5px solid #a8b4d9',
+                          backgroundColor: '#fff'
+                        }}>
+                          <div style={{ display: 'flex', gap: 12 }}>
+                            <div style={{ width: 110, height: 74, borderRadius: 12, overflow: 'hidden', background: '#f8f9fa' }}>
+                              {img ? <img src={img} alt={item?.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 40 }}>🧃</span>}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <h4 style={{ margin: '2px 0 6px', color: '#1E1F24' }}>{item?.title}</h4>
+                              <div style={{ display: 'flex', gap: 12, background: '#F7F9FF', border: '1.5px solid #E6E9FA', borderRadius: 17, padding: '10px 15px' }}>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>Start Time</div>
+                                  <div style={{ fontWeight: 700, color: '#1E1F24' }}>{startTime}</div>
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 4 }}>End Time</div>
+                                  <div style={{ fontWeight: 700, color: '#1E1F24' }}>{endTime}</div>
+                                </div>
+                              </div>
+                            </div>
+                            <button style={{ border: '1.5px solid #C4C3C2', background: '#fff', borderRadius: 12, width: 36, height: 36, cursor: 'pointer' }}>⋯</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {finalSamplesData.length > 3 && (
+                    <button
+                      onClick={visibleSamples < finalSamplesData.length ? handleSampleMore : handleSampleLess}
+                      style={{
+                        width: '100%', height: 56, border: '1.5px solid #556bb9', borderRadius: 1000,
+                        backgroundColor: 'transparent', color: '#556bb9', fontSize: 18, fontWeight: 700, cursor: 'pointer', marginTop: 15
+                      }}
+                    >
+                      {visibleSamples < finalSamplesData.length ? 'View More' : 'View Less'}
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* No Results */}
-              {finalBoothsData?.length === 0 && (
+              {['Booths'].includes(listCategory) && finalBoothsData?.length === 0 && (
                 <div style={{
                   textAlign: 'center',
                   padding: '40px 20px',
@@ -1387,6 +1575,18 @@ export default function PlanVisit() {
                   <p style={{ margin: 0 }}>
                     Try adjusting your search or filter criteria
                   </p>
+                </div>
+              )}
+              {['Seminars'].includes(listCategory) && finalSeminarsData?.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6B7280' }}>
+                  <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>🔍</span>
+                  <h3 style={{ margin: '0 0 8px', color: '#1E1F24' }}>No seminars found</h3>
+                </div>
+              )}
+              {['Samples'].includes(listCategory) && finalSamplesData?.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6B7280' }}>
+                  <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>🔍</span>
+                  <h3 style={{ margin: '0 0 8px', color: '#1E1F24' }}>No samples found</h3>
                 </div>
               )}
             </>
