@@ -13,6 +13,7 @@ import Profile from './pages/Profile.jsx'
 import TipsDetails from './pages/TipsDetails.jsx'
 import Speakers from './pages/Speakers.jsx'
 import Seminars from './pages/Seminars.jsx'
+import SeminarDetailPage from './pages/SeminarDetailPage.jsx'
 import DriversLicenseSignup from './pages/DriversLicenseSignup.jsx'
 import SignupName from './pages/SignupName.jsx'
 import SignupDOB from './pages/SignupDOB.jsx'
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="/tips" element={<TipsDetails />} />
           <Route path="/speakers" element={<Speakers />} />
           <Route path="/seminars" element={<Seminars />} />
+          <Route path="/seminars/:id" element={<SeminarDetailPage />} />
           <Route path="/profile/information" element={<ProfileInformation />} />
           <Route path="/profile/liked-items" element={<LikedItems />} />
           <Route path="/profile/family" element={<MyFamily />} />
