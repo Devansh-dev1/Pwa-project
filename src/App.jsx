@@ -27,6 +27,7 @@ import LikedItems from './pages/LikedItems.jsx'
 import MyFamily from './pages/MyFamily.jsx'
 import MyCouponsRewards from './pages/MyCouponsRewards.jsx'
 import ExhibitorDetail from './pages/ExhibitorDetail.jsx'
+import Products from './pages/Products.jsx'
 import useFirebaseVersion from './hooks/useFirebaseVersion.js'
 
 function RootRedirect() { /* unchanged */ }
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/booths" element={<Booths />} />
           <Route path="/booths/:id" element={<ExhibitorDetail />} />
+          <Route path="/products" element={<Products />} />
           <Route path="/map" element={<Map />} />
           <Route path="/plan-visit" element={<PlanVisit />} />
           <Route path="/scanner" element={<Scanner />} />

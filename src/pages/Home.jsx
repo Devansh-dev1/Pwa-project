@@ -902,11 +902,14 @@ export default function Home() {
               {/* Products Section */}
               {homeData.product && homeData.product.length > 0 && (
                 <div style={{ marginBottom: 32 }}>
-                  <div style={{ marginBottom: 12 }}>
-                    <h3 style={{ margin: '0 0 8px', fontSize: 22, color: '#1E1F24' }}>Recommended Products</h3>
-                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280', maxWidth: 720 }}>
-                      Manage the list of recommended products to showcase to users based on preferences, trends, or related categories.
-                    </p>
+                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 8px', fontSize: 22, color: '#1E1F24' }}>Recommended Products</h3>
+                      <p style={{ margin: 0, fontSize: 14, color: '#6B7280', maxWidth: 720 }}>
+                        Manage the list of recommended products to showcase to users based on preferences, trends, or related categories.
+                      </p>
+                    </div>
+                   
                   </div>
 
                   <div style={{
