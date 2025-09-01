@@ -3,78 +3,46 @@ import { storeHomeData, getHomeData, clearAllHomeData } from '../utils/indexedDB
 import axios from 'axios';
 
 // Get all home page data (booths, events, etc.)
-export const handleAllData = async (forceFresh = false) => {
-  // Use more reliable CORS proxies
-  const corsProxies = [
-    'https://api.allorigins.win/raw?url=',
-    'https://thingproxy.freeboard.io/fetch/',
-    'https://cors.bridged.cc/',
-    'https://api.codetabs.com/v1/proxy?quest=',
-    'https://cors-anywhere.herokuapp.com/'
-  ];
-  
-  const baseUrl = `https://d9wbof3q09tw.cloudfront.net/${EVENT_ID}.json`;
+export async function handleAllData(forceFresh = false) {
+  const controller = new AbortController();
+  const url = new URL('https://perksevent.s3.us-east-1.amazonaws.com/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json');
 
-  const withBust = (url) => {
-    if (!forceFresh) return url;
-    const sep = url.includes('?') ? '&' : '?';
-    return `${url}${sep}cb=${Date.now()}`;
-  };
-  
-  console.log('🔄 Starting data fetch with multiple CORS proxies...');
+  // Optional cache-buster when you want to skip caches
+  if (forceFresh) url.searchParams.set('_t', String(Date.now()));
 
-  // Try each CORS proxy until one works
-  for (let i = 0; i < corsProxies.length; i++) {
-    const proxy = corsProxies[i];
-    let url;
-    
-    // Handle different proxy formats
-    if (proxy.includes('allorigins.win')) {
-      url = `${proxy}${encodeURIComponent(withBust(baseUrl))}`;
-    } else if (proxy.includes('codetabs.com')) {
-      url = `${proxy}${withBust(baseUrl)}`;
-    } else {
-      url = `${proxy}${withBust(baseUrl)}`;
+  try {
+    const res = await fetch(url.toString(), {
+      method: 'GET',
+      signal: controller.signal,
+      // mode: 'cors' // default for cross-origin; ok to omit
+      headers: {
+        // DO NOT set User-Agent in browser; it’s forbidden.
+        // You also don't need Cache-Control/Pragma/Expires here.
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} ${res.statusText}`);
     }
-    
+
+    const jsonData = await res.json();
+
+    // Store in IndexedDB (your own helper)
     try {
-      console.log(`🔄 Trying proxy ${i + 1}/${corsProxies.length}: ${proxy}`);
-      const response = await axios.get(url, {
-        timeout: 10000, // 10 second timeout
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
-      
-      const jsonData = response.data;
-      console.log(`✅ Proxy ${i + 1} successful! Data received:`, jsonData);
-      
-      // Store data in IndexedDB for offline access
-      try {
-        await storeHomeData(jsonData, 'allData');
-        console.log('✅ Data stored in IndexedDB');
-      } catch (dbError) {
-        console.warn('⚠️ Could not store data in IndexedDB:', dbError);
-      }
-
-      return jsonData;
-    } catch (error) {
-      console.log(`❌ Proxy ${i + 1} failed:`, error.message);
-      
-      // If this is the last proxy, log the final error
-      if (i === corsProxies.length - 1) {
-        console.error('❌ All CORS proxies failed. Final error:', error);
-      }
+      await storeHomeData(jsonData, 'allData');
+      console.log('✅ Data stored in IndexedDB');
+    } catch (dbError) {
+      console.warn('⚠️ Could not store data in IndexedDB:', dbError);
     }
-  }
-  
-  // Return null so the component can handle the error gracefully
-  return null;
-};
 
+    return jsonData;
+  } catch (err) {
+    console.error('❌ Fetch failed:', err?.message || err);
+    return null;
+  } finally {
+    controller.abort(); // cleanup
+  }
+}
 // Get stored home data from IndexedDB
 export const getStoredHomeData = async () => {
   try {
