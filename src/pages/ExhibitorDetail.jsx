@@ -277,7 +277,7 @@ export default function ExhibitorDetail() {
           }}>
             {/* Back button */}
             <button
-              onClick={() => navigate('/booths')}
+              onClick={() => navigate(-1)}
               style={{
                 width: 48,
                 height: 48,

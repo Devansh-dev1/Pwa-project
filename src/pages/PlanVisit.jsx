@@ -949,7 +949,7 @@ export default function PlanVisit() {
   const [isHiddenArray, setIsHiddenArray] = useState([]);
   const [isSelectedSamples, setSelectedSamples] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [visibleCount, setVisibleCount] = useState(8);
   const [botamSheetOpen, setBotamSheetOpen] = useState(false);
   const [bothamSheetData, setBothamSheetData] = useState({});
   const [addMyDayItem, setAddMyDayItem] = useState([]);
@@ -1368,6 +1368,7 @@ export default function PlanVisit() {
                     {displayedBooths.map((booth, index) => {
                       const isSuggested = boothData.slice(0, 5).includes(booth?.exhibitor?.booth_id);
                       const zoneColor = getZoneBackgroundColor(booth?.id, boothNZone);
+                      if(!booth.company_name) return null;
                       
                       return (
                         <BoothCard
