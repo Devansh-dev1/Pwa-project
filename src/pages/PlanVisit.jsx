@@ -7,6 +7,7 @@ import AppLayout from '../components/AppLayout.jsx';
 import { imagesURL } from '../api/index.js';
 import { useGetPearksData } from '../utils/index.js';
 import moment from 'moment';
+import { getStoredHomeData } from '../api/home.js';
 
 // EXACT MOBILE APP CONSTANTS - Direct from GlobalStyles
 const Padding = {
@@ -718,10 +719,11 @@ const PlanVisitFirstTime = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const existingData = localStorage.getItem('homeData')
-        if (existingData) {
+        const userData = await getStoredHomeData()
+        if (userData) {
           try {
-            const userData = JSON.parse(existingData)
+            setAlldata(userData);
+            // const userData = JSON.parse(existingData)
             setBoothData(userData.show_exhibitor || []);
             setSeminarData(userData.seminars || []);
             setSampleData(userData.samples || []);
@@ -1020,9 +1022,9 @@ export default function PlanVisit() {
   }, []);
 
   // Also mirror mobile hook source of truth so seminars render even if storage keys differ
-  const parksdata = useGetPearksData();
-  useEffect(() => {
-    // prefer loaded state; if empty, hydrate from hook
+  // const parksdata = useGetPearksData();
+  const perkDAtasho=async () => {
+    const parksdata = await getStoredHomeData();
     if ((!seminars || seminars.length === 0) && parksdata?.seminars?.length) {
       setSeminars(parksdata.seminars);
     }
@@ -1035,7 +1037,13 @@ export default function PlanVisit() {
     if ((!boothNZone || boothNZone.length === 0) && parksdata?.Booth_N_Zone?.length) {
       setBoothNZone(parksdata.Booth_N_Zone);
     }
-  }, [parksdata]);
+
+    
+  }
+  useEffect(() => {
+    // prefer loaded state; if empty, hydrate from hook
+    perkDAtasho();
+  }, []);
 
   // Group exhibitors by zone
   const groupedByZone = useMemo(() => {

@@ -514,11 +514,11 @@ export default function Home() {
                            });
 
                          }else if( highlight?.type === 'Location'){
-                           navigate('/highlights-details', {
-                             state: {
-                               highlightsData: highlight,
-                             }
-                           });
+                          //  navigate('/highlights-details', {
+                          //    state: {
+                          //      highlightsData: highlight,
+                          //    }
+                          //  });
 
                          }
                        }}
