@@ -29,6 +29,7 @@ import MyCouponsRewards from './pages/MyCouponsRewards.jsx'
 import ExhibitorDetail from './pages/ExhibitorDetail.jsx'
 import HighlightsDetails from './pages/HighlightsDetails.jsx'
 import GiveawayDetails from './pages/GiveawayDetails.jsx'
+import GiveawayDetailPage from './pages/GiveawayDetailPage.jsx'
 
 function RootRedirect() { /* unchanged */ }
 
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="/profile/coupons" element={<MyCouponsRewards />} />
           <Route path="/highlights-details" element={<HighlightsDetails />} />
           <Route path="/giveaway-details" element={<GiveawayDetails />} />
+          <Route path="/giveaway-detail" element={<GiveawayDetailPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     </BrowserRouter>

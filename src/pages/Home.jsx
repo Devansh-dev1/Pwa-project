@@ -556,34 +556,31 @@ export default function Home() {
                       }}
                       onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                       onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
-                      onClick={()=>{
-                        if(highlight?.type === 'GiveAway'){
-                          navigate('/giveaway-details', {
-                            state: {
-                              giveawayData: highlight,
-                            }
-                          });
-                        }else if( highlight?.type === 'Exhibitor'){
-                          console.log('highlight', highlight?.additional_data?.data?.exhibitor_id);
-                          navigate(`/booths/${highlight?.additional_data?.data?.exhibitor_id}`, {
-                            state: {
-                              exhibitorData: highlight,
-                            }
-                          });
+                                             onClick={()=>{
+                         if(highlight?.type === 'GiveAway'){
+                           navigate('/giveaway-detail', {
+                             state: {
+                               giveawayData: highlight,
+                               fromActivities: false
+                             }
+                           });
+                         }else if( highlight?.type === 'Exhibitor'){
+                           console.log('highlight', highlight?.additional_data?.data?.exhibitor_id);
+                           navigate(`/booths/${highlight?.additional_data?.data?.exhibitor_id}`, {
+                             state: {
+                               exhibitorData: highlight,
+                             }
+                           });
 
-                          navigate(`/booths/${ highlight?.additional_data?.data?.exhibitor_id}`, { 
-                             
-                          });
+                         }else if( highlight?.type === 'Location'){
+                           navigate('/highlights-details', {
+                             state: {
+                               highlightsData: highlight,
+                             }
+                           });
 
-                        }else if( highlight?.type === 'Location'){
-                          // navigate('/highlights-details ', {
-                          //   state: {
-                          //     highlightsData: highlight,
-                          //   }
-                          // });
-
-                        }
-                      }}
+                         }
+                       }}
                       >
                         {highlight?.additional_data?.image ? (
                           <img 
@@ -1047,7 +1044,15 @@ export default function Home() {
                                 fontWeight: 700,
                                 cursor: 'pointer'
                               }}
-                              onClick={() => console.log('View Details clicked', activity)}
+                              onClick={() => {
+                                // Navigate to giveaway details page
+                                navigate('/giveaway-details', {
+                                  state: {
+                                    activityData: activity,
+                                    fromActivities: true
+                                  }
+                                });
+                              }}
                             >
                               View Details
                             </button>
