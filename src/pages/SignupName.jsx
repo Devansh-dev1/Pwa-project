@@ -192,9 +192,11 @@ const  getUserInfos=async()=>{
             <button style={styles.disabledBtn} disabled>Next</button>
           )}
         </div>
+
+        <img src="/assets/cameraAI.svg" alt="" title="" className='cameraAi' />
       </div>
     </div>
-    </AppLayout>
+  </AppLayout>
   )
 }
 

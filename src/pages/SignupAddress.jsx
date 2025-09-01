@@ -31,6 +31,10 @@ export default function SignupAddress() {
     isValidating: false
   })
   const [userInfo, setUserInfo] = useState(null)
+  
+  // Focus state management
+  const [focusedField, setFocusedField] = useState(null)
+  
   const  getUserInfos=async()=>{
     const userInfo = await getUserInfo()
     setUserInfo(userInfo)
@@ -52,16 +56,21 @@ export default function SignupAddress() {
     backBtn: { borderRadius: 18, width: 48, height: 48, border: '1.5px solid #c4c3c2', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer' },
     progressWrap: { margin: '4px 0 12px', height: 10, borderRadius: 10, background: '#F2E9FF', position: 'relative' },
     progressBar: { position: 'absolute', top: 0, left: 0, bottom: 0, width: '70%', borderRadius: 10, background: 'linear-gradient(90deg,#B682F7,#D0A7FF)' },
-    title: { marginTop: 12, fontFamily: 'Nunito-ExtraBold, sans-serif', fontSize: 24, letterSpacing: '-0.4px', color: '#413C3A', fontWeight: 800 },
-    subtitle: { marginTop: 8, color: '#807C7B', fontSize: 14 },
-    label: { color: '#7EC8C9', fontSize: 14, fontFamily: 'Nunito-SemiBold, sans-serif', fontWeight: 600, marginTop: 16 },
+    title: { marginTop: 12, fontSize: 24, letterSpacing: '-0.4px', color: '#413C3A', fontWeight: 800 },
+    subtitle: { marginTop: 8, color: '#807C7B', fontSize: 14, fontWeight: 500 },
+    label: { color: '#7EC8C9', fontSize: 14, fontWeight: 'bold', marginTop: 16 },
+    labelFocused: { color: '#2C4682', fontSize: 14, fontWeight: 'bold', marginTop: 16 },
+    borderWrap: (active) => ({ marginTop: 5, borderRadius: 30, border: '4px solid', borderColor: active ? '#EFE6FB' : '#eef7f7' }),
     inputRow: { height: 52, borderRadius: 40, background: '#EFF7F7', display: 'flex', alignItems: 'center', padding: '0 16px' },
-    input: { flex: 1, fontSize: 14, border: 'none', outline: 'none', background: 'transparent', color: '#80B0B0', fontFamily: 'Nunito-Medium, sans-serif' },
-    fieldPill: { marginTop: 8, borderRadius: 40, border: '1.5px solid #E5F1F1' },
-    consent: { marginTop: '50%', color: '#A8A5A4', textAlign: 'center', fontSize: 12 },
-    nextBtn: { marginTop: 'auto', height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', cursor: 'pointer', fontFamily: 'Nunito-ExtraBold, sans-serif', fontSize: 18 },
-    loadingBtn: { marginTop: 'auto', height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #6b7280 0%, #4b5563 100%)', cursor: 'not-allowed', fontFamily: 'Nunito-ExtraBold, sans-serif', fontSize: 18, opacity: 0.7 },
-    skipBtn: { marginTop: 12, height: 48, width: '100%', borderRadius: 999, border: '1.5px solid #2a46a8', color: '#2a46a8', background: 'transparent', cursor: 'pointer', fontFamily: 'Nunito-ExtraBold, sans-serif', fontSize: 16 },
+    inputRowFocused: { height: 52, borderRadius: 40, background: '#fff', display: 'flex', alignItems: 'center', padding: '0 16px' },
+    input: { flex: 1, fontSize: 14, border: 'none', outline: 'none', background: 'transparent', color: '#80B0B0' },
+    inputFocused: { flex: 1, fontSize: 14, border: 'none', outline: 'none', background: 'transparent', color: '#4A55A2' },
+    fieldPill: { borderRadius: 40, },
+    fieldPillFocused: { borderRadius: 40, border: '1.5px solid #4A55A2' },
+    consent: { marginTop: '38%', color: '#A8A5A4', textAlign: 'center', fontSize: 12, fontWeight: 500 },
+    nextBtn: { marginTop: 'auto', height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', cursor: 'pointer', fontSize: 18, fontWeight: 'bold' },
+    loadingBtn: { marginTop: 'auto', height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #6b7280 0%, #4b5563 100%)', cursor: 'not-allowed', fontSize: 18, opacity: 0.7, fontWeight: 'bold' },
+    skipBtn: { marginTop: 12, height: 48, width: '100%', borderRadius: 999, border: '1.5px solid #2a46a8', color: '#2a46a8', background: 'transparent', cursor: 'pointer', fontSize: 16 },
     error: { marginTop: 6, color: '#ff3333', fontSize: 12, textAlign: 'center' }
   }), [])
 
@@ -427,24 +436,33 @@ export default function SignupAddress() {
     <AppLayout hideBottomNav={true}>
       <div style={styles.screen}>
         <div style={styles.frame}>
+
+        <div className='topProgressBarUpr'>
           <button style={styles.backBtn} onClick={() => navigate(-1)}>
             <img src="/assets/iconchevron-left.png" alt="Back" style={{ width: 24, height: 24 }} />
           </button>
-          <div style={styles.progressWrap}><div style={styles.progressBar} /></div>
+          <div className='progressBarCstm' style={styles.progressWrap}><div style={styles.progressBar} /></div>
+        </div>
+
           <div style={styles.title}>Enter your address!</div>
           <div style={styles.subtitle}>Please Enter your Address below!</div>
 
-          <div style={styles.label}>Address <span style={{ color: '#ff6e95' }}>*</span></div>
+          <div style={focusedField === 'address' ? styles.labelFocused : styles.label}>Address <span style={{ color: '#ff6e95' }}>*</span></div>
           <div style={{ position: 'relative' }}>
-            <div style={styles.fieldPill}>
-              <div style={styles.inputRow}>
+            
+            <div style={styles.borderWrap(focusedField === 'address')}>
+            <div className='signUpAddressInput' style={focusedField === 'address' ? styles.fieldPillFocused : styles.fieldPill}>
+              <div style={focusedField === 'address' ? styles.inputRowFocused : styles.inputRow}>
                 <input 
-                  style={styles.input} 
+                  style={focusedField === 'address' ? styles.inputFocused : styles.input} 
                   value={address} 
                   onChange={(e)=>handleAddressChange(e.target.value)} 
                   placeholder="Enter House No, Building, Area"
+                  onFocus={() => setFocusedField('address')}
+                  onBlur={() => setFocusedField(null)}
                 />
               </div>
+            </div>
             </div>
             {showAddressSuggestions && addressSuggestions.length > 0 && (
               <div style={{ 
@@ -484,8 +502,21 @@ export default function SignupAddress() {
             {/* Debug info */}
           </div>
 
-          <div style={styles.label}>Select City & State <span style={{ color: '#ff6e95' }}>*</span></div>
-          <div style={styles.fieldPill}><div style={styles.inputRow}><input style={styles.input} value={city} onChange={(e)=>handleCityChange(e.target.value)} placeholder="Enter City, State (e.g., Toronto, ON)"/></div></div>
+          <div style={focusedField === 'city' ? styles.labelFocused : styles.label}>Select City & State <span style={{ color: '#ff6e95' }}>*</span></div>
+          <div style={styles.borderWrap(focusedField === 'city')}>
+            <div className='signUpAddressInput' style={focusedField === 'city' ? styles.fieldPillFocused : styles.fieldPill}>
+            <div style={focusedField === 'city' ? styles.inputRowFocused : styles.inputRow}>
+              <input 
+                style={focusedField === 'city' ? styles.inputFocused : styles.input} 
+                value={city} 
+                onChange={(e)=>handleCityChange(e.target.value)} 
+                placeholder="Enter City, State (e.g., Toronto, ON)"
+                onFocus={() => setFocusedField('city')}
+                onBlur={() => setFocusedField(null)}
+              />
+            </div>
+          </div>
+          </div>
 
           {showCitySuggestions && citySuggestions.length > 0 && (
             <div style={{ marginTop: 8, padding: '0 16px', background: '#EFF7F7', borderRadius: 40, border: '1.5px solid #E5F1F1' }}>
@@ -512,8 +543,21 @@ export default function SignupAddress() {
             </div>
           )}
 
-          <div style={styles.label}>Postal Code <span style={{ color: '#ff6e95' }}>*</span></div>
-          <div style={styles.fieldPill}><div style={styles.inputRow}><input style={styles.input} value={postal} onChange={(e)=>handlePostalChange(e.target.value)} placeholder="Enter Postal code (e.g., M5H 2M9)"/></div></div>
+          <div style={focusedField === 'postal' ? styles.labelFocused : styles.label}>Postal Code <span style={{ color: '#ff6e95' }}>*</span></div>
+          <div style={styles.borderWrap(focusedField === 'postal')}>
+            <div className='signUpAddressInput' style={focusedField === 'postal' ? styles.fieldPillFocused : styles.fieldPill}>
+            <div style={focusedField === 'postal' ? styles.inputRowFocused : styles.inputRow}>
+              <input 
+                style={focusedField === 'postal' ? styles.inputFocused : styles.input} 
+                value={postal} 
+                onChange={(e)=>handlePostalChange(e.target.value)} 
+                placeholder="Enter Postal code (e.g., M5H 2M9)"
+                onFocus={() => setFocusedField('postal')}
+                onBlur={() => setFocusedField(null)}
+              />
+            </div>
+          </div>
+          </div>
           
           {postalCodeValidation.error && (
             <div style={{ color: '#ff3333', fontSize: 12, marginTop: 4, marginLeft: 16 }}>
@@ -535,6 +579,9 @@ export default function SignupAddress() {
             Skip Address
           </button> */}
           {error && <div style={styles.error}>{error}</div>}
+
+          <img src="/assets/cameraAI.svg" alt="" title="" className='cameraAi' />
+          
         </div>
       </div>
     </AppLayout>
