@@ -13,21 +13,42 @@ export default function SignupPhone() {
   const [loading, setLoading] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [selectedCountry, setSelectedCountry] = useState({ code: 'US', flag: '🇺🇸', dialCode: '+1' })
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false)
+
+  const countries = [
+    { code: 'US', flag: '🇺🇸', dialCode: '+1', name: 'United States' },
+    { code: 'CA', flag: '🇨🇦', dialCode: '+1', name: 'Canada' },
+    { code: 'GB', flag: '🇬🇧', dialCode: '+44', name: 'United Kingdom' },
+    { code: 'AU', flag: '🇦🇺', dialCode: '+61', name: 'Australia' },
+    { code: 'IN', flag: '🇮🇳', dialCode: '+91', name: 'India' },
+    { code: 'DE', flag: '🇩🇪', dialCode: '+49', name: 'Germany' },
+    { code: 'FR', flag: '🇫🇷', dialCode: '+33', name: 'France' },
+    { code: 'JP', flag: '🇯🇵', dialCode: '+81', name: 'Japan' },
+  ]
 
   const styles = useMemo(() => ({
     screen: { height: 'calc(var(--vh, 1vh) * 100)', display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg, #fff 80%, #eff7f7 100%)' },
     frame: { width: '100%', maxWidth: 430, margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 16px', boxSizing: 'border-box' },
     backBtn: { borderRadius: 18, width: 48, height: 48, border: '1.5px solid #c4c3c2', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer' },
-    title: { marginTop: 24, fontFamily: 'Nunito-ExtraBold, sans-serif', fontSize: 24, color: '#2a2a2a', fontWeight: 800 },
-    subtitle: { marginTop: 7, color: '#6B7280', fontSize: 14 },
-    label: { color: '#2A46A8', fontSize: 14, fontFamily: 'Nunito-SemiBold, sans-serif', marginTop: 24 },
-    borderWrap: { marginTop: 5, borderRadius: 24, border: '4px solid #EFE6FB' },
-    inputRow: { height: 52, borderRadius: 24, border: '1.5px solid #2A46A8', background: '#fff', display: 'flex', alignItems: 'center', padding: '0 12px' },
-    input: { flex: 1, fontSize: 16, border: 'none', outline: 'none', background: 'transparent', color: '#413c3a', fontFamily: 'Nunito-Medium, sans-serif' },
-    nextBtn: { marginTop: 'auto', height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', cursor: 'pointer', fontFamily: 'Nunito-ExtraBold, sans-serif' },
-    loadingBtn: { marginTop: 'auto', height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #6b7280 0%, #4b5563 100%)', cursor: 'not-allowed', fontFamily: 'Nunito-ExtraBold, sans-serif', opacity: 0.7 },
-    skipBtn: { marginTop: 12, height: 48, width: '100%', borderRadius: 999, border: '1.5px solid #2a46a8', color: '#2a46a8', background: 'transparent', cursor: 'pointer', fontFamily: 'Nunito-ExtraBold, sans-serif', fontSize: 16 },
-    error: { marginTop: 6, color: '#ff3333', fontSize: 12, textAlign: 'center' }
+    title: { marginTop: 24, fontSize: 24, color: '#2a2a2a', fontWeight: 800 },
+    subtitle: { marginTop: 7, color: '#6B7280', fontSize: 14, fontWeight:500 },
+    label: { color: '#2A46A8', fontSize: 14, marginTop: 24, fontWeight:700, position: 'relative' },
+    borderWrap: { marginTop: 5, borderRadius: 27, border: '4px solid #EFE6FB' },
+    inputRow: { height: 52, borderRadius: 24, border: '1.5px solid #2A46A8', background: '#fff', display: 'flex', alignItems: 'center', padding: '0 12px', position: 'relative' },
+    input: { flex: 1, fontSize: 16, border: 'none', outline: 'none', background: 'transparent', color: '#413c3a', marginLeft: 8 },
+    countrySelector: { display: 'flex', alignItems: 'center', cursor: 'pointer', padding: '4px 8px', borderRadius: 8, border: 'none', background: 'transparent' },
+    flag: { fontSize: 20, marginRight: 4 },
+    chevron: { fontSize: 12, color: '#2A46A8', marginLeft: 4 },
+    dropdown: { position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #2A46A8', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 1000, maxHeight: 200, overflowY: 'auto' },
+    dropdownItem: { padding: '12px 16px', display: 'flex', alignItems: 'center', cursor: 'pointer', borderBottom: '1px solid #f0f0f0' },
+    dropdownItemText: { marginLeft: 8, fontSize: 14, color: '#413c3a' },
+    nextBtn: { marginTop: 'auto', height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)', cursor: 'pointer', fontWeight: 800 },
+    loadingBtn: { marginTop: 'auto', height: 56, width: '100%', borderRadius: 999, border: 'none', color: '#fff', background: 'linear-gradient(90deg, #6b7280 0%, #4b5563 100%)', cursor: 'not-allowed', opacity: 0.7, fontWeight: 800 },
+    skipBtn: { marginTop: 12, height: 48, width: '100%', borderRadius: 999, border: '1.5px solid #2a46a8', color: '#2a46a8', background: 'transparent', cursor: 'pointer', fontSize: 16, fontWeight: 800 },
+    error: { marginTop: 6, color: '#ff3333', fontSize: 12, textAlign: 'center' },
+    progressWrap: { margin: '4px 0 12px', height: 10, borderRadius: 10, background: '#F2E9FF', position: 'relative' },
+    progressBar: { position: 'absolute', top: 0, left: 0, bottom: 0, width: '70%', borderRadius: 10, background: 'linear-gradient(90deg,#B682F7,#D0A7FF)' },
   }), [])
 
   const onNext = async () => {
@@ -104,16 +125,52 @@ export default function SignupPhone() {
     <AppLayout hideBottomNav={true}>
       <div style={styles.screen}>
         <div style={styles.frame}>
+
+        <div className='topProgressBarUpr'>
           <button style={styles.backBtn} onClick={() => navigate(-1)}>
             <img src="/assets/iconchevron-left.png" alt="Back" style={{ width: 24, height: 24 }} />
           </button>
-          <div style={styles.title}>Enter phone number!</div>
-          <div style={styles.subtitle}>We’ll send you an OTP to verify</div>
+          <div className='progressBarCstm' style={styles.progressWrap}><div style={styles.progressBar} /></div>
+        </div> 
 
-          <div style={styles.label}>Phone Number</div>
-          <div style={styles.borderWrap}>
+          <div style={styles.title}>Enter phone number!</div>
+          <div style={styles.subtitle}>Please Enter your phone number below, we'll send you otp to verify!</div>
+
+          <div style={styles.label}>Phone number</div>
+          <div className='phoneNumInput' style={styles.borderWrap}>
             <div style={styles.inputRow}>
-              <input style={styles.input} value={phone} onChange={(e)=>setPhone(e.target.value)} placeholder="Enter phone number" />
+              <button 
+                style={styles.countrySelector}
+                onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+              >
+                <span style={styles.flag}>{selectedCountry.flag}</span>
+                <span style={styles.chevron}>▼</span>
+              </button>
+              
+              {showCountryDropdown && (
+                <div style={styles.dropdown}>
+                  {countries.map((country) => (
+                    <div
+                      key={country.code}
+                      style={styles.dropdownItem}
+                      onClick={() => {
+                        setSelectedCountry(country)
+                        setShowCountryDropdown(false)
+                      }}
+                    >
+                      <span style={styles.flag}>{country.flag}</span>
+                      <span style={styles.dropdownItemText}>{country.name} ({country.dialCode})</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <input 
+                style={styles.input} 
+                value={phone} 
+                onChange={(e)=>setPhone(e.target.value)} 
+                placeholder="Enter phone number" 
+              />
             </div>
           </div>
 
