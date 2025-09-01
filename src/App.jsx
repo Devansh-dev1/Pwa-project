@@ -27,6 +27,8 @@ import LikedItems from './pages/LikedItems.jsx'
 import MyFamily from './pages/MyFamily.jsx'
 import MyCouponsRewards from './pages/MyCouponsRewards.jsx'
 import ExhibitorDetail from './pages/ExhibitorDetail.jsx'
+import HighlightsDetails from './pages/HighlightsDetails.jsx'
+import GiveawayDetails from './pages/GiveawayDetails.jsx'
 
 function RootRedirect() { /* unchanged */ }
 
@@ -61,6 +63,8 @@ export default function App() {
           <Route path="/profile/liked-items" element={<LikedItems />} />
           <Route path="/profile/family" element={<MyFamily />} />
           <Route path="/profile/coupons" element={<MyCouponsRewards />} />
+          <Route path="/highlights-details" element={<HighlightsDetails />} />
+          <Route path="/giveaway-details" element={<GiveawayDetails />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     </BrowserRouter>

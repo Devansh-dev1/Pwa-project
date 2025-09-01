@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout.jsx';
 import { imagesURL } from '../api/index.js';
+import { getStoredHomeData } from '../api/home.js';
 
 // Helper function to build image URLs
 const buildImg = (key) => {
@@ -92,13 +93,15 @@ export default function ExhibitorDetail() {
   const [scrollY, setScrollY] = useState(0);
   const [isHalfScrolled, setIsHalfScrolled] = useState(false);
 
-  useEffect(() => {
-    // If no booth data from navigation, try to load from localStorage
+
+  const getBoothData =async () => {
+
     if (id) {
-      const existingData = localStorage.getItem('homeData');
+      // const existingData = localStorage.getItem('homeData');
+      const existingData = await getStoredHomeData();
       if (existingData) {
         try {
-          const userData = JSON.parse(existingData);
+          const userData =existingData// JSON.parse(existingData);
           const foundBooth = userData.show_exhibitor?.find(
             exhibitor => exhibitor.exhibitor_id === id
           );
@@ -113,6 +116,11 @@ export default function ExhibitorDetail() {
       }
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    // If no booth data from navigation, try to load from localStorage
+    getBoothData()
   }, []);
 
   // Handle scroll events

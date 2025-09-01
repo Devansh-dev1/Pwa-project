@@ -314,7 +314,6 @@ export default function ProfileInformation() {
       title={tooltip}
       onMouseEnter={(e) => {
         e.target.style.transform = 'scale(1.1)';
-        e.target.style.backgroundColor = '#f0f0f0';
       }}
       onMouseLeave={(e) => {
         e.target.style.transform = 'scale(1)';

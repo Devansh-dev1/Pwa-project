@@ -7,7 +7,7 @@ import useStore from '../store/useStore.js'
 import AppLayout from '../components/AppLayout.jsx'
 import moment from 'moment'
 import { imagesURL } from '../api/index.js'
-import { handleAllData } from '../api/home.js'
+import { handleAllData, getStoredHomeData } from '../api/home.js'
 import { getUserInfo as getIndexedDBUserInfo } from '../utils/indexedDB.js'
 import GlobalLoader from '../components/GlobalLoader.jsx'
 
@@ -70,34 +70,13 @@ const QuickActionCard = ({ title, icon, onClick }) => (
 
 export default function Home() {
   const navigate = useNavigate()
-  const { userInfo, clearUserData, setUserInfo } = useStore()
-  const [loading, setLoading] = useState(true)
-  const [homeData, setHomeData] = useState(null)
-  const [dataLoading, setDataLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [localUserInfo, setLocalUserInfo] = useState(null)
-  const [selectedTip, setSelectedTip] = useState(null)
-  const [showTipModal, setShowTipModal] = useState(false)
 
-   const handleAllDataWithFetch = async () => {
-    const baseUrl = `https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json`;
-    
-    try {
-      
-      fetch('https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json')
-      .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        return response.json();
-      })
-      .then(json => setData(json))
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-    } catch (fetchError) {
-      console.log('⚠️ Fetch failed, trying CORS proxy...');
-    }
-    
-    
-  };
+  const [loading, setLoading] = useState(false)
+  const [homeData, setHomeData] = useState(null)
+ 
+  const [localUserInfo, setLocalUserInfo] = useState(null)
+  const [visibleBooths, setVisibleBooths] = useState({})
+
 
   // Get user info from IndexedDB
   const getUserInfoFromDB = async () => {
@@ -131,45 +110,30 @@ export default function Home() {
   useEffect(() => {
     const initializeHome = async () => {
       try {
+        setLoading(true)
        
-        // const token = await getToken()
-        // if (!token) {
-        //   navigate('/welcome', { replace: true })
-        //   return
-        // }
-
-        // Try to get user info if not already loaded
-        // if (!userInfo || !userInfo.auto_id) {
-        //   try {
-        //     const fetchedUserInfo = await getUserInfo()
-        //     setUserInfo(fetchedUserInfo)
-        //   } catch (error) {
-        //     console.warn('Could not fetch user info:', error)
-        //   }
-        // }
-
-        // Get user info from IndexedDB
         await getUserInfoFromDB()
 
-        // Load existing data from localStorage if available
-        const existingData = localStorage.getItem('homeData')
-        if (existingData) {
-          try {
-            const parsedData = JSON.parse(existingData)
-            setHomeData(parsedData)
-            console.log('✅ Loaded existing data from localStorage:', parsedData)
-          } catch (parseError) {
-           
+        // First try to get stored data from IndexedDB
+        let storedData = await getStoredHomeData()
+        
+        if (storedData) {
+          setHomeData(storedData)
+          console.log('✅ Loaded existing data from IndexedDB:', storedData)
+        } else {
+          // If no stored data, fetch fresh data and store it
+          console.log('🔄 No stored data found, fetching fresh data...')
+          const freshData = await handleAllData()
+          
+          if (freshData) {
+            setHomeData(freshData)
+            console.log('✅ Fresh data fetched and stored:', freshData)
+          } else {
+            console.error('❌ Failed to fetch home data')
           }
-        }else{
-          const parsedData = await handleAllData()
-          localStorage.setItem('homeData', JSON.stringify(parsedData))
-          setHomeData(parsedData)
-
         }
       } catch (error) {
         console.error('Error initializing home:', error)
-      
       } finally {
         setLoading(false)
       }
@@ -178,7 +142,219 @@ export default function Home() {
     initializeHome()
   }, [navigate])
 
- 
+  // Listen for data-version updates from Firebase hook and refresh local state
+  useEffect(() => {
+    const onVersionUpdate = async () => {
+      try {
+        const storedData = await getStoredHomeData()
+        if (storedData) {
+          setHomeData(storedData)
+        }
+      } catch (e) {
+        console.log('Error updating home data after version change:', e)
+      }
+    }
+    window.addEventListener('data-version-updated', onVersionUpdate)
+    return () => window.removeEventListener('data-version-updated', onVersionUpdate)
+  }, [])
+
+  // Memoized function to create sections for the sponsor, partners, and exhibitor data
+  const sections = useMemo(() => {
+    if (!homeData) return [];
+    
+    return [
+      {
+        key: 'Sponsor',
+        title: `${moment().format('YYYY')} Sponsors`,
+        data: homeData.sponsor || [],
+        logoPath: item => item.logo,
+      },
+      {
+        key: 'Partners',
+        title: `${moment().format('YYYY')} Partners`,
+        data: homeData.partners || [],
+        logoPath: item => item.logo,
+      },
+      {
+        key: 'Exhibitor',
+        title: `${moment().format('YYYY')} Participating Brands`,
+        data: homeData.show_exhibitor?.slice().sort(() => Math.random() - 0.5) || [], // shuffle
+        logoPath: item => item?.company?.[0]?.logo,
+      },
+    ];
+  }, [homeData]);
+
+  const filteredSections = useMemo(() => {
+    return sections
+      .map(section => {
+        const data = section.data || [];
+
+        if (section.key === 'Exhibitor') {
+          // For Exhibitor, show all participating brands/exhibitors
+          return data.length > 0 ? section : null;
+        }
+
+        // For all other sections, keep them only if data is not empty
+        return data.length > 0 ? section : null;
+      })
+      .filter(Boolean); // Remove null entries
+  }, [sections]);
+
+  // Function to show less booths
+  const showLessBooths = (zone) => {
+    setVisibleBooths(prev => ({
+      ...prev,
+      [zone]: 9,
+    }));
+  };
+
+  // Function to show more booths
+  const showMoreBooths = (zone) => {
+    setVisibleBooths(prev => ({
+      ...prev,
+      [zone]: (prev[zone] || 9) + 9,
+    }));
+  };
+
+  // Component to render logos section
+  const RenderLogos = ({ key, title, data, logoPath }, index) => {
+    const boothsToShow = visibleBooths[key] || 9;
+    
+    return (
+      <div key={`${key}-${index}`} style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 16 }}>
+          <h3 style={{ 
+            margin: '0 0 8px', 
+            fontSize: 18, 
+            color: '#1E1F24',
+            marginTop: title.includes('Sponsors') ? 5 : 15 
+          }}>
+            {title}
+          </h3>
+          <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+            {key === 'Sponsor' && 'Thank you to our amazing sponsors'}
+            {key === 'Partners' && 'Our valued partners supporting this event'}
+            {key === 'Exhibitor' && 'Discover all participating brands and exhibitors'}
+          </p>
+        </div>
+        
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
+          gap: 16,
+          marginBottom: 16
+        }}>
+          {data?.slice(0, boothsToShow)?.map((item, index) => {
+            const logo = logoPath(item);
+            return (
+              <div 
+                key={index} 
+                style={{
+                  background: '#fff',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: 12,
+                  padding: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '80px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                onClick={() => {
+                  if (key === 'Exhibitor') {
+                    console.log('Navigate to exhibitor details:', item);
+                    // Navigate to exhibitor details
+                  } else {
+                    console.log('Navigate to sponsor/partner details:', item);
+                    // Navigate to sponsor/partner details
+                  }
+                }}
+              >
+                {logo ? (
+                  <img 
+                    src={`${imagesURL}${logo}/public`}
+                    alt="Logo"
+                    style={{ 
+                      maxWidth: '100%', 
+                      maxHeight: '50px', 
+                      objectFit: 'contain' 
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <span 
+                  style={{ 
+                    fontSize: 24, 
+                    color: '#9ca3af',
+                    display: logo ? 'none' : 'flex'
+                  }}
+                >
+                  🏢
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* Load More/Less buttons */}
+        <div style={{ textAlign: 'center' }}>
+          {data.length > boothsToShow ? (
+            <button
+              style={{
+                background: 'linear-gradient(90deg, #2a46a8 0%, #17275c 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 20,
+                padding: '12px 24px',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={() => showMoreBooths(key)}
+              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+            >
+              Load More
+            </button>
+          ) : (
+            boothsToShow > 9 && (
+              <button
+                style={{
+                  background: 'transparent',
+                  color: '#4A57C7',
+                  border: '2px solid #C9D3FF',
+                  borderRadius: 20,
+                  padding: '12px 24px',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={() => showLessBooths(key)}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#4A57C7';
+                  e.target.style.color = '#fff';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = '#4A57C7';
+                }}
+              >
+                Load Less
+              </button>
+            )
+          )}
+        </div>
+      </div>
+    );
+  };
 
   if (loading) {
     return <GlobalLoader visible={true} />
@@ -354,6 +530,7 @@ export default function Home() {
               )}
 
               {/* Highlights Section */}
+              {/* Highlights Section */}
               {homeData.Highlight && homeData.Highlight.length > 0 && (
                 <div style={{ marginBottom: 24 }}>
                   <div style={{ marginBottom: 16 }}>
@@ -379,6 +556,34 @@ export default function Home() {
                       }}
                       onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                       onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                      onClick={()=>{
+                        if(highlight?.type === 'GiveAway'){
+                          navigate('/giveaway-details', {
+                            state: {
+                              giveawayData: highlight,
+                            }
+                          });
+                        }else if( highlight?.type === 'Exhibitor'){
+                          console.log('highlight', highlight?.additional_data?.data?.exhibitor_id);
+                          navigate(`/booths/${highlight?.additional_data?.data?.exhibitor_id}`, {
+                            state: {
+                              exhibitorData: highlight,
+                            }
+                          });
+
+                          navigate(`/booths/${ highlight?.additional_data?.data?.exhibitor_id}`, { 
+                             
+                          });
+
+                        }else if( highlight?.type === 'Location'){
+                          // navigate('/highlights-details ', {
+                          //   state: {
+                          //     highlightsData: highlight,
+                          //   }
+                          // });
+
+                        }
+                      }}
                       >
                         {highlight?.additional_data?.image ? (
                           <img 
@@ -465,9 +670,14 @@ export default function Home() {
                         onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                         onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                         onClick={() => {
-                          // Show tip details in a modal or expand the tip
-                          setSelectedTip(tip);
-                          setShowTipModal(true);
+                          // Navigate to TipsDetails page like React Native version
+                          navigate('/tips', {
+                            state: {
+                              tipData: tip,
+                              backColor: tipColor,
+                              fromList: true
+                            }
+                          });
                         }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
@@ -507,17 +717,7 @@ export default function Home() {
                           }}>
                             {tip.description ? tip.description.replace(/<[^>]*>/g, '') : 'Tip description'}
                           </p>
-                          
-                          {/* Click indicator */}
-                          <div style={{
-                            marginTop: 12,
-                            textAlign: 'center',
-                            fontSize: 12,
-                            color: `${tipColor}80`,
-                            fontWeight: 500
-                          }}>
-                            Click to see details →
-                          </div>
+
                         </div>
                       );
                     })}
@@ -861,71 +1061,30 @@ export default function Home() {
 
             
 
-              {/* Sponsors & Partners Section */}
-              {(homeData.sponsor || homeData.partners || homeData.show_exhibitor) && (
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>
-                      {moment().format('YYYY')} Sponsors & Partners
-                    </h3>
-                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
-                      Thank you to our amazing sponsors and partners
-                    </p>
-                  </div>
-                  
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-                    gap: 16 
-                  }}>
-                    {[
-                      ...(homeData.sponsor || []),
-                      ...(homeData.partners || []),
-                      ...(homeData.show_exhibitor?.filter(item => item.is_featured === 1) || [])
-                    ].slice(0, 8).map((item, index) => (
-                      <div key={index} style={{
-                        background: '#fff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: 12,
-                        padding: 16,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: '80px',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-                      onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
-                      >
-                        {item?.logo || item?.company?.[0]?.logo ? (
-                          <img 
-                            // src={item.logo || item.company[0].logo} 
-                            src={`${imagesURL}${item.logo || item.company[0].logo}/public`} 
-                            alt="Logo"
-                            style={{ 
-                              maxWidth: '100%', 
-                              maxHeight: '50px', 
-                              objectFit: 'contain' 
-                            }}
-                          />
-                        ) : (
-                          <span style={{ fontSize: 24, color: '#9ca3af' }}>🏢</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+              {/* Enhanced Sponsors & Partners Section */}
+              {filteredSections.length > 0 && (
+                <div style={{ 
+                  background: '#fff', 
+                  border: '1px solid #e5e7eb', 
+                  borderRadius: 12, 
+                  padding: 20,
+                  marginBottom: 24 
+                }}>
+                  {filteredSections?.map(RenderLogos)}
                 </div>
               )}
 
               {/* Products Section */}
               {homeData.product && homeData.product.length > 0 && (
                 <div style={{ marginBottom: 32 }}>
-                  <div style={{ marginBottom: 12 }}>
-                    <h3 style={{ margin: '0 0 8px', fontSize: 22, color: '#1E1F24' }}>Recommended Products</h3>
-                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280', maxWidth: 720 }}>
-                      Manage the list of recommended products to showcase to users based on preferences, trends, or related categories.
-                    </p>
+                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h3 style={{ margin: '0 0 8px', fontSize: 22, color: '#1E1F24' }}>Recommended Products</h3>
+                      <p style={{ margin: 0, fontSize: 14, color: '#6B7280', maxWidth: 720 }}>
+                        Manage the list of recommended products to showcase to users based on preferences, trends, or related categories.
+                      </p>
+                    </div>
+                   
                   </div>
 
                   <div style={{
@@ -1092,186 +1251,7 @@ export default function Home() {
             </>
           )}
 
-          {/* Tip Detail Modal */}
-          {showTipModal && selectedTip && (
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              zIndex: 1000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '20px'
-            }}>
-              <div style={{
-                background: '#fff',
-                borderRadius: '20px',
-                maxWidth: '500px',
-                width: '100%',
-                maxHeight: '90vh',
-                overflow: 'auto',
-                position: 'relative'
-              }}>
-                {/* Close button */}
-                <button
-                  onClick={() => setShowTipModal(false)}
-                  style={{
-                    position: 'absolute',
-                    top: '16px',
-                    right: '16px',
-                    background: 'rgba(0, 0, 0, 0.1)',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    fontSize: '18px',
-                    color: '#666'
-                  }}
-                >
-                  ✕
-                </button>
 
-                {/* Tip content */}
-                <div style={{ padding: '24px' }}>
-                  {/* Header */}
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '16', 
-                    marginBottom: '20',
-                    flexWrap: 'wrap'
-                  }}>
-                    <h2 style={{ 
-                      margin: 0, 
-                      fontSize: '24px', 
-                      color: '#1E1F24',
-                      flex: 1,
-                      minWidth: '200px'
-                    }}>
-                      {selectedTip.title}
-                    </h2>
-                    {selectedTip.logo && (
-                      <div style={{
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '50%',
-                        border: '3px solid #e5e7eb',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                      }}>
-                        <img 
-                          src={`${imagesURL}${selectedTip.logo}/public`}
-                          alt="Tip"
-                          style={{ width: '32px', height: '32px', objectFit: 'contain' }}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Description */}
-                  <div style={{ marginBottom: '24px' }}>
-                    <p style={{ 
-                      margin: 0, 
-                      fontSize: '16px', 
-                      color: '#4B5563', 
-                      lineHeight: '1.6',
-                      whiteSpace: 'pre-wrap'
-                    }}>
-                      {selectedTip.description ? 
-                        selectedTip.description.replace(/<[^>]*>/g, '') : 
-                        'No description available for this tip.'
-                      }
-                    </p>
-                  </div>
-
-                  {/* Additional details if available */}
-                  {selectedTip.additional_data && (
-                    <div style={{ 
-                      background: '#f8f9fa', 
-                      borderRadius: '12px', 
-                      padding: '16px',
-                      marginBottom: '20px'
-                    }}>
-                      <h4 style={{ 
-                        margin: '0 0 12px', 
-                        fontSize: '18px', 
-                        color: '#1E1F24' 
-                      }}>
-                        Additional Information
-                      </h4>
-                      {Object.entries(selectedTip.additional_data).map(([key, value]) => {
-                        if (key !== 'description' && key !== 'name' && key !== 'title' && value) {
-                          return (
-                            <div key={key} style={{ marginBottom: '8px' }}>
-                              <strong style={{ color: '#374151' }}>
-                                {key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')}:
-                              </strong>
-                              <span style={{ color: '#6B7280', marginLeft: '8px' }}>
-                                {typeof value === 'string' ? value : JSON.stringify(value)}
-                              </span>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })}
-                    </div>
-                  )}
-
-                  {/* Action buttons */}
-                  <div style={{ 
-                    display: 'flex', 
-                    gap: '12px', 
-                    justifyContent: 'flex-end',
-                    flexWrap: 'wrap'
-                  }}>
-                    <button
-                      onClick={() => setShowTipModal(false)}
-                      style={{
-                        padding: '12px 24px',
-                        background: '#f3f4f6',
-                        color: '#374151',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Close
-                    </button>
-                    <button
-                      onClick={() => {
-                        // You can add more actions here like sharing, bookmarking, etc.
-                        console.log('Tip action clicked:', selectedTip);
-                      }}
-                      style={{
-                        padding: '12px 24px',
-                        background: '#3B82F6',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Save Tip
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
         
 

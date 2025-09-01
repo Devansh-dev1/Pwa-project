@@ -386,9 +386,9 @@ export default function SignIn() {
         <button className='magicLinkBtn' type="submit" disabled={loading || !email}  style={{ cursor: loading || !email ? 'not-allowed' : 'pointer' }}>
           {loading ? 'Sending…' : 'Send Magic Link'}
         </button>
-        <button className='signUpLinkBtn'  type="button" onClick={() => navigate('/signup/drivers-license')}>
+        {/* <button className='signUpLinkBtn'  type="button" onClick={() => navigate('/signup/drivers-license')}>
             Sign Up 
-        </button>
+        </button> */}
         {/* </button> */}
 
         <div className='proceedUpr'>

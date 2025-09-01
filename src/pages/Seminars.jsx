@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { imagesURL } from '../api/index.js';
-import { handleAllData } from '../api/home.js';
+import { handleAllData, getStoredHomeData } from '../api/home.js';
 import AppLayout from '../components/AppLayout.jsx';
 import GlobalLoader from '../components/GlobalLoader.jsx';
 import moment from 'moment';
@@ -15,19 +15,20 @@ export default function Seminars() {
   useEffect(() => {
     const loadSeminars = async () => {
       try {
-        // Try to get existing data from localStorage
-        const existingData = localStorage.getItem('homeData');
-        if (existingData) {
-          const parsedData = JSON.parse(existingData);
-          if (parsedData.seminars && parsedData.seminars.length > 0) {
-            setSeminars(parsedData.seminars);
-          }
+        // Try to get stored data from IndexedDB first
+        const storedData = await getStoredHomeData();
+        
+        if (storedData && storedData.seminars && storedData.seminars.length > 0) {
+          setSeminars(storedData.seminars);
+          console.log('✅ Loaded seminars from IndexedDB:', storedData.seminars);
         } else {
-          // Fetch fresh data if not available
+          // Fetch fresh data if not available in IndexedDB
+          console.log('🔄 No stored data found, fetching fresh data...');
           const freshData = await handleAllData();
-          if (freshData.seminars && freshData.seminars.length > 0) {
+          
+          if (freshData && freshData.seminars && freshData.seminars.length > 0) {
             setSeminars(freshData.seminars);
-            localStorage.setItem('homeData', JSON.stringify(freshData));
+            console.log('✅ Fresh seminars data fetched:', freshData.seminars);
           }
         }
       } catch (error) {
