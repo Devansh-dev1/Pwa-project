@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { imagesURL } from '../api/index.js';
-import { handleAllData } from '../api/home.js';
+import { handleAllData, getStoredHomeData } from '../api/home.js';
 import AppLayout from '../components/AppLayout.jsx';
 import GlobalLoader from '../components/GlobalLoader.jsx';
 
@@ -14,19 +14,20 @@ export default function Speakers() {
   useEffect(() => {
     const loadSpeakers = async () => {
       try {
-        // Try to get existing data from localStorage
-        const existingData = localStorage.getItem('homeData');
-        if (existingData) {
-          const parsedData = JSON.parse(existingData);
-          if (parsedData.speaker && parsedData.speaker.length > 0) {
-            setSpeakers(parsedData.speaker);
-          }
+        // Try to get stored data from IndexedDB first
+        const storedData = await getStoredHomeData();
+        
+        if (storedData && storedData.speaker && storedData.speaker.length > 0) {
+          setSpeakers(storedData.speaker);
+          console.log('✅ Loaded speakers from IndexedDB:', storedData.speaker);
         } else {
-          // Fetch fresh data if not available
+          // Fetch fresh data if not available in IndexedDB
+          console.log('🔄 No stored data found, fetching fresh data...');
           const freshData = await handleAllData();
-          if (freshData.speaker && freshData.speaker.length > 0) {
+          
+          if (freshData && freshData.speaker && freshData.speaker.length > 0) {
             setSpeakers(freshData.speaker);
-            localStorage.setItem('homeData', JSON.stringify(freshData));
+            console.log('✅ Fresh speakers data fetched:', freshData.speaker);
           }
         }
       } catch (error) {

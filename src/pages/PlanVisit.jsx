@@ -5,6 +5,7 @@ import { fetchPersonalizedData } from '../api/auth.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import AppLayout from '../components/AppLayout.jsx';
 import { imagesURL } from '../api/index.js';
+import { getStoredHomeData } from '../api/home.js';
 import moment from 'moment';
 
 // EXACT MOBILE APP CONSTANTS - Direct from GlobalStyles
@@ -743,16 +744,16 @@ const PlanVisitFirstTime = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const existingData = localStorage.getItem('homeData')
-        if (existingData) {
-          try {
-            const userData = JSON.parse(existingData)
-            setBoothData(userData.show_exhibitor || []);
-            setSeminarData(userData.seminars || []);
-            setSampleData(userData.samples || []);
-          } catch (error) {
-            console.error('Error parsing homeData:', error);
-          }
+        
+        // Get data from IndexedDB
+        const storedData = await getStoredHomeData();
+        if (storedData) {
+          setBoothData(storedData.show_exhibitor || []);
+          setSeminarData(storedData.seminars || []);
+          setSampleData(storedData.samples || []);
+          console.log('✅ Loaded plan visit data from IndexedDB:', storedData);
+        } else {
+          console.log('⚠️ No stored plan visit data found in IndexedDB');
         }
     
         
@@ -1070,43 +1071,40 @@ export default function PlanVisit() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Get data from localStorage
-        const existingData = localStorage.getItem('homeData');
-        if (existingData) {
-          try {
-            const userData = JSON.parse(existingData);
-            if (userData) {
-              setShowExhibitor(userData.show_exhibitor || []);
-              setBoothNZone(userData.Booth_N_Zone || []);
-              setSeminars(userData.seminars || []);
-              setSamples(userData.sample || []);
-              
-              // Extract categories from exhibitor data
-              const allCategories = [];
-              userData.show_exhibitor?.forEach(booth => {
-                if (booth.categories && Array.isArray(booth.categories)) {
-                  booth.categories.forEach(cat => {
-                    if (cat.name) {
-                      const existingCategory = allCategories.find(c => c.name === cat.name);
-                      if (existingCategory) {
-                        existingCategory.fulldata.push(booth);
-                      } else {
-                        allCategories.push({
-                          id: cat.id,
-                          name: cat.name,
-                          fulldata: [booth]
-                        });
-                      }
-                    }
-                  });
+        // Get data from IndexedDB
+        const storedData = await getStoredHomeData();
+        
+        if (storedData) {
+          setShowExhibitor(storedData.show_exhibitor || []);
+          setBoothNZone(storedData.Booth_N_Zone || []);
+          setSeminars(storedData.seminars || []);
+          setSamples(storedData.sample || []);
+          
+          // Extract categories from exhibitor data
+          const allCategories = [];
+          storedData.show_exhibitor?.forEach(booth => {
+            if (booth.categories && Array.isArray(booth.categories)) {
+              booth.categories.forEach(cat => {
+                if (cat.name) {
+                  const existingCategory = allCategories.find(c => c.name === cat.name);
+                  if (existingCategory) {
+                    existingCategory.fulldata.push(booth);
+                  } else {
+                    allCategories.push({
+                      id: cat.id,
+                      name: cat.name,
+                      fulldata: [booth]
+                    });
+                  }
                 }
               });
-              
-              setCategories(allCategories.sort((a, b) => a.name.localeCompare(b.name)));
             }
-          } catch (parseError) {
-            console.warn('Could not parse existing data from localStorage:', parseError);
-          }
+          });
+          
+          setCategories(allCategories.sort((a, b) => a.name.localeCompare(b.name)));
+          console.log('✅ Loaded plan visit data from IndexedDB:', storedData);
+        } else {
+          console.log('⚠️ No stored plan visit data found in IndexedDB');
         }
       } catch (error) {
         console.error('Error loading plan visit data:', error);

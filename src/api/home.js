@@ -1,9 +1,9 @@
 import axiosInstance, { EVENT_ID } from './index.js';
-import {   } from '../utils/indexedDB.js';
+import { storeHomeData, getHomeData, clearAllHomeData } from '../utils/indexedDB.js';
 import axios from 'axios';
 
 // Get all home page data (booths, events, etc.)
-export const handleAllData = async () => {
+export const handleAllData = async (forceFresh = false) => {
   // Use more reliable CORS proxies
   const corsProxies = [
     'https://api.allorigins.win/raw?url=',
@@ -14,6 +14,12 @@ export const handleAllData = async () => {
   ];
   
   const baseUrl = `https://d9wbof3q09tw.cloudfront.net/${EVENT_ID}.json`;
+
+  const withBust = (url) => {
+    if (!forceFresh) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    return `${url}${sep}cb=${Date.now()}`;
+  };
   
   console.log('🔄 Starting data fetch with multiple CORS proxies...');
 
@@ -24,11 +30,11 @@ export const handleAllData = async () => {
     
     // Handle different proxy formats
     if (proxy.includes('allorigins.win')) {
-      url = `${proxy}${encodeURIComponent(baseUrl)}`;
+      url = `${proxy}${encodeURIComponent(withBust(baseUrl))}`;
     } else if (proxy.includes('codetabs.com')) {
-      url = `${proxy}${baseUrl}`;
+      url = `${proxy}${withBust(baseUrl)}`;
     } else {
-      url = `${proxy}${baseUrl}`;
+      url = `${proxy}${withBust(baseUrl)}`;
     }
     
     try {
@@ -36,7 +42,10 @@ export const handleAllData = async () => {
       const response = await axios.get(url, {
         timeout: 10000, // 10 second timeout
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       });
       
@@ -45,7 +54,7 @@ export const handleAllData = async () => {
       
       // Store data in IndexedDB for offline access
       try {
-        // await storeUserData(jsonData);
+        await storeHomeData(jsonData, 'allData');
         console.log('✅ Data stored in IndexedDB');
       } catch (dbError) {
         console.warn('⚠️ Could not store data in IndexedDB:', dbError);
@@ -64,6 +73,38 @@ export const handleAllData = async () => {
   
   // Return null so the component can handle the error gracefully
   return null;
+};
+
+// Get stored home data from IndexedDB
+export const getStoredHomeData = async () => {
+  try {
+    console.log('🔄 Retrieving stored home data from IndexedDB...');
+    const storedData = await getHomeData('allData');
+    
+    if (storedData) {
+      console.log('✅ Stored home data retrieved successfully:', storedData);
+      return storedData;
+    } else {
+      console.log('⚠️ No stored home data found in IndexedDB');
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Error retrieving stored home data:', error);
+    return null;
+  }
+};
+
+// Clear all stored home data from IndexedDB
+export const clearStoredHomeData = async () => {
+  try {
+    console.log('🔄 Clearing all stored home data from IndexedDB...');
+    await clearAllHomeData();
+    console.log('✅ All stored home data cleared successfully');
+    return true;
+  } catch (error) {
+    console.error('❌ Error clearing stored home data:', error);
+    return false;
+  }
 };
 
 // Alternative function using fetch with no-cors mode (limited but might work)

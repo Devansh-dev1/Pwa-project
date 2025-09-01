@@ -7,7 +7,7 @@ import useStore from '../store/useStore.js'
 import AppLayout from '../components/AppLayout.jsx'
 import moment from 'moment'
 import { imagesURL } from '../api/index.js'
-import { handleAllData } from '../api/home.js'
+import { handleAllData, getStoredHomeData } from '../api/home.js'
 import { getUserInfo as getIndexedDBUserInfo } from '../utils/indexedDB.js'
 import GlobalLoader from '../components/GlobalLoader.jsx'
 
@@ -70,34 +70,14 @@ const QuickActionCard = ({ title, icon, onClick }) => (
 
 export default function Home() {
   const navigate = useNavigate()
-  const { userInfo, clearUserData, setUserInfo } = useStore()
-  const [loading, setLoading] = useState(true)
+
+  const [loading, setLoading] = useState(false)
   const [homeData, setHomeData] = useState(null)
-  const [dataLoading, setDataLoading] = useState(false)
-  const [error, setError] = useState(null)
+ 
   const [localUserInfo, setLocalUserInfo] = useState(null)
   const [selectedTip, setSelectedTip] = useState(null)
   const [showTipModal, setShowTipModal] = useState(false)
 
-   const handleAllDataWithFetch = async () => {
-    const baseUrl = `https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json`;
-    
-    try {
-      
-      fetch('https://d9wbof3q09tw.cloudfront.net/bc2a58dc-e740-4217-b2c0-f06eb3c508fe.json')
-      .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        return response.json();
-      })
-      .then(json => setData(json))
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-    } catch (fetchError) {
-      console.log('⚠️ Fetch failed, trying CORS proxy...');
-    }
-    
-    
-  };
 
   // Get user info from IndexedDB
   const getUserInfoFromDB = async () => {
@@ -131,45 +111,30 @@ export default function Home() {
   useEffect(() => {
     const initializeHome = async () => {
       try {
+        setLoading(true)
        
-        // const token = await getToken()
-        // if (!token) {
-        //   navigate('/welcome', { replace: true })
-        //   return
-        // }
-
-        // Try to get user info if not already loaded
-        // if (!userInfo || !userInfo.auto_id) {
-        //   try {
-        //     const fetchedUserInfo = await getUserInfo()
-        //     setUserInfo(fetchedUserInfo)
-        //   } catch (error) {
-        //     console.warn('Could not fetch user info:', error)
-        //   }
-        // }
-
-        // Get user info from IndexedDB
         await getUserInfoFromDB()
 
-        // Load existing data from localStorage if available
-        const existingData = localStorage.getItem('homeData')
-        if (existingData) {
-          try {
-            const parsedData = JSON.parse(existingData)
-            setHomeData(parsedData)
-            console.log('✅ Loaded existing data from localStorage:', parsedData)
-          } catch (parseError) {
-           
+        // First try to get stored data from IndexedDB
+        let storedData = await getStoredHomeData()
+        
+        if (storedData) {
+          setHomeData(storedData)
+          console.log('✅ Loaded existing data from IndexedDB:', storedData)
+        } else {
+          // If no stored data, fetch fresh data and store it
+          console.log('🔄 No stored data found, fetching fresh data...')
+          const freshData = await handleAllData()
+          
+          if (freshData) {
+            setHomeData(freshData)
+            console.log('✅ Fresh data fetched and stored:', freshData)
+          } else {
+            console.error('❌ Failed to fetch home data')
           }
-        }else{
-          const parsedData = await handleAllData()
-          localStorage.setItem('homeData', JSON.stringify(parsedData))
-          setHomeData(parsedData)
-
         }
       } catch (error) {
         console.error('Error initializing home:', error)
-      
       } finally {
         setLoading(false)
       }
@@ -177,6 +142,22 @@ export default function Home() {
 
     initializeHome()
   }, [navigate])
+
+  // Listen for data-version updates from Firebase hook and refresh local state
+  useEffect(() => {
+    const onVersionUpdate = async () => {
+      try {
+        const storedData = await getStoredHomeData()
+        if (storedData) {
+          setHomeData(storedData)
+        }
+      } catch (e) {
+        console.log('Error updating home data after version change:', e)
+      }
+    }
+    window.addEventListener('data-version-updated', onVersionUpdate)
+    return () => window.removeEventListener('data-version-updated', onVersionUpdate)
+  }, [])
 
  
 

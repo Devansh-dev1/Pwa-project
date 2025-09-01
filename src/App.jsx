@@ -27,11 +27,12 @@ import LikedItems from './pages/LikedItems.jsx'
 import MyFamily from './pages/MyFamily.jsx'
 import MyCouponsRewards from './pages/MyCouponsRewards.jsx'
 import ExhibitorDetail from './pages/ExhibitorDetail.jsx'
+import useFirebaseVersion from './hooks/useFirebaseVersion.js'
 
 function RootRedirect() { /* unchanged */ }
 
 export default function App() {
-  /* unchanged useEffect */
+  useFirebaseVersion()
   return (
     <BrowserRouter>
               <Routes>

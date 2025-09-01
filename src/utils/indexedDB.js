@@ -56,6 +56,18 @@ class IndexedDBManager {
           globalJsonStore.createIndex('timestamp', 'timestamp', { unique: false });
         }
 
+        // Create HomeData table for storing home page data
+        if (!db.objectStoreNames.contains('HomeData')) {
+          const homeDataStore = db.createObjectStore('HomeData', { 
+            keyPath: 'id', 
+            autoIncrement: true 
+          });
+          // Create index on timestamp for sorting
+          homeDataStore.createIndex('timestamp', 'timestamp', { unique: false });
+          // Create index on dataType for filtering
+          homeDataStore.createIndex('dataType', 'dataType', { unique: false });
+        }
+
         console.log('IndexedDB tables created successfully');
       };
     });
@@ -525,6 +537,224 @@ class IndexedDBManager {
   }
 
   // ========================================
+  // HOMEDATA TABLE OPERATIONS
+  // ========================================
+
+  /**
+   * Store home page data in the HomeData table
+   * Deletes all existing home data first, then adds the new data
+   * @param {Object} homeData - Home page data object
+   * @param {string} dataType - Type of data (e.g., 'allData', 'booths', 'events')
+   * @returns {Promise<boolean>} Success status
+   */
+  async storeHomeData(homeData, dataType = 'allData') {
+    try {
+      await this.init();
+      
+      // 1) Clear all existing home data in its own short-lived transaction
+      await new Promise((resolve, reject) => {
+        const tx = this.db.transaction(['HomeData'], 'readwrite');
+        const store = tx.objectStore('HomeData');
+        store.clear();
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(new Error('Transaction aborted while clearing HomeData'));
+      });
+
+      // 2) Add the new home data in a fresh transaction
+      const data = {
+        data: homeData,
+        dataType: dataType,
+        timestamp: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      await new Promise((resolve, reject) => {
+        const tx = this.db.transaction(['HomeData'], 'readwrite');
+        const store = tx.objectStore('HomeData');
+        store.add(data);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(new Error('Transaction aborted while adding HomeData'));
+      });
+
+      console.log('HomeData stored successfully:', dataType);
+      return true;
+    } catch (error) {
+      console.error('Error in storeHomeData:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get home page data from the HomeData table
+   * @param {string} dataType - Type of data to retrieve (optional, defaults to 'allData')
+   * @returns {Promise<Object|null>} Home data or null if not found
+   */
+  async getHomeData(dataType = 'allData') {
+    try {
+      const store = await this.getStore('HomeData');
+      
+      return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => {
+          const results = request.result;
+          if (results && results.length > 0) {
+            // Find the most recent data of the specified type
+            const filteredResults = results.filter(item => item.dataType === dataType);
+            if (filteredResults.length > 0) {
+              // Sort by timestamp and get the most recent
+              const sortedResults = filteredResults.sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+              );
+              const latestData = sortedResults[0];
+              console.log('HomeData retrieved:', dataType, latestData.data);
+              resolve(latestData.data);
+            } else {
+              console.log('No HomeData found for type:', dataType);
+              resolve(null);
+            }
+          } else {
+            console.log('No HomeData found');
+            resolve(null);
+          }
+        };
+        request.onerror = () => {
+          console.error('Error getting HomeData:', request.error);
+          reject(request.error);
+        };
+      });
+    } catch (error) {
+      console.error('Error in getHomeData:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all home data from the HomeData table
+   * @returns {Promise<Array>} Array of all stored home data
+   */
+  async getAllHomeData() {
+    try {
+      const store = await this.getStore('HomeData');
+      
+      return new Promise((resolve, reject) => {
+        const request = store.getAll();
+        request.onsuccess = () => {
+          const results = request.result;
+          console.log('All HomeData retrieved:', results);
+          resolve(results || []);
+        };
+        request.onerror = () => {
+          console.error('Error getting all HomeData:', request.error);
+          reject(request.error);
+        };
+      });
+    } catch (error) {
+      console.error('Error in getAllHomeData:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update existing home data
+   * @param {number} id - Home data ID to update
+   * @param {Object} newData - New data to store
+   * @param {string} dataType - Type of data
+   * @returns {Promise<boolean>} Success status
+   */
+  async updateHomeData(id, newData, dataType = 'allData') {
+    try {
+      const store = await this.getStore('HomeData', 'readwrite');
+      
+      // First get the existing data
+      const existingData = await new Promise((resolve, reject) => {
+        const request = store.get(id);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+
+      if (!existingData) {
+        throw new Error(`HomeData with ID ${id} not found`);
+      }
+
+      const updatedData = {
+        ...existingData,
+        data: newData,
+        dataType: dataType,
+        updated_at: new Date().toISOString()
+      };
+
+      return new Promise((resolve, reject) => {
+        const request = store.put(updatedData);
+        request.onsuccess = () => {
+          console.log('HomeData updated successfully:', id);
+          resolve(true);
+        };
+        request.onerror = () => {
+          console.error('Error updating HomeData:', request.error);
+          reject(request.error);
+        };
+      });
+    } catch (error) {
+      console.error('Error in updateHomeData:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete home data by ID
+   * @param {number} id - Home data ID to delete
+   * @returns {Promise<boolean>} Success status
+   */
+  async deleteHomeData(id) {
+    try {
+      const store = await this.getStore('HomeData', 'readwrite');
+      
+      return new Promise((resolve, reject) => {
+        const request = store.delete(id);
+        request.onsuccess = () => {
+          console.log('HomeData deleted successfully:', id);
+          resolve(true);
+        };
+        request.onerror = () => {
+          console.error('Error deleting HomeData:', request.error);
+          reject(request.error);
+        };
+      });
+    } catch (error) {
+      console.error('Error in deleteHomeData:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Clear all home data
+   * @returns {Promise<boolean>} Success status
+   */
+  async clearAllHomeData() {
+    try {
+      const store = await this.getStore('HomeData', 'readwrite');
+      
+      return new Promise((resolve, reject) => {
+        const request = store.clear();
+        request.onsuccess = () => {
+          console.log('All HomeData cleared successfully');
+          resolve(true);
+        };
+        request.onerror = () => {
+          console.error('Error clearing all HomeData:', request.error);
+          reject(request.error);
+        };
+      });
+    } catch (error) {
+      console.error('Error in clearAllHomeData:', error);
+      throw error;
+    }
+  }
+
+  // ========================================
   // UTILITY OPERATIONS
   // ========================================
 
@@ -538,6 +768,7 @@ class IndexedDBManager {
       
       await this.clearAllUserInfo();
       await this.clearAllGlobalJson();
+      await this.clearAllHomeData();
       
       console.log('All data cleared successfully');
       return true;
@@ -566,11 +797,13 @@ class IndexedDBManager {
     try {
       const userInfoCount = (await this.getAllUserInfo()).length;
       const globalJsonCount = (await this.getAllGlobalJson()).length;
+      const homeDataCount = (await this.getAllHomeData()).length;
       
       return {
         userInfoCount,
         globalJsonCount,
-        totalRecords: userInfoCount + globalJsonCount,
+        homeDataCount,
+        totalRecords: userInfoCount + globalJsonCount + homeDataCount,
         databaseName: this.dbName,
         version: this.version
       };
@@ -638,6 +871,14 @@ export const getAllGlobalJson = () => indexedDBManager.getAllGlobalJson();
 export const editGlobalJson = (key, newData) => indexedDBManager.editGlobalJson(key, newData);
 export const deleteGlobalJson = (key) => indexedDBManager.deleteGlobalJson(key);
 export const clearAllGlobalJson = () => indexedDBManager.clearAllGlobalJson();
+
+// HomeData convenience functions
+export const storeHomeData = (homeData, dataType) => indexedDBManager.storeHomeData(homeData, dataType);
+export const getHomeData = (dataType) => indexedDBManager.getHomeData(dataType);
+export const getAllHomeData = () => indexedDBManager.getAllHomeData();
+export const updateHomeData = (id, newData, dataType) => indexedDBManager.updateHomeData(id, newData, dataType);
+export const deleteHomeData = (id) => indexedDBManager.deleteHomeData(id);
+export const clearAllHomeData = () => indexedDBManager.clearAllHomeData();
 
 // Utility functions
 export const clearAllData = () => indexedDBManager.clearAllData();

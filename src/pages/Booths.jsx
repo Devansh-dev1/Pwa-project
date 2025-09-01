@@ -4,6 +4,7 @@ import AppLayout from '../components/AppLayout.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 
 import { imagesURL } from '../api/index.js';
+import { getStoredHomeData } from '../api/home.js';
 
 // Helper function to build image URLs
 const buildImg = (key) => {
@@ -404,47 +405,40 @@ export default function Booths() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Get data from localStorage
-         const userData = ''//await getUserData();
-        const existingData = localStorage.getItem('homeData')
-        if (existingData) {
-          try {
-            const userData = JSON.parse(existingData)
-            if (userData) {
-              setShowExhibitor(userData.show_exhibitor || []);
-              setBoothNZone(userData.Booth_N_Zone || []);
-              
-              // Extract categories from exhibitor data
-              const allCategories = [];
-              userData.show_exhibitor?.forEach(booth => {
-                if (booth.categories && Array.isArray(booth.categories)) {
-                  booth.categories.forEach(cat => {
-                    if (cat.name) {
-                      const existingCategory = allCategories.find(c => c.name === cat.name);
-                      if (existingCategory) {
-                        existingCategory.fulldata.push(booth);
-                      } else {
-                        allCategories.push({
-                          id: cat.id,
-                          name: cat.name,
-                          fulldata: [booth]
-                        });
-                      }
-                    }
-                  });
+        // Get data from IndexedDB
+        const storedData = await getStoredHomeData();
+        
+        if (storedData) {
+          setShowExhibitor(storedData.show_exhibitor || []);
+          setBoothNZone(storedData.Booth_N_Zone || []);
+          
+          // Extract categories from exhibitor data
+          const allCategories = [];
+          storedData.show_exhibitor?.forEach(booth => {
+            if (booth.categories && Array.isArray(booth.categories)) {
+              booth.categories.forEach(cat => {
+                if (cat.name) {
+                  const existingCategory = allCategories.find(c => c.name === cat.name);
+                  if (existingCategory) {
+                    existingCategory.fulldata.push(booth);
+                  } else {
+                    allCategories.push({
+                      id: cat.id,
+                      name: cat.name,
+                      fulldata: [booth]
+                    });
+                  }
                 }
               });
-              
-              setCategories(allCategories.sort((a, b) => a.name.localeCompare(b.name)));
             }
-            
-                         console.log('✅ Loaded existing data from localStorage:', userData)
-          } catch (parseError) {
-            console.warn('Could not parse existing data from localStorage:', parseError)
-          }
+          });
+          
+          setCategories(allCategories.sort((a, b) => a.name.localeCompare(b.name)));
+          console.log('✅ Loaded booth data from IndexedDB:', storedData);
+        } else {
+          console.log('⚠️ No stored booth data found in IndexedDB');
         }
         
-       
       } catch (error) {
         console.error('Error loading booth data:', error);
       } finally {

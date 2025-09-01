@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { imagesURL } from '../api/index.js';
+import { getStoredHomeData } from '../api/home.js';
 import AppLayout from '../components/AppLayout.jsx';
 
 // Helper to build Cloudflare image URL keys into full URLs
@@ -23,22 +24,28 @@ const TipsDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get data from location state or localStorage
+  // Get data from location state or IndexedDB
   const { tipData, backColor, fromList } = location.state || {};
   
-  // Get tips data from localStorage
+  // Get tips data from IndexedDB
   const [tipsData, setTipsData] = useState([]);
   
   useEffect(() => {
-    const homeData = localStorage.getItem('homeData');
-    if (homeData) {
+    const loadTipsData = async () => {
       try {
-        const parsed = JSON.parse(homeData);
-        setTipsData(parsed.Tip || []);
+        const storedData = await getStoredHomeData();
+        if (storedData && storedData.Tip) {
+          setTipsData(storedData.Tip);
+          console.log('✅ Loaded tips data from IndexedDB:', storedData.Tip);
+        } else {
+          console.log('⚠️ No tips data found in IndexedDB');
+        }
       } catch (error) {
-        console.error('Error parsing homeData:', error);
+        console.error('Error loading tips data:', error);
       }
-    }
+    };
+
+    loadTipsData();
   }, []);
 
   const extractTextFromHTML = (html) => {
