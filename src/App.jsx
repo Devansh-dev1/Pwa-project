@@ -31,6 +31,7 @@ import ExhibitorDetail from './pages/ExhibitorDetail.jsx'
 import HighlightsDetails from './pages/HighlightsDetails.jsx'
 import GiveawayDetails from './pages/GiveawayDetails.jsx'
 import GiveawayDetailPage from './pages/GiveawayDetailPage.jsx'
+import Products from './pages/Products.jsx'
 
 function RootRedirect() { /* unchanged */ }
 
@@ -69,6 +70,7 @@ export default function App() {
           <Route path="/highlights-details" element={<HighlightsDetails />} />
           <Route path="/giveaway-details" element={<GiveawayDetails />} />
           <Route path="/giveaway-detail" element={<GiveawayDetailPage />} />
+          <Route path="/products" element={<Products />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     </BrowserRouter>

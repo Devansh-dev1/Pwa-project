@@ -63,6 +63,7 @@ export default function Speakers() {
   }
 
   return (
+    <AppLayout hideBottomNav={true}>
     <div style={{
       height: '100vh',
       display: 'flex',
@@ -405,5 +406,6 @@ export default function Speakers() {
         )}
       </div>
     </div>
+    </AppLayout>
   );
 }
