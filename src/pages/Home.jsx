@@ -3,11 +3,12 @@ import { clearToken, } from '../utils/auth.js'
 import { useEffect, useState, useMemo } from 'react'
 import { getUserInfo } from '../api/auth.js'
 import useStore from '../store/useStore.js'
+import { requireAuth } from '../utils/authUtils.js'
 
 import AppLayout from '../components/AppLayout.jsx'
 import moment from 'moment'
 import { imagesURL } from '../api/index.js'
-import { handleAllData, getStoredHomeData } from '../api/home.js'
+import { handleAllData, getStoredHomeData, clearAndFetchFreshData } from '../api/home.js'
 import { getUserInfo as getIndexedDBUserInfo } from '../utils/indexedDB.js'
 import GlobalLoader from '../components/GlobalLoader.jsx'
 
@@ -70,6 +71,7 @@ const QuickActionCard = ({ title, icon, onClick }) => (
 
 export default function Home() {
   const navigate = useNavigate()
+  const { showLoginPopup } = useStore()
 
   const [loading, setLoading] = useState(false)
   const [homeData, setHomeData] = useState(null)
@@ -114,23 +116,15 @@ export default function Home() {
        
         await getUserInfoFromDB()
 
-        // First try to get stored data from IndexedDB
-        let storedData = await getStoredHomeData()
+        // Clear IndexedDB first, then fetch fresh data from API
+        console.log('🔄 Clearing IndexedDB and fetching fresh data...')
+        const freshData = await clearAndFetchFreshData()
         
-        if (storedData) {
-          setHomeData(storedData)
-          console.log('✅ Loaded existing data from IndexedDB:', storedData)
+        if (freshData) {
+          setHomeData(freshData)
+          console.log('✅ Fresh data fetched and stored after clearing IndexedDB:', freshData)
         } else {
-          // If no stored data, fetch fresh data and store it
-          console.log('🔄 No stored data found, fetching fresh data...')
-          const freshData = await handleAllData()
-          
-          if (freshData) {
-            setHomeData(freshData)
-            console.log('✅ Fresh data fetched and stored:', freshData)
-          } else {
-            console.error('❌ Failed to fetch home data')
-          }
+          console.error('❌ Failed to fetch home data after clearing IndexedDB')
         }
       } catch (error) {
         console.error('Error initializing home:', error)
@@ -363,7 +357,7 @@ export default function Home() {
   return (
     <AppLayout>
     
-      {localUserInfo && (
+     
         <div style={{
           position: 'sticky',
           top: 0,
@@ -394,20 +388,23 @@ export default function Home() {
             cursor: 'pointer',
             transition: 'all 0.2s ease'
           }}
-          onMouseEnter={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.3)'
-            e.target.style.transform = 'scale(1.05)'
+          // onMouseEnter={(e) => {
+          //   e.target.style.background = 'rgba(255, 255, 255, 0.3)'
+          //   e.target.style.transform = 'scale(1.05)'
+          // }}
+          // onMouseLeave={(e) => {
+          //   e.target.style.background = 'rgba(255, 255, 255, 0.2)'
+          //   e.target.style.transform = 'scale(1)'
+          // }}
+          onClick={() => {
+            console.log('👤 Profile button clicked - checking auth...');
+            requireAuth(() => navigate('/profile'), showLoginPopup)
           }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.2)'
-            e.target.style.transform = 'scale(1)'
-          }}
-          onClick={() => navigate('/profile')}
           >
             {getUserInitials()}
           </div>
         </div>
-      )}
+      
 
       {/* Main content */}
       <div className='mainContentCstm'>

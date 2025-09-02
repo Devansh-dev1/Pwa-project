@@ -32,14 +32,25 @@ import HighlightsDetails from './pages/HighlightsDetails.jsx'
 import GiveawayDetails from './pages/GiveawayDetails.jsx'
 import GiveawayDetailPage from './pages/GiveawayDetailPage.jsx'
 import Products from './pages/Products.jsx'
+import LoginPopup from './components/LoginPopup.jsx'
+import useStore from './store/useStore.js'
 
 function RootRedirect() { /* unchanged */ }
 
 export default function App() {
+  const { hideLoginPopup } = useStore();
+  
+  // Ensure login popup is hidden on app start
+  useEffect(() => {
+    console.log('🚀 App starting - hiding login popup');
+    hideLoginPopup();
+  }, [hideLoginPopup]);
+  
   /* unchanged useEffect */
   return (
     <BrowserRouter>
-              <Routes>
+      <LoginPopup />
+      <Routes>
           <Route path="/" element={<Welcome />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/onboarding" element={<Onboarding />} />

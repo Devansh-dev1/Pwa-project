@@ -33,6 +33,10 @@ const useStore = create(
     currentScreen: 'welcome',
     screenHistory: [],
 
+    // Login Popup state
+    showLoginPopup: false,
+    loginPopupCallback: null,
+
     // Actions
     setUserInfo: (userInfo) => set({ userInfo }),
     mergeUserInfo: (partial) => set((state) => ({ userInfo: { ...(state.userInfo || {}), ...(partial || {}) } })),
@@ -80,6 +84,16 @@ const useStore = create(
       screenHistory: []
     }),
 
+    // Login Popup actions
+    showLoginPopup: (callback = null) => set({ 
+      showLoginPopup: true, 
+      loginPopupCallback: callback 
+    }),
+    hideLoginPopup: () => set({ 
+      showLoginPopup: false, 
+      loginPopupCallback: null 
+    }),
+
     // Clear all user data (for logout)
     clearUserData: () => set({
       userInfo: null,
@@ -88,7 +102,9 @@ const useStore = create(
       myDayData: [],
       boothIds: '',
       currentScreen: 'welcome',
-      screenHistory: []
+      screenHistory: [],
+      showLoginPopup: false,
+      loginPopupCallback: null
     }),
 
     // Initialize app state

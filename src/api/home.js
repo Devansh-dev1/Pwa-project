@@ -75,6 +75,34 @@ export const clearStoredHomeData = async () => {
   }
 };
 
+// Clear all IndexedDB data and then fetch fresh data
+export const clearAndFetchFreshData = async () => {
+  try {
+    console.log('🔄 Clearing all IndexedDB data and fetching fresh data...');
+    
+    // Import clearAllData from indexedDB utils
+    const { clearAllData } = await import('../utils/indexedDB.js');
+    
+    // Clear all IndexedDB data first
+    await clearAllData();
+    console.log('✅ All IndexedDB data cleared successfully');
+    
+    // Then fetch fresh data
+    const freshData = await handleAllData();
+    
+    if (freshData) {
+      console.log('✅ Fresh data fetched and stored after clearing IndexedDB:', freshData);
+      return freshData;
+    } else {
+      console.error('❌ Failed to fetch fresh data after clearing IndexedDB');
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Error in clearAndFetchFreshData:', error);
+    return null;
+  }
+};
+
 // Alternative function using fetch with no-cors mode (limited but might work)
 export const handleAllDataWithFetch = async () => {
   const baseUrl = `https://d9wbof3q09tw.cloudfront.net/${EVENT_ID}.json`;
