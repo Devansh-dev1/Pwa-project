@@ -766,7 +766,7 @@ class IndexedDBManager {
     try {
       console.log('Clearing all data from IndexedDB...');
       
-      await this.clearAllUserInfo();
+      // await this.clearAllUserInfo();
       await this.clearAllGlobalJson();
       await this.clearAllHomeData();
       

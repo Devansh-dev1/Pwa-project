@@ -210,6 +210,18 @@ export default function Home() {
     }));
   };
 
+  const handleBoothClick = (booth,showExhibitor) => {
+    let exhibitorId = showExhibitor?.find(item=>item?.exhibitor_id == booth?.exhibitor_id)
+    console.log('exhibitorId-->',exhibitorId);
+    navigate(`/booths/${exhibitorId?.exhibitor_id}`, { 
+      state: { 
+        booth,
+        zoneName: booth.zone,
+        sampleIconShow: Array.isArray(booth?.company?.[0]?.sample_ids)
+      } 
+    });
+  };
+
   // Component to render logos section
   const RenderLogos = ({ key, title, data, logoPath }, index) => {
     const boothsToShow = visibleBooths[key] || 9;
@@ -259,6 +271,7 @@ export default function Home() {
                 onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                 onClick={() => {
                   if (key === 'Exhibitor') {
+                    handleBoothClick(item, homeData?.show_exhibitor);
                     console.log('Navigate to exhibitor details:', item);
                     // Navigate to exhibitor details
                   } else {
@@ -960,10 +973,10 @@ export default function Home() {
                               }}
                               onClick={() => {
                                 // Navigate to giveaway details page
-                                navigate('/giveaway-details', {
+                                navigate('/giveaway-detail', {
                                   state: {
-                                    activityData: activity,
-                                    fromActivities: true
+                                    giveawayData: activity,
+                                    fromActivities: false
                                   }
                                 });
                               }}
@@ -974,6 +987,24 @@ export default function Home() {
                         </div>
                       );
                     })}
+                  </div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+                    <button
+                      onClick={() => navigate('/giveaways')}
+                      style={{
+                        padding: '12px 28px',
+                        background: 'transparent',
+                        color: '#4A57C7',
+                        border: '3px solid #C9D3FF',
+                        borderRadius: 999,
+                        fontSize: 20,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      View More
+                    </button>
                   </div>
                 </div>
               )}
@@ -1020,7 +1051,12 @@ export default function Home() {
                           borderRadius: 20,
                           overflow: 'hidden'
                         }}>
-                          <div style={{ padding: 14 }}>
+                          <div style={{ padding: 14, cursor:'pointer' }} 
+                            onClick={() => {
+                              if (product?.product_url) {
+                                window.open(product.product_url, '_blank');
+                              }
+                            }}>
                             <div style={{
                               height: 180,
                               background: '#fff',
@@ -1041,7 +1077,12 @@ export default function Home() {
                               )}
                             </div>
 
-                            <div style={{ marginTop: 14 }}>
+                            <div style={{ marginTop: 14 }} 
+                              onClick={() => {
+                                if (product?.product_url) {
+                                  window.open(product.product_url, '_blank');
+                                }
+                              }}>
                               <h4 style={{
                                 margin: '0 0 8px',
                                 fontSize: 16,
