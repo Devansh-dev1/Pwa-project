@@ -32,6 +32,7 @@ import HighlightsDetails from './pages/HighlightsDetails.jsx'
 import GiveawayDetails from './pages/GiveawayDetails.jsx'
 import GiveawayDetailPage from './pages/GiveawayDetailPage.jsx'
 import Products from './pages/Products.jsx'
+import Giveaway from './pages/Giveaway.jsx'
 import LoginPopup from './components/LoginPopup.jsx'
 import useStore from './store/useStore.js'
 
@@ -82,6 +83,7 @@ export default function App() {
           <Route path="/giveaway-details" element={<GiveawayDetails />} />
           <Route path="/giveaway-detail" element={<GiveawayDetailPage />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/giveaways" element={<Giveaway />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     </BrowserRouter>

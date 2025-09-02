@@ -152,9 +152,9 @@ export default function GiveawayDetailPage() {
             }}>
               {/* Giveaway Image */}
               <div style={{ position: 'relative' }}>
-                {(giveaway?.additional_data?.image || giveaway?.image) ? (
+                {(giveaway?.additional_data?.image || giveaway?.image || giveaway?.logo) ? (
                   <img 
-                    src={`${imagesURL}${giveaway?.additional_data?.image || giveaway?.image}/public`}
+                    src={`${imagesURL}${giveaway?.additional_data?.image || giveaway?.image || giveaway?.logo}/public`}
                     alt="Giveaway"
                     style={{ 
                       width: '100%', 
