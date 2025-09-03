@@ -770,72 +770,78 @@ button.resendOtp label {
 .mainContentCstmIner{
   padding: 12px 18px 18px;
   min-height: 100vh;
-  background: rgb(248, 249, 250);
+  background: rgb(248 249 250 / 0%);
 }
 .eventInfoDivUpr {
   margin-bottom: 24px;
+  border: 4px solid #eef7f7;
+  border-radius: 24px;
 }
 .eventInfoDiv {
-  background: rgb(255, 255, 255);
-  border: 1px solid rgb(229, 231, 235);
-  border-radius: 12px;
+  background: #EFF7F7;
+  border: 1.5px solid #62AAAB;
+  border-radius: 24px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding-top: 10px;
+  padding: 16px;
 }
 .eventImgDiv {
-  flex: 0 0 200px;
+  /* flex: 0 0 200px; */
   position: relative;
 }
 .eventImgDiv img {
   width: 100%;
-  height: 150px;
-  object-fit: cover;
+  object-fit: contain;
+  border-radius: 16px;
 }
 .eventDetails {
   flex: 1 1 0%;
-  padding: 16px;
+  padding-top: 12px;
 }
 .eventDetailsIner {
-  margin-bottom: 12px;
+  margin-bottom: 0px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 .eventDetailsData h2 {
   margin: 0px 0px 8px;
-  font-size: 13px;
+  font-size: 18px;
   color: rgb(30, 31, 36);
+  font-weight: 800;
+  line-height: 17px;
 }
 .eventDetailsData  p {
   margin: 0px 0px 8px;
-  font-size: 8px;
-  color: rgb(107, 114, 128);
+  font-size: 12px;
+  color: #807C7B;
+  font-weight: 500;
 }
 .eventDateTBD {
   background: rgb(129, 187, 188);
-  padding: 12px 16px;
+  padding: 5px 10px;
   border-radius: 20px;
   display: inline-block;
-  font-size: 14px;
+  font-size: 12px;
   color: rgb(255, 255, 255);
-  font-weight: 600;
+  font-weight: 800;
   white-space: nowrap;
-  margin-left: 16px;
+  margin-left: 5px;
 }
 .eventDateLoc {
-  display: flex
-;
+  display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 0px;
 }
 span.eventDateLocFrstSpan {
   font-size: 16px;
 }
 span.eventDateLocFrstTxt {
   font-size: 14px;
-  color: rgb(107, 114, 128);
+  color: #413C3A;
+  font-weight: 700;
 }
 .highlightSection {
   margin-bottom: 24px;
@@ -844,9 +850,10 @@ span.eventDateLocFrstTxt {
   margin-bottom: 16px;
 }
 .highlightSectionInr h3 {
-  margin: 0px 0px 8px;
-  font-size: 18px;
-  color: rgb(30, 31, 36);
+  margin: 0px;
+  font-size: 20px;
+  color: #413C3A;
+  font-weight: 800;
 }
 .highlightSectionInr p {
   margin: 0px;
@@ -855,16 +862,17 @@ span.eventDateLocFrstTxt {
 }
 .highlightSectionGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 .highlightSectionGridInr {
-  background: rgb(255, 255, 255);
-  border: 1px solid rgb(229, 231, 235);
+  border: none;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s;
+  background: #EFF7F7;
+  padding: 8px 8px;
 }
 .highlightTitleSec {
   padding: 16px;
@@ -885,15 +893,17 @@ span.eventDateLocFrstTxt {
   display: inline-block;
   font-size: 11px;
   color: rgb(129, 187, 188);
-  font-weight: 500;
+  font-weight: 800;
+  margin-top: 5px;
 }
 .tipsUprIner {
   margin-bottom: 16px;
 }
 .tipsUprIner h3 {
-  margin: 0px 0px 8px;
-  font-size: 18px;
-  color: rgb(30, 31, 36);
+  margin: 0px;
+  font-size: 20px;
+  color: #413C3A;
+  font-weight: 800;
 }
 .tipsUprIner p {
   margin: 0px;
@@ -940,7 +950,445 @@ span.eventDateLocFrstTxt {
   justify-content: space-between;
   margin-bottom: 0px;
   padding: 12px 28px 0px;
-  background: #f8f9fa;
+  background: rgb(248 249 250 / 0%);
+}
+.tipsTxtPara h4 {
+  margin: 0px;
+  font-size: 16px;
+  flex: 1 1 0%;
+}
+.tipsMapTxt {
+  margin: 0px;
+    font-size: 14px;
+    line-height: 1.4;
+  /* margin: 0px;
+  font-size: 14px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transform: translateY(-2px); */
+}
+.speakerSectionMap {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.speakerSectionMapTxt {
+  /* min-width: 80px; */
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-right: -41px;
+}
+.speakerSectionMapTxt img {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgb(229, 231, 235);
+}
+.speakerLengthUpr {
+  min-width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #2A46A8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgb(229, 231, 235);
+  cursor: pointer;
+  transition: 0.2s;
+  color: #FFFFFF;
+}
+.speakerLengthUpr span {
+  font-size: 12px;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+.highlightTitleSec h4 {
+  margin: 0px;
+  font-size: 12px;
+  line-height: 15px;
+  color: rgb(30, 31, 36);
+  height: 32px;
+  overflow: hidden;
+}
+.highlightTitleSec p {
+  color: #807C7B;
+  font-size: 12px;
+  margin: 0px;
+  line-height: 17px;
+  height: 32px;
+  overflow: hidden;
+}
+.highlightTitleSec {
+  padding: 0px 8px 8px;
+}
+.highlightSectionGridInr img {
+  border-radius: 12px 12px 0px 0px;
+}
+span.eventDateLocFrstSpan img {
+  height: 23px;
+  vertical-align: middle;
+}
+img.shareBtn {
+  height: 48px;
+  width: initial;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  cursor: pointer;
+}
+.tipsMapTxt p {
+  margin-bottom: 0px;
+}
+.speakerSectionTxt {
+  margin-bottom: 16px;
+}
+.speakerSection {
+  margin-top: 15px;
+  margin-bottom: 24px;
+}
+.speakerSectionTxt h3 {
+  margin: 0px;
+  font-size: 20px;
+  color: #413C3A;
+  font-weight: 800;
+}
+.speakerSectionMapTxt p {
+  display: none;
+}
+.upcomingUpr {
+  margin-bottom: 24px;
+}
+.upcomingInr {
+  margin-bottom: 16px;
+}
+.upcomingInr h3 {
+  margin: 0px;
+  font-size: 20px;
+  color: #413C3A;
+  font-weight: 800;
+}
+.upcomingInr p {
+  margin: 0px;
+  font-size: 14px;
+  color: rgb(107, 114, 128);
+}
+.InShowActivities {
+  margin-bottom: 24px;
+}
+.InShowActivitiesInr {
+  margin-bottom: 16px;
+}
+.InShowActivitiesInr h3 {
+  margin: 0px;
+  font-size: 20px;
+  color: #413C3A;
+  font-weight: 800;
+}
+.InShowActivitiesInr p {
+  margin: 0px;
+  font-size: 14px;
+  color: rgb(107, 114, 128);
+}
+.InActivitiesList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.InActivitiesListInr {
+  background: #F3F6FE;
+  border-radius: 24px;
+  overflow: hidden;
+  padding: 16px;
+}
+.InActivitiesListInrDiv {
+  background: rgb(255, 255, 255);
+  border-radius: 20px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.InActivitiesListInrTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.InActivitiesListInrTitle h4 {
+  line-height: 1.25;
+  margin: 0px;
+  font-size: 18px;
+  color: #413C3A;
+  font-weight: 800;
+}
+.InActivitiesListType {
+  margin-top: 5px;
+  margin-bottom: 12px;
+}
+.InActivitiesBtns {
+  display: flex;
+  justify-content: center;
+}
+.InActivitiesBtns button {
+  width: 100%;
+  padding: 12px 18px;
+  background: transparent;
+  color: #556BB9;
+  border: 1.5px solid #556BB9;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.InActivitiesListInrDiv img {
+  width: 100%;
+  max-height: 95%;
+  object-fit: cover;
+  border-radius: 22px;
+}
+.InActivitiesListInrBooth {
+  padding: 6px 10px;
+  background: rgb(228, 235, 255);
+  color: rgb(63, 87, 208);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.homeSponsors {
+  background: #E9ECF6;
+  border: 1.5px solid #2A46A8;
+  border-radius: 24px;
+  padding: 20px;
+}
+.RenderLogosList {
+  margin-bottom: 28px;
+}
+.RenderLogosGridIner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+  margin-bottom: 4px;
+}
+.RenderLogosGridIner img {
+  max-width: 100%;
+  max-height: 50px;
+  object-fit: contain;
+}
+.RenderLogosListIner {
+  margin-bottom: 15px;
+}
+.RenderLogosListIner h3 {
+  margin: 0px;
+  font-size: 16px;
+  color: #413C3A;
+  font-weight: 800;
+  text-align: center;
+}
+.RenderLogosListIner p {
+  margin: 0px;
+  font-size: 14px;
+  color: rgb(107, 114, 128);
+  text-align: center;
+}
+.RenderLogosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.homeSponsorsUpr {
+  border: 3.5px solid #2a46a81a;
+  border-radius: 28px;
+  margin-bottom: 25px;
+}
+.recommendedProducts {
+  margin-bottom: 32px;
+}
+.recommendedProductInr {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.recommendedProductTxt h3 {
+  margin: 0px;
+  font-size: 20px;
+  color: #413C3A;
+  font-weight: 800;
+}
+.recommendedProductTxt p {
+  margin: 0px;
+  font-size: 14px;
+  color: rgb(107, 114, 128);
+  max-width: 720px;
+}
+.recommendedProductsList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.recommendedProductsIndex {
+  background: #EFF7F7;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.recommendedProductsIndexInr {
+  padding: 14px;
+}
+.recommendedProductsIndexInrDiv {
+  height: 105px;
+  background: rgb(255, 255, 255);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.recommendedProductsIndexInrDiv img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+.productsIndexUpr {
+  margin-top: 14px;
+}
+.productsIndexUpr h4 {
+  margin: 0px 0px 8px;
+  font-size: 14px;
+  color: #413C3A;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 17px;
+}
+.productsIndexUpr p {
+  margin: 0px 0px 12px;
+  font-size: 14px;
+  color: #807C7B;
+  line-height: 17px;
+}
+.productsIndexBtn {
+  display: flex
+;
+  justify-content: center;
+}
+.productsIndexBtn  button {
+  min-width: 140px;
+  padding: 10px 18px;
+  background: rgb(39, 67, 184);
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 28px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.productsIndexBtn button {
+  min-width: 105px;
+  padding: 8px 13px;
+  background: rgb(39, 67, 184);
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.productViewMore {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.productViewMore button {
+  width: 100%;
+  padding: 12px 18px;
+  background: transparent;
+  color: #556BB9;
+  border: 1.5px solid #556BB9;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ReviewsSection {
+  margin-bottom: 32px;
+}
+.ReviewsSectionInr {
+  margin-bottom: 12px;
+}
+.ReviewsSectionInr h3 {
+  margin: 0px;
+  font-size: 20px;
+  color: #413C3A;
+  font-weight: 800;
+}
+.ReviewsSectionInr p {
+  margin: 0px;
+  font-size: 14px;
+  color: rgb(107, 114, 128);
+  max-width: 720px;
+}
+.ReviewsSectionGrid {
+  display: grid;
+  gap: 16px;
+}
+.ReviewsSectionList {
+  background: #ECECEB;
+  border-radius: 18px;
+  padding: 16px;
+}
+.ReviewsSectionListInr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.ReviewsSectionDiv {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgb(215 215 215);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(91, 94, 104);
+  font-weight: 700;
+}
+.ReviewsSectionTitle {
+  font-size: 16px;
+  color: #413C3A;
+  font-weight: 700;
+}
+.ReviewsSectionBody {
+  font-size: 12px;
+  color: #676361;
+  line-height: 16px;
+  font-weight: 500;
+}
+.rvwViewMore {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.rvwViewMore button {
+  width: 100%;
+  padding: 12px 18px;
+  background: transparent;
+  color: #556BB9;
+  border: 1.5px solid #556BB9;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
 }
 @media (max-width: 600px) {
   .mobile-frame-container, .commonContainer {

@@ -221,17 +221,12 @@ export default function Home() {
     const boothsToShow = visibleBooths[key] || 9;
     
     return (
-      <div key={`${key}-${index}`} style={{ marginBottom: 24 }}>
-        <div style={{ marginBottom: 16 }}>
-          <h3 style={{ 
-            margin: '0 0 8px', 
-            fontSize: 18, 
-            color: '#1E1F24',
-            marginTop: title.includes('Sponsors') ? 5 : 15 
-          }}>
+      <div className='RenderLogosList' key={`${key}-${index}`}>
+        <div className='RenderLogosListIner'>
+          <h3 style={{ marginTop: title.includes('Sponsors') ? 5 : 15 }}>
             {title}
           </h3>
-          <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+          <p>
             {key === 'Sponsor' && 'Thank you to our amazing sponsors'}
             {key === 'Partners' && 'Our valued partners supporting this event'}
             {key === 'Exhibitor' && 'Discover all participating brands and exhibitors'}
@@ -239,31 +234,15 @@ export default function Home() {
         </div>
 
         
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-          gap: 16,
-          marginBottom: 16
-        }}>
+        <div className='RenderLogosGrid'>
           {data?.slice(0, boothsToShow)?.map((item, index) => {
             const logo = logoPath(item);
             return (
               <div 
-                key={index} 
-                style={{
-                  background: '#fff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 12,
-                  padding: 16,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: '80px',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease'
-                }}
-                onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-                onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                className='RenderLogosGridIner'
+                key={index}
+                // onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                // onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                 onClick={() => {
                   if (key === 'Exhibitor') {
                     console.log('Navigate to exhibitor details:', item);
@@ -272,17 +251,11 @@ export default function Home() {
                     console.log('Navigate to sponsor/partner details:', item);
                     // Navigate to sponsor/partner details
                   }
-                }}
-              >
+                }}>
                 {logo ? (
                   <img 
                     src={`${imagesURL}${logo}/public`}
                     alt="Logo"
-                    style={{ 
-                      maxWidth: '100%', 
-                      maxHeight: '50px', 
-                      objectFit: 'contain' 
-                    }}
                     onError={(e) => {
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'flex';
@@ -442,19 +415,15 @@ export default function Home() {
                           <span>🎪</span>
                         </div>
                       )}
-                    
+                      <img src="/assets/shareButton.svg" alt="" title="" className='shareBtn' />
                     </div>
 
                     {/* Event Details */}
                     <div className='eventDetails'>
                       <div className='eventDetailsIner'>
                         <div className='eventDetailsData'>
-                        <h2>
-                          {homeData.event[0]?.title || 'Event Title'}
-                        </h2>
-                        <p>
-                          {homeData.event[0]?.organizer_name || 'Organizer'}
-                        </p>
+                         <h2>{homeData.event[0]?.title || 'Event Title'}</h2>
+                         <p>{homeData.event[0]?.organizer_name || 'Organizer'}</p>
                         </div>
                         <div className='eventDateTBD'>
                           {homeData.event[0]?.show_date?.[0]?.date ? 
@@ -465,7 +434,9 @@ export default function Home() {
                       </div>
                       
                       <div className='eventDateLoc'>
-                        <span className='eventDateLocFrstSpan'>📍</span>
+                        <span className='eventDateLocFrstSpan'>
+                          <img src="/assets/LocationIcon.svg" alt="" title="" />
+                        </span>
                         <span className='eventDateLocFrstTxt'>
                           {homeData.event[0]?.address ? 
                             `${homeData.event[0].address.address_line_1 || ''}, ${homeData.event[0].address.city || ''}, ${homeData.event[0].address.state_or_region || ''}` : 
@@ -506,9 +477,7 @@ export default function Home() {
                   <div className='highlightSectionGrid'>
                     {homeData.Highlight.slice(0, 6).map((highlight, index) => (
                       <div className='highlightSectionGridInr' key={index}
-                      onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-                      onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
-                                             onClick={()=>{
+                         onClick={()=>{
                          if(highlight?.type === 'GiveAway'){
                            navigate('/giveaway-detail', {
                              state: {
@@ -537,19 +506,18 @@ export default function Home() {
                         {highlight?.additional_data?.image ? (
                           <img 
                             // src={highlight.additional_data.image} 
-                          src={`${imagesURL}${highlight.additional_data.image}/public`} 
-
+                            src={`${imagesURL}${highlight.additional_data.image}/public`} 
                             alt="Highlight"
                             style={{ 
                               width: '100%', 
-                              height: '160px', 
+                              height: '60px', 
                               objectFit: 'cover' 
                             }}
                           />
                         ) : (
                           <div style={{ 
                             width: '100%', 
-                            height: '160px', 
+                            height: '60px', 
                             background: '#f3f4f6',
                             display: 'flex',
                             alignItems: 'center',
@@ -602,8 +570,8 @@ export default function Home() {
                           background: `${tipColor}15`,
                           border: `1.5px solid ${tipColor}`,
                         }}
-                        onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
-                        onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                        // onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                        // onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                         onClick={() => {
                           // Navigate to TipsDetails page like React Native version
                           navigate('/tips', {
@@ -613,12 +581,9 @@ export default function Home() {
                               fromList: true
                             }
                           });
-                        }}
-                        >
-                          <div className='tipsTxtPara' style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                            <h4 style={{ margin: 0, fontSize: 16, color: tipColor, flex: 1 }}>
-                              {tip.title}
-                            </h4>
+                        }}>
+                          <div className='tipsTxtPara'>
+                            <h4 style={{color: tipColor}}>{tip.title}</h4>
                             {tip.logo && (
                               <div className='tipsTxtLogo' style={{ border: `2px solid ${tipColor}`}}>
                                 <img 
@@ -629,20 +594,9 @@ export default function Home() {
                               </div>
                             )}
                           </div>
-                          
-                          <p style={{ 
-                            margin: 0, 
-                            fontSize: 14, 
-                            color: `${tipColor}95`, 
-                            lineHeight: 1.4,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
-                          }}>
+                          <p style={{color: `${tipColor}95`, }}>
                             {tip.description ? tip.description.replace(/<[^>]*>/g, '') : 'Tip description'}
                           </p>
-
                         </div>
                       );
                     })}
@@ -650,65 +604,44 @@ export default function Home() {
                 </div>
               )}
 
-             
-
-                        {/* Speakers Section */}
+              {/* Speakers Section */}
               {homeData.speaker && homeData.speaker.length > 0 && (
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Speakers</h3>
+                <div className='speakerSection'>
+                  <div className='speakerSectionTxt'>
+                    <h3>Speakers</h3>
                     <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
                       {homeData?.event[0]?.global_test?.find(item => item?.Type === 'Speaker')?.description || 'Meet the experts and thought leaders'}
                     </p>
                   </div>
                   
-                  <div style={{ 
-                    display: 'flex', 
-                    gap: 16, 
-                    overflowX: 'auto', 
-                    paddingBottom: 8 
-                  }}>
+                  <div className='speakerSectionMap'>
                     {homeData.speaker.slice(0, 7).map((speaker, index) => (
-                      <div 
-                        key={index} 
-                        style={{
-                          minWidth: '80px',
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease'
-                        }}
+                      <div
+                        className='speakerSectionMapTxt' 
+                        key={index}
                         onClick={() => navigate('/speakers')}
-                        onMouseEnter={(e) => {
-                          e.target.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.transform = 'scale(1)';
-                        }}
-                      >
+                        // onMouseEnter={(e) => { e.target.style.transform = 'scale(1.05)';}}
+                        // onMouseLeave={(e) => {e.target.style.transform = 'scale(1)';}}
+                        >
                         {speaker?.image ? (
                           <img 
                             // src={speaker.image} 
                             src={`${imagesURL}${speaker.image}/public`} 
                             alt={speaker.name}
-                            style={{ 
-                              width: '80px', 
-                              height: '80px', 
-                              borderRadius: '50%',
-                              objectFit: 'cover',
-                              border: '3px solid #e5e7eb'
-                            }}
                           />
                         ) : (
-                          <div style={{ 
-                            width: '80px', 
-                            height: '80px', 
-                            borderRadius: '50%',
-                            background: '#f3f4f6',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            border: '3px solid #e5e7eb'
-                          }}>
+                          <div className='speakerSectionMapTxtDumy' 
+                          // style={{ 
+                          //   width: '80px', 
+                          //   height: '80px', 
+                          //   borderRadius: '50%',
+                          //   background: '#f3f4f6',
+                          //   display: 'flex',
+                          //   alignItems: 'center',
+                          //   justifyContent: 'center',
+                          //   border: '3px solid #e5e7eb'
+                          // }}
+                          >
                             <span style={{ fontSize: 24 }}>👤</span>
                           </div>
                         )}
@@ -728,29 +661,18 @@ export default function Home() {
                     
                     {homeData.speaker.length > 1 && (
                       <div 
-                        style={{
-                          minWidth: '80px',
-                          height: '80px',
-                          borderRadius: '50%',
-                          background: '#f3f4f6',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: '3px solid #e5e7eb',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease'
-                        }}
+                       className='speakerLengthUpr'
                         onClick={() => navigate('/speakers')}
-                        onMouseEnter={(e) => {
-                          e.target.style.background = '#e5e7eb';
-                          e.target.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.background = '#f3f4f6';
-                          e.target.style.transform = 'scale(1)';
-                        }}
-                      >
-                        <span style={{ fontSize: 14, color: '#6B7280', fontWeight: '500' }}>See All</span>
+                        // onMouseEnter={(e) => {
+                        //   e.target.style.background = '#e5e7eb';
+                        //   e.target.style.transform = 'scale(1.05)';
+                        // }}
+                        // onMouseLeave={(e) => {
+                        //   e.target.style.background = '#f3f4f6';
+                        //   e.target.style.transform = 'scale(1)';
+                        // }}
+                        >
+                        <span>See All</span>
                       </div>
                     )}
                   </div>
@@ -759,15 +681,15 @@ export default function Home() {
 
               {/* Seminars Section */}
               {homeData.seminars && homeData.seminars.length > 0 && (
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>Upcoming Seminars</h3>
-                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                <div className='upcomingUpr'>
+                  <div className='upcomingInr'>
+                    <h3>Upcoming Seminars</h3>
+                    <p>
                       Don't miss these informative sessions
                     </p>
                   </div>
                   
-                  <div style={{ 
+                  <div className='upcomingSeminarUpr' style={{ 
                     display: 'grid', 
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
                     gap: 16 
@@ -882,96 +804,59 @@ export default function Home() {
 
               {/* Activities Section */}
               {homeData.AllAcivity && homeData.AllAcivity.length > 0 && (
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ marginBottom: 16 }}>
-                    <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#1E1F24' }}>In-Show Activities</h3>
-                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280' }}>
+                <div className='InShowActivities'>
+                  <div className='InShowActivitiesInr'>
+                    <h3>In-Show Activities</h3>
+                    <p>
                       Engage with interactive activities and games
                     </p>
                   </div>
                   
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-                    gap: 16 
-                  }}>
+                  <div className='InActivitiesList'>
                     {homeData.AllAcivity.slice(0, 4).map((activity, index) => {
                       const activityColor = getActivityColor(activity?.activity_type);
                       const img = buildImg(activity?.image || activity?.logo);
                       const boothLabel = activity?.booth_name || activity?.zone || activity?.stage || '';
                       return (
-                        <div key={index} style={{
-                          background: '#F6F7FF',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: 24,
-                          overflow: 'hidden',
-                          padding: 16
-                        }}>
+                        <div className='InActivitiesListInr' key={index}>
                           {/* Image */}
-                          <div style={{
-                            background: '#fff',
-                            border: '1px solid #e5e7eb',
-                            borderRadius: 20,
-                            height: 220,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginBottom: 16
-                          }}>
+                          <div className='InActivitiesListInrDiv'>
                             {img ? (
-                              <img src={img} alt={activity.title || 'Activity'} style={{ maxWidth: '95%', maxHeight: '95%', objectFit: 'contain' }} />
+                              <img src={img} alt={activity.title || 'Activity'} />
                             ) : (
                               <span style={{ fontSize: 40 }}>🎮</span>
                             )}
                           </div>
 
                           {/* Title + Booth badge */}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                            <h4 style={{ margin: 0, fontSize: 24, color: '#1E1F24', fontWeight: 800, lineHeight: 1.25 }}>
+                          <div className='InActivitiesListInrTitle'>
+                            <h4>
                               {activity.title || 'Activity Title'}
                             </h4>
                             {boothLabel && (
-                              <div style={{
-                                padding: '6px 10px',
-                                background: '#E4EBFF',
-                                color: '#3F57D0',
-                                borderRadius: 12,
-                                fontSize: 12,
-                                fontWeight: 700
-                              }}>{boothLabel}</div>
+                              <div className='InActivitiesListInrBooth'>{boothLabel}</div>
                             )}
                           </div>
 
                           {/* Type chip */}
-                          <div style={{ marginTop: 12, marginBottom: 16 }}>
+                          <div className='InActivitiesListType'>
                             <span style={{
                               display: 'inline-block',
-                              padding: '8px 14px',
+                              padding: '1px 8px',
                               borderRadius: 24,
-                              border: `2px solid ${activityColor}`,
+                              border: `1.5px solid ${activityColor}`,
                               color: activityColor,
                               background: `${activityColor}15`,
-                              fontWeight: 600,
-                              fontSize: 14
+                              fontWeight: 700,
+                              fontSize: 12
                             }}>
                               {activity.activity_type || 'Activity'}
                             </span>
                           </div>
 
                           {/* View Details button */}
-                          <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          <div className='InActivitiesBtns'>
                             <button
-                              style={{
-                                width: '100%',
-                                padding: '12px 18px',
-                                background: 'transparent',
-                                color: '#3F57D0',
-                                border: '3px solid #C9D3FF',
-                                borderRadius: 999,
-                                fontSize: 18,
-                                fontWeight: 700,
-                                cursor: 'pointer'
-                              }}
                               onClick={() => {
                                 // Navigate to giveaway details page
                                 navigate('/giveaway-details', {
@@ -992,104 +877,59 @@ export default function Home() {
                 </div>
               )}
 
-            
-
               {/* Enhanced Sponsors & Partners Section */}
               {filteredSections.length > 0 && (
-                <div style={{ 
-                  background: '#fff', 
-                  border: '1px solid #e5e7eb', 
-                  borderRadius: 12, 
-                  padding: 20,
-                  marginBottom: 24 
-                }}>
+                <div className='homeSponsorsUpr'>
+                <div className='homeSponsors'>
                   {filteredSections?.map(RenderLogos)}
+                </div>
                 </div>
               )}
 
               {/* Products Section */}
               {homeData.product && homeData.product.length > 0 && (
-                <div style={{ marginBottom: 32 }}>
-                  <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <h3 style={{ margin: '0 0 8px', fontSize: 22, color: '#1E1F24' }}>Recommended Products</h3>
-                      <p style={{ margin: 0, fontSize: 14, color: '#6B7280', maxWidth: 720 }}>
+                <div className='recommendedProducts'>
+                  <div className='recommendedProductInr'>
+                    <div className='recommendedProductTxt'>
+                      <h3>Recommended Products</h3>
+                      <p>
                         Manage the list of recommended products to showcase to users based on preferences, trends, or related categories.
                       </p>
                     </div>
-                   
                   </div>
 
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                    gap: 16
-                  }}>
+                  <div className='recommendedProductsList'>
                     {homeData.product.slice(0, 4).map((product, index) => {
                       const img = buildImg(product?.product_image?.[0]);
                       return (
-                        <div key={index} style={{
-                          background: '#F0F7FB',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: 20,
-                          overflow: 'hidden'
-                        }}>
-                          <div style={{ padding: 14 }}>
-                            <div style={{
-                              height: 180,
-                              background: '#fff',
-                              borderRadius: 16,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              border: '1px solid #e5e7eb'
-                            }}>
+                        <div className='recommendedProductsIndex' key={index}>
+                          <div className='recommendedProductsIndexInr'>
+                            <div className='recommendedProductsIndexInrDiv'>
                               {img ? (
                                 <img
                                   src={img}
                                   alt={product.product_name || 'Product'}
-                                  style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }}
                                 />
                               ) : (
                                 <span style={{ fontSize: 32 }}>📦</span>
                               )}
                             </div>
 
-                            <div style={{ marginTop: 14 }}>
-                              <h4 style={{
-                                margin: '0 0 8px',
-                                fontSize: 16,
-                                color: '#1E1F24',
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden'
-                              }}>
+                            <div className='productsIndexUpr'>
+                              <h4>
                                 {product.product_name || 'Product Name'}
                               </h4>
-                              <p style={{ margin: '0 0 14px', fontSize: 16, color: '#6B7280' }}>
+                              <p>
                                 Price ${product.product_price || '—'}
                               </p>
 
-                              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                              <div className='productsIndexBtn'>
                                 <button
                                   onClick={() => {
                                     if (product?.product_url) {
                                       window.open(product.product_url, '_blank');
                                     }
-                                  }}
-                                  style={{
-                                    minWidth: 140,
-                                    padding: '10px 18px',
-                                    background: '#2743B8',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: 28,
-                                    fontSize: 16,
-                                    fontWeight: 700,
-                                    cursor: 'pointer'
-                                  }}
-                                >
+                                  }}>
                                   Buy
                                 </button>
                               </div>
@@ -1100,20 +940,9 @@ export default function Home() {
                     })}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+                  <div className='productViewMore'>
                     <button
-                      onClick={() => navigate('/products')}
-                      style={{
-                        padding: '12px 28px',
-                        background: 'transparent',
-                        color: '#4A57C7',
-                        border: '3px solid #C9D3FF',
-                        borderRadius: 999,
-                        fontSize: 20,
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                      }}
-                    >
+                      onClick={() => navigate('/products')}>
                       View More
                     </button>
                   </div>
@@ -1122,15 +951,15 @@ export default function Home() {
 
               {/* Reviews Section */}
               {homeData.reviews && homeData.reviews.length > 0 && (
-                <div style={{ marginBottom: 32 }}>
-                  <div style={{ marginBottom: 12 }}>
-                    <h3 style={{ margin: '0 0 8px', fontSize: 22, color: '#1E1F24' }}>Reviews</h3>
-                    <p style={{ margin: 0, fontSize: 14, color: '#6B7280', maxWidth: 720 }}>
+                <div className='ReviewsSection'>
+                  <div className='ReviewsSectionInr'>
+                    <h3>Reviews</h3>
+                    <p>
                       Display authentic reviews to build trust and improve the overall experience.
                     </p>
                   </div>
 
-                  <div style={{ display: 'grid', gap: 16 }}>
+                  <div className='ReviewsSectionGrid'>
                     {homeData.reviews.map((rev, idx) => {
                       const title = rev.title || rev.headline || rev.subject || 'Review';
                       const body = rev.description || rev.content || rev.review || '';
@@ -1143,37 +972,27 @@ export default function Home() {
                         .slice(0, 2)
                         .toUpperCase();
                       return (
-                        <div key={idx} style={{
-                          background: '#fff',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: 18,
-                          padding: 16
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                            <div style={{
-                              width: 48,
-                              height: 48,
-                              borderRadius: '50%',
-                              background: '#E6E7EB',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: '#5B5E68',
-                              fontWeight: 700
-                            }}>
+                        <div className='ReviewsSectionList' key={idx}>
+                          <div className='ReviewsSectionListInr'>
+                            <div className='ReviewsSectionDiv'>
                               {initials}
                             </div>
-                            <div>
-                              <div style={{ fontSize: 18, color: '#1E1F24', fontWeight: 700 }}>{title}</div>
-                              <div style={{ fontSize: 12, color: '#9CA3AF' }}>
+                            <div className='ReviewsSectionText'>
+                              <div className='ReviewsSectionTitle'>{title}</div>
+                              <div className='ReviewsSectionDate'>
                                 {dateStr ? moment(dateStr).format('MMM D, YYYY h:mm A') : ''}
                               </div>
                             </div>
                           </div>
-                          <div style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.6 }}>{body}</div>
+                          <div className='ReviewsSectionBody'>{body}</div>
                         </div>
                       );
                     })}
+                  </div>
+                  <div className='rvwViewMore'>
+                    <button>
+                      See More
+                    </button>
                   </div>
                 </div>
               )}
